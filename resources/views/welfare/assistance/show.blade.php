@@ -1,0 +1,864 @@
+@extends('layouts.app')
+
+@section('title', 'Welfare Assistance Details')
+
+@push('styles')
+<style>
+    .page-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:20px;
+        margin-bottom:22px;
+    }
+
+    .page-header h1 {
+        margin:0;
+        font-size:25px;
+        font-weight:700;
+    }
+
+    .page-header p {
+        margin:6px 0 0;
+        color:var(--muted);
+    }
+
+    .actions {
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+    }
+
+    .ui-btn {
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:7px;
+        min-height:40px;
+        padding:0 14px;
+        border:1px solid var(--border);
+        border-radius:9px;
+        background:#fff;
+        color:#596760;
+        text-decoration:none;
+        font-weight:650;
+    }
+
+    .ui-btn.primary {
+        background:var(--primary);
+        border-color:var(--primary);
+        color:#fff;
+    }
+
+    .ui-btn.danger {
+        background:#fff;
+        border-color:#e4c4c0;
+        color:#9a4037;
+    }
+
+    .layout {
+        display:grid;
+        grid-template-columns:minmax(0,1fr) 310px;
+        gap:18px;
+    }
+
+    .card {
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius:14px;
+        overflow:hidden;
+        margin-bottom:18px;
+    }
+
+    .card-head {
+        padding:17px 20px;
+        border-bottom:1px solid var(--border);
+    }
+
+    .card-head strong {
+        font-size:16px;
+    }
+
+    .card-head span {
+        display:block;
+        margin-top:4px;
+        color:var(--muted);
+        font-size:14px;
+    }
+
+    .card-body {
+        padding:20px;
+    }
+
+    .grid {
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:18px 24px;
+    }
+
+    .item label {
+        display:block;
+        color:#6d7571;
+        font-size:12px;
+        text-transform:uppercase;
+        letter-spacing:.5px;
+        margin-bottom:5px;
+    }
+
+    .item strong {
+        display:block;
+        color:#3e4b45;
+        font-size:15px;
+    }
+
+    .status {
+        display:inline-flex;
+        padding:6px 10px;
+        border-radius:999px;
+        font-size:12px;
+        font-weight:700;
+    }
+
+    .status.pending {
+        background:#fff7df;
+        color:#87671d;
+    }
+
+    .status.approved {
+        background:#eaf6ef;
+        color:#28704a;
+    }
+
+    .status.rejected {
+        background:#fbeceb;
+        color:#9a4037;
+    }
+
+    .notice {
+        display:flex;
+        gap:10px;
+        padding:13px;
+        background:#f7f9f8;
+        border:1px solid #e5ebe8;
+        border-radius:10px;
+        color:#66726c;
+        line-height:1.6;
+        font-size:14px;
+    }
+
+    .notice i {
+        color:var(--primary);
+        font-size:18px;
+    }
+
+    .side-number {
+        text-align:center;
+        font-size:28px;
+        font-weight:700;
+        color:var(--primary);
+    }
+
+    .side-label {
+        text-align:center;
+        color:var(--muted);
+        margin-top:4px;
+    }
+
+    .side-row {
+        display:flex;
+        justify-content:space-between;
+        gap:12px;
+        padding:10px 0;
+        border-bottom:1px solid #eef1ef;
+        font-size:14px;
+    }
+
+    .side-row:last-child {
+        border-bottom:none;
+    }
+
+    .side-row span:first-child {
+        color:#6d7571;
+    }
+
+    .side-row span:last-child {
+        font-weight:650;
+        color:#47554e;
+        text-align:right;
+    }
+
+    @media(max-width:900px) {
+        .layout {
+            grid-template-columns:1fr;
+        }
+    }
+
+    @media(max-width:650px) {
+        .page-header {
+            flex-direction:column;
+        }
+
+        .grid {
+            grid-template-columns:1fr;
+        }
+    }
+</style>
+@endpush
+
+@section('content')
+
+@php
+    $typeLabel = match ($assistance->assistance_type) {
+        'monthly_assistance' => 'Monthly Assistance',
+        'food_ration' => 'Food / Ration',
+        'medical_assistance' => 'Medical Assistance',
+        'education_support' => 'Education Support',
+        'emergency_assistance' => 'Emergency Assistance',
+        'one_time_support' => 'One-Time Support',
+        default => ucfirst(str_replace('_', ' ', $assistance->assistance_type)),
+    };
+
+    $statusClass = match ($assistance->status) {
+        'approved', 'paid', 'completed' => 'approved',
+        'rejected' => 'rejected',
+        default => 'pending',
+    };
+@endphp
+
+<div class="page-header">
+
+    <div>
+        <h1>{{ $assistance->assistance_number }}</h1>
+
+        <p>
+            {{ $assistance->beneficiary?->full_name ?? 'Unknown beneficiary' }}
+            · {{ $typeLabel }}
+        </p>
+    </div>
+
+    <div class="actions">
+
+    <a
+        href="{{ route('welfare.assistance.reviews.index') }}"
+        class="ui-btn"
+    >
+        <i class="bi bi-clipboard-check"></i>
+        Review Queue
+    </a>
+
+        <a
+            href="{{ route('welfare.assistance.index') }}"
+            class="ui-btn"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Back
+        </a>
+
+        @can('welfare.assistance.manage')
+            @if(in_array($assistance->status, ['pending', 'rejected'], true))
+                <a
+                    href="{{ route('welfare.assistance.edit', $assistance) }}"
+                    class="ui-btn primary"
+                >
+                    <i class="bi bi-pencil"></i>
+                    Edit
+                </a>
+            @endif
+        @endcan
+        @can('welfare.assistance.manage')
+            @if($assistance->status === 'approved')
+
+                <a
+                    href="{{ route('welfare.assistance.payments.create', $assistance) }}"
+                    class="ui-btn primary"
+                >
+                    <i class="bi bi-wallet2"></i>
+                    Record Payment
+                </a>
+
+            @endif
+        @endcan
+
+        @if(
+            $assistance->status === 'approved'
+            && auth()->user()->hasPermission('welfare.assistance.manage')
+        )
+
+            <a
+                href="{{ route(
+                    'welfare.assistance.reviews.create',
+                    $assistance
+                ) }}"
+                class="ui-btn"
+            >
+                <i class="bi bi-clipboard-check"></i>
+                Record Review
+            </a>
+
+        @endif
+
+        @can('welfare.assistance.approve')
+            @if($assistance->status === 'pending')
+
+                <form
+                    method="POST"
+                    action="{{ route('welfare.assistance.approve', $assistance) }}"
+                >
+                    @csrf
+
+                    <button
+                        type="submit"
+                        class="ui-btn primary"
+                        onclick="return confirm('Approve this assistance request?')"
+                    >
+                        <i class="bi bi-check-lg"></i>
+                        Approve
+                    </button>
+                </form>
+
+                <form
+                    method="POST"
+                    action="{{ route('welfare.assistance.reject', $assistance) }}"
+                >
+                    @csrf
+
+                    <button
+                        type="submit"
+                        class="ui-btn danger"
+                        onclick="return confirm('Reject this assistance request?')"
+                    >
+                        <i class="bi bi-x-lg"></i>
+                        Reject
+                    </button>
+                </form>
+
+            @endif
+        @endcan
+
+    </div>
+
+</div>
+
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+<div class="layout">
+
+    <div>
+
+        <div class="card">
+
+            <div class="card-head">
+                <strong>Assistance Information</strong>
+
+                <span>
+                    Request details and approval status.
+                </span>
+            </div>
+
+            <div class="card-body">
+
+                <div class="grid">
+
+                    <div class="item">
+                        <label>Assistance Number</label>
+                        <strong>{{ $assistance->assistance_number }}</strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Status</label>
+
+                        <span class="status {{ $statusClass }}">
+                            {{ ucfirst($assistance->status) }}
+                        </span>
+                    </div>
+
+                    <div class="item">
+                        <label>Beneficiary</label>
+                        <strong>
+                            {{ $assistance->beneficiary?->full_name ?? '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Beneficiary Number</label>
+                        <strong>
+                            {{ $assistance->beneficiary?->beneficiary_number ?? '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Assistance Type</label>
+                        <strong>{{ $typeLabel }}</strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Amount</label>
+                        <strong>
+                            PKR {{ number_format((float) $assistance->amount, 2) }}
+                        </strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Frequency</label>
+                        <strong>
+                            {{ $assistance->frequency
+                                ? ucfirst(str_replace('_', ' ', $assistance->frequency))
+                                : '—'
+                            }}
+                        </strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Fund</label>
+                        <strong>
+                            {{ $assistance->fund?->name ?? 'Unassigned' }}
+                        </strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Start Date</label>
+                        <strong>
+                            {{ $assistance->start_date?->format('d M Y') ?? '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="item">
+                        <label>End Date</label>
+                        <strong>
+                            {{ $assistance->end_date?->format('d M Y') ?? '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Next Review</label>
+                        <strong>
+                            {{ $assistance->next_review_date?->format('d M Y') ?? '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Requested At</label>
+                        <strong>
+                            {{ $assistance->requested_at?->format('d M Y H:i') ?? '—' }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-head">
+                <strong>Purpose & Notes</strong>
+            </div>
+
+            <div class="card-body">
+
+                <div class="item">
+                    <label>Purpose Notes</label>
+
+                    <strong style="line-height:1.7;">
+                        {{ $assistance->purpose_notes ?: 'No purpose notes recorded.' }}
+                    </strong>
+                </div>
+
+                <div class="item mt-4">
+                    <label>Internal Notes</label>
+
+                    <strong style="line-height:1.7;">
+                        {{ $assistance->internal_notes ?: 'No internal notes recorded.' }}
+                    </strong>
+                </div>
+
+                <div class="item mt-4">
+                    <label>General Notes</label>
+
+                    <strong style="line-height:1.7;">
+                        {{ $assistance->notes ?: 'No additional notes recorded.' }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-head">
+
+                <div>
+                    <strong>
+                        Payment History
+                    </strong>
+
+                    <span>
+                        Financial payments recorded against this assistance.
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                @forelse($assistance->payments as $payment)
+
+                    <div class="assistance-row">
+
+                        <div class="assistance-icon">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+
+
+                        <div class="assistance-info">
+
+                            <strong>
+                                {{ $payment->payment_number }}
+                            </strong>
+
+                            <span>
+                                {{ $payment->payment_date->format('d M Y') }}
+
+                                ·
+
+                                {{ ucfirst(
+                                    str_replace(
+                                        '_',
+                                        ' ',
+                                        $payment->payment_method
+                                    )
+                                ) }}
+
+                                ·
+
+                                {{ $payment->fund?->name ?: 'No fund' }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="assistance-amount">
+
+                            @if($payment->status === 'void')
+
+                                <span style="
+                                    color:#a34f4f;
+                                    text-decoration:line-through;
+                                ">
+                                    PKR {{ number_format($payment->amount, 0) }}
+                                </span>
+
+                                <span style="
+                                    display:block;
+                                    margin-top:3px;
+                                    color:#a34f4f;
+                                    font-size:12px;
+                                    font-weight:650;
+                                ">
+                                    Voided
+                                </span>
+
+                            @else
+
+                                PKR {{ number_format($payment->amount, 0) }}
+
+                            @endif
+
+
+                            <a
+                                href="{{ route(
+                                    'welfare.assistance.payments.show',
+                                    [
+                                        'assistance' => $assistance,
+                                        'payment' => $payment,
+                                    ]
+                                ) }}"
+                                style="
+                                    display:block;
+                                    margin-top:4px;
+                                    color:var(--primary);
+                                    font-size:12px;
+                                    text-decoration:none;
+                                "
+                            >
+                                View Details
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                @empty
+
+                    <div class="notice">
+
+                        <i class="bi bi-wallet2"></i>
+
+                        <p>
+                            No payments have been recorded for this assistance yet.
+                        </p>
+
+                    </div>
+
+                @endforelse
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-head">
+
+                <div>
+
+                    <strong>
+                        Review History
+                    </strong>
+
+                    <span>
+                        Previous reviews, outcomes and scheduled follow-up dates.
+                    </span>
+
+                </div>
+
+
+                @if(
+                    $assistance->status === 'approved'
+                    && auth()->user()->hasPermission('welfare.assistance.manage')
+                )
+
+                    <a
+                        href="{{ route(
+                            'welfare.assistance.reviews.create',
+                            $assistance
+                        ) }}"
+                        class="ui-btn"
+                    >
+                        <i class="bi bi-plus-lg"></i>
+                        Record Review
+                    </a>
+
+                @endif
+
+            </div>
+
+
+            <div class="card-body">
+
+                @forelse(
+                    $assistance->reviews
+                        ->sortByDesc('review_date')
+                    as $review
+                )
+
+                    <div style="
+                        display:flex;
+                        gap:12px;
+                        padding:12px 0;
+                        border-bottom:1px solid #eef1ef;
+                    ">
+
+                        <div style="
+                            width:32px;
+                            height:32px;
+                            border-radius:9px;
+                            background:var(--primary-soft);
+                            color:var(--primary);
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            flex-shrink:0;
+                        ">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+
+
+                        <div style="flex:1; min-width:0;">
+
+                            <strong style="
+                                display:block;
+                                font-size:14px;
+                            ">
+                                {{ ucfirst(
+                                    str_replace(
+                                        '_',
+                                        ' ',
+                                        $review->outcome
+                                    )
+                                ) }}
+                            </strong>
+
+
+                            <span style="
+                                display:block;
+                                margin-top:3px;
+                                color:#6c7570;
+                                font-size:12px;
+                            ">
+                                {{ $review->review_date->format('d M Y') }}
+
+                                ·
+
+                                {{ $review->reviewedBy?->name ?: 'System' }}
+                            </span>
+
+
+                            @if($review->next_review_date)
+
+                                <span style="
+                                    display:block;
+                                    margin-top:5px;
+                                    color:var(--primary);
+                                    font-size:12px;
+                                    font-weight:650;
+                                ">
+                                    Next review:
+                                    {{ $review->next_review_date->format('d M Y') }}
+                                </span>
+
+                            @endif
+
+
+                            @if($review->notes)
+
+                                <p style="
+                                    margin:7px 0 0;
+                                    color:#65706a;
+                                    font-size:13px;
+                                    line-height:1.55;
+                                ">
+                                    {{ $review->notes }}
+                                </p>
+
+                            @endif
+
+                        </div>
+
+                    </div>
+
+                @empty
+
+                    <div class="notice">
+
+                        <i class="bi bi-clipboard"></i>
+
+                        <p>
+                            No review history has been recorded for this assistance yet.
+                        </p>
+
+                    </div>
+
+                @endforelse
+
+            </div>
+
+        </div>
+
+        
+
+    </div>
+
+
+    <aside>
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <div class="side-number">
+                    PKR {{ number_format((float) $assistance->amount, 0) }}
+                </div>
+
+                <div class="side-label">
+                    Assistance Amount
+                </div>
+
+                <div style="
+                    height:1px;
+                    background:#eef1ef;
+                    margin:17px 0;
+                "></div>
+
+                <div class="side-row">
+                    <span>Status</span>
+
+                    <span>
+                        {{ ucfirst($assistance->status) }}
+                    </span>
+                </div>
+
+                <div class="side-row">
+                    <span>Beneficiary</span>
+
+                    <span>
+                        {{ $assistance->beneficiary?->full_name ?? '—' }}
+                    </span>
+                </div>
+
+                <div class="side-row">
+                    <span>Fund</span>
+
+                    <span>
+                        {{ $assistance->fund?->name ?? 'Unassigned' }}
+                    </span>
+                </div>
+
+                <div class="side-row">
+                    <span>Approved By</span>
+
+                    <span>
+                        {{ $assistance->approvedBy?->name ?? 'Not approved' }}
+                    </span>
+                </div>
+
+                <div class="side-row">
+                    <span>Approved At</span>
+
+                    <span>
+                        {{ $assistance->approved_at?->format('d M Y H:i') ?? '—' }}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-head">
+                <strong>Finance Control</strong>
+            </div>
+
+            <div class="card-body">
+
+                <div class="notice">
+                    <i class="bi bi-shield-check"></i>
+
+                    <div>
+                        This assistance request is separate from financial
+                        disbursement. A Finance ledger entry will be created
+                        only when an actual payment is recorded.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+</div>
+
+@endsection

@@ -1,0 +1,894 @@
+@extends('layouts.app')
+
+@section('title', 'Committees')
+
+@push('styles')
+<style>
+    /* =========================================
+       PAGE HEADER
+    ========================================= */
+
+    .committee-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .committee-header h1 {
+        margin: 0;
+        font-size: 25px;
+        font-weight: 700;
+        letter-spacing: -.5px;
+    }
+
+    .committee-header p {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+    }
+
+    .committee-actions {
+        display: flex;
+        gap: 9px;
+    }
+
+    .committee-btn {
+        height: 40px;
+        padding: 0 15px;
+        border-radius: 10px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        font-size: 16px;
+        font-weight: 650;
+
+        cursor: pointer;
+        transition: all .18s ease;
+        text-decoration: none;
+    }
+
+    .committee-btn.secondary {
+        background: #fff;
+        border: 1px solid var(--border);
+        color: #617068;
+    }
+
+    .committee-btn.secondary:hover {
+        background: #fafcfb;
+        border-color: #6f7572;
+        color: var(--primary);
+    }
+
+    .committee-btn.primary {
+        background: var(--primary);
+        border: 1px solid var(--primary);
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(23,63,53,.12);
+    }
+
+    .committee-btn.primary:hover {
+        background: var(--primary-light);
+        transform: translateY(-1px);
+    }
+
+
+    /* =========================================
+       SUMMARY
+    ========================================= */
+
+    .committee-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .summary-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        padding: 16px;
+    }
+
+    .summary-label {
+        color: var(--muted);
+        font-size: 16px;
+    }
+
+    .summary-value {
+        margin-top: 6px;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -.3px;
+    }
+
+    .summary-meta {
+        margin-top: 5px;
+        color: #6d7572;
+        font-size: 16px;
+    }
+
+
+    /* =========================================
+       SEARCH / FILTER BAR
+    ========================================= */
+
+    .committee-toolbar {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 15px 17px;
+
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+
+        margin-bottom: 18px;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        min-width: 230px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6f7672;
+        font-size: 17px;
+    }
+
+    .search-box input {
+        width: 100%;
+        height: 40px;
+
+        border: 1px solid var(--border);
+        border-radius: 9px;
+
+        padding: 0 13px 0 36px;
+
+        background: #fafcfa;
+        outline: none;
+
+        font-size: 16px;
+    }
+
+    .search-box input:focus {
+        background: #fff;
+        border-color: #6e7772;
+        box-shadow: 0 0 0 3px rgba(23,63,53,.06);
+    }
+
+    .filter-select {
+        height: 40px;
+        min-width: 150px;
+
+        border: 1px solid var(--border);
+        border-radius: 9px;
+
+        padding: 0 34px 0 12px;
+
+        background: #fff;
+        color: #68756f;
+
+        font-size: 16px;
+        outline: none;
+        cursor: pointer;
+    }
+
+
+    /* =========================================
+       COMMITTEE GRID
+    ========================================= */
+
+    .committee-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .committee-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+
+        transition:
+            transform .18s ease,
+            box-shadow .18s ease,
+            border-color .18s ease;
+    }
+
+    .committee-card:hover {
+        transform: translateY(-2px);
+
+        border-color: #707673;
+
+        box-shadow:
+            0 12px 28px rgba(25,55,45,.06);
+    }
+
+    .committee-card-top {
+        padding: 18px;
+
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+    .committee-identity {
+        display: flex;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .committee-icon {
+        width: 44px;
+        height: 44px;
+
+        border-radius: 12px;
+
+        background: var(--primary-soft);
+        color: var(--primary);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex-shrink: 0;
+
+        font-size: 18px;
+    }
+
+    .committee-name {
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .committee-code {
+        margin-top: 4px;
+
+        color: #6d7571;
+        font-size: 16px;
+    }
+
+    .committee-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+
+        padding: 5px 8px;
+
+        border-radius: 30px;
+
+        background: #edf7f0;
+        color: #397955;
+
+        font-size: 16px;
+        font-weight: 650;
+
+        white-space: nowrap;
+    }
+
+    .committee-status::before {
+        content: "";
+
+        width: 5px;
+        height: 5px;
+
+        border-radius: 50%;
+
+        background: #4c9a6c;
+    }
+
+    .committee-description {
+        padding: 0 18px 17px;
+
+        color: #6b7670;
+
+        font-size: 16px;
+        line-height: 1.65;
+    }
+
+    .committee-divider {
+        height: 1px;
+        background: #eef1ef;
+    }
+
+    .committee-meta {
+        padding: 14px 18px;
+
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .meta-item label {
+        display: block;
+
+        color: #707772;
+
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .meta-item strong {
+        display: block;
+
+        margin-top: 4px;
+
+        color: #46534c;
+
+        font-size: 16px;
+    }
+
+    .committee-card-footer {
+        padding: 11px 18px;
+
+        background: #fafcfb;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        border-top: 1px solid #eef1ef;
+    }
+
+    .member-stack {
+        display: flex;
+        align-items: center;
+    }
+
+    .mini-avatar {
+        width: 25px;
+        height: 25px;
+
+        margin-left: -5px;
+
+        border: 2px solid #fff;
+        border-radius: 50%;
+
+        background: #e7efeb;
+        color: var(--primary);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .mini-avatar:first-child {
+        margin-left: 0;
+    }
+
+    .member-count {
+        margin-left: 8px;
+
+        color: #6c7570;
+        font-size: 16px;
+    }
+
+    .view-committee {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+
+        color: var(--primary);
+
+        font-size: 16px;
+        font-weight: 650;
+    }
+
+    /* =========================================
+       EMPTY / INFO BANNER
+    ========================================= */
+
+    .config-banner {
+        margin-top: 18px;
+
+        padding: 15px 17px;
+
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+
+        border-radius: 13px;
+
+        background: #f7f9f8;
+        border: 1px solid #e5ebe8;
+    }
+
+    .config-banner i {
+        color: var(--primary);
+        font-size: 18px;
+        margin-top: 1px;
+    }
+
+    .config-banner strong {
+        display: block;
+        font-size: 16px;
+    }
+
+    .config-banner p {
+        margin: 4px 0 0;
+
+        color: #6b7670;
+
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+
+    @media (max-width: 1000px) {
+
+        .committee-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .committee-summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 650px) {
+
+        .committee-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .committee-actions {
+            width: 100%;
+        }
+
+        .committee-actions .committee-btn {
+            flex: 1;
+        }
+
+        .committee-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .committee-toolbar {
+            align-items: stretch;
+        }
+
+        .search-box {
+            width: 100%;
+            min-width: 100%;
+        }
+
+        .filter-select {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .committee-meta {
+            grid-template-columns: 1fr;
+            gap: 13px;
+        }
+    }
+</style>
+@endpush
+
+
+@section('content')
+
+<!-- =========================================
+     PAGE HEADER
+========================================== -->
+
+<div class="committee-header">
+
+    <div>
+        <h1>Committees</h1>
+
+        <p>
+            Manage committees, members, positions and organizational responsibilities.
+        </p>
+    </div>
+
+    <div class="committee-actions">
+
+        <button class="committee-btn secondary">
+            <i class="bi bi-download"></i>
+            Export
+        </button>
+
+        <a
+            href="{{ route('committees.create') }}"
+            class="committee-btn primary"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Add Committee
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     SUMMARY
+========================================== -->
+
+<div class="committee-summary">
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Total Committees
+        </div>
+
+        <div class="summary-value">
+            {{ number_format($totalCommittees) }}
+        </div>
+
+        <div class="summary-meta">
+            Configured organizational groups
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Active Committees
+        </div>
+
+        <div class="summary-value">
+            {{ number_format($activeCommittees) }}
+        </div>
+
+        <div class="summary-meta">
+            Currently operating
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Total Positions
+        </div>
+
+        <div class="summary-value">
+            &mdash;
+        </div>
+
+        <div class="summary-meta">
+            Positions schema not yet configured
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Assigned Members
+        </div>
+
+        <div class="summary-value">
+            {{ number_format($committees->sum('members_count')) }}
+        </div>
+
+        <div class="summary-meta">
+            Across committees shown below
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     SEARCH / FILTERS
+========================================== -->
+
+<div class="committee-toolbar">
+
+    <div class="search-box">
+
+        <i class="bi bi-search"></i>
+
+        <input
+            type="text"
+            id="committeeSearch"
+            placeholder="Search committees, responsibilities..."
+        >
+
+    </div>
+
+
+    <select class="filter-select" id="committeeStatus">
+
+        <option value="">All Statuses</option>
+
+        <option value="active">
+            Active
+        </option>
+
+        <option value="inactive">
+            Inactive
+        </option>
+
+    </select>
+
+
+    <select class="filter-select">
+
+        <option value="">
+            All Types
+        </option>
+
+        <option>
+            Decision-Making
+        </option>
+
+        <option>
+            Implementation
+        </option>
+
+        <option>
+            Administration
+        </option>
+
+    </select>
+
+</div>
+
+
+<!-- =========================================
+     COMMITTEE CARDS
+========================================== -->
+
+<div class="committee-grid" id="committeeGrid">
+
+    @forelse ($committees as $committee)
+
+        <article
+            class="committee-card"
+            data-status="{{ $committee->status }}"
+        >
+
+            <div class="committee-card-top">
+
+                <div class="committee-identity">
+
+                    <div class="committee-icon">
+                        <i class="bi bi-diagram-3"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="committee-name">
+                            {{ $committee->name }}
+                        </div>
+
+                        <div class="committee-code">
+                            {{ $committee->committee_number }}
+                            &middot;
+                            {{ ucfirst($committee->type) }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <span
+                    class="committee-status"
+                    style="
+                        @if ($committee->status !== 'active')
+                            background:#f1f3f2;
+                            color:#6a766f;
+                        @endif
+                    "
+                >
+                    {{ ucfirst($committee->status) }}
+                </span>
+
+            </div>
+
+
+            <div class="committee-description">
+                {{ $committee->description ?: 'No description has been recorded for this committee.' }}
+            </div>
+
+
+            <div class="committee-divider"></div>
+
+
+            <div class="committee-meta">
+
+                <div class="meta-item">
+                    <label>Type</label>
+                    <strong>{{ ucfirst($committee->type) }}</strong>
+                </div>
+
+                <div class="meta-item">
+                    <label>Members</label>
+                    <strong>{{ $committee->members_count }}</strong>
+                </div>
+
+                <div class="meta-item">
+                    <label>Established</label>
+                    <strong>
+                        {{
+                            $committee->established_at
+                                ? $committee->established_at->format('d M Y')
+                                : '—'
+                        }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="committee-card-footer">
+
+                <div class="member-stack">
+                    <span class="member-count">
+                        {{ $committee->members_count }}
+                        member(s)
+                    </span>
+                </div>
+
+                <a
+                    href="{{ route('committees.show', $committee) }}"
+                    class="view-committee"
+                >
+                    View committee
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+            </div>
+
+        </article>
+
+    @empty
+
+        <div
+            style="
+                grid-column:1/-1;
+                padding:50px;
+                text-align:center;
+                background:#fff;
+                border:1px solid var(--border);
+                border-radius:14px;
+                color:#89948f;
+            "
+        >
+
+            <i
+                class="bi bi-diagram-3"
+                style="font-size:28px;"
+            ></i>
+
+            <div style="margin-top:10px;">
+                No committees have been created yet.
+            </div>
+
+        </div>
+
+    @endforelse
+
+</div>
+
+
+<div style="
+    margin-top:18px;
+    display:flex;
+    justify-content:flex-end;
+">
+    {{ $committees->links() }}
+</div>
+
+
+<!-- =========================================
+     CONFIGURATION BANNER
+========================================== -->
+
+<div class="config-banner">
+
+    <i class="bi bi-sliders"></i>
+
+    <div>
+
+        <strong>
+            Configurable organizational structure
+        </strong>
+
+        <p>
+            Committees, positions and responsibilities are designed to be
+            configurable so the organization can change its structure
+            without rebuilding the application.
+        </p>
+
+    </div>
+
+</div>
+
+@endsection
+
+
+@push('scripts')
+
+<script>
+
+    const committeeSearch =
+        document.getElementById('committeeSearch');
+
+    const committeeStatus =
+        document.getElementById('committeeStatus');
+
+    const committeeCards =
+        document.querySelectorAll('.committee-card');
+
+
+    function filterCommittees() {
+
+        const search =
+            committeeSearch.value.toLowerCase().trim();
+
+        const status =
+            committeeStatus.value;
+
+
+        committeeCards.forEach(card => {
+
+            const text =
+                card.textContent.toLowerCase();
+
+            const cardStatus =
+                card.dataset.status;
+
+            const matchesSearch =
+                !search || text.includes(search);
+
+            const matchesStatus =
+                !status || cardStatus === status;
+
+            card.style.display =
+                matchesSearch && matchesStatus
+                    ? ''
+                    : 'none';
+
+        });
+
+    }
+
+
+    committeeSearch.addEventListener(
+        'input',
+        filterCommittees
+    );
+
+    committeeStatus.addEventListener(
+        'change',
+        filterCommittees
+    );
+
+</script>
+
+@endpush
