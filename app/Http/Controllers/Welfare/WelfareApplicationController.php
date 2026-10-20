@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Welfare;
 
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Applications\Models\WelfareApplicationReview;
@@ -12,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -241,10 +243,10 @@ class WelfareApplicationController extends Controller
          * We do not trust a client-provided value for this.
          */
         $requestedAmount =
-            (float) $data['requested_amount'];
+            Money::minor($data['requested_amount']);
 
         $applicantContribution =
-            (float) ($data['applicant_contribution'] ?? 0);
+            Money::minor($data['applicant_contribution'] ?? 0);
 
         if ($applicantContribution > $requestedAmount) {
             return back()
@@ -256,7 +258,7 @@ class WelfareApplicationController extends Controller
         }
 
         $organizationContribution =
-            $requestedAmount - $applicantContribution;
+            Money::decimal(Money::add($requestedAmount, -$applicantContribution));
 
         /*
          * Create the application atomically.
@@ -284,10 +286,7 @@ class WelfareApplicationController extends Controller
                     );
 
                 $data['applicant_contribution'] =
-                    (float) (
-                        $data['applicant_contribution']
-                        ?? 0
-                    );
+                    Money::decimal(Money::minor($data['applicant_contribution'] ?? 0));
 
                 $data['organization_contribution'] =
                     $organizationContribution;
@@ -323,7 +322,7 @@ class WelfareApplicationController extends Controller
             ) {
                 $file->store(
                     'welfare/applications/' . $application->id,
-                    'public'
+                    'private'
                 );
             }
 
@@ -360,6 +359,7 @@ class WelfareApplicationController extends Controller
             'approvedBy',
             'rejectedBy',
             'agreement',
+            'assistanceIncludingArchived',
 
         'verifications' => function ($query) {
             $query
@@ -380,14 +380,17 @@ class WelfareApplicationController extends Controller
 
         $directory = 'welfare/applications/' . $application->id;
 
-        if (Storage::disk('public')->exists($directory)) {
+        if (Storage::disk('private')->exists($directory)) {
             $documents = collect(
-                Storage::disk('public')->files($directory)
-            )->map(function ($path) {
+                Storage::disk('private')->files($directory)
+            )->map(function ($path) use ($application) {
                 return [
                     'name' => basename($path),
-                    'url' => Storage::disk('public')->url($path),
-                    'size' => Storage::disk('public')->size($path),
+                    'url' => route(
+                        'welfare.applications.documents.show',
+                        [$application, basename($path)]
+                    ),
+                    'size' => Storage::disk('private')->size($path),
                     'extension' => strtolower(
                         pathinfo($path, PATHINFO_EXTENSION)
                     ),
@@ -401,6 +404,27 @@ class WelfareApplicationController extends Controller
                 'application',
                 'documents'
             )
+        );
+    }
+
+    /** Stream a private application document to an authorized staff member. */
+    public function document(
+        WelfareApplication $application,
+        string $document
+    ): StreamedResponse {
+        abort_unless(
+            $document !== '' && basename($document) === $document,
+            404
+        );
+
+        $path = 'welfare/applications/' . $application->id . '/' . $document;
+
+        abort_unless(Storage::disk('private')->exists($path), 404);
+
+        return Storage::disk('private')->response(
+            $path,
+            $document,
+            ['Cache-Control' => 'private, no-store']
         );
     }
 
@@ -423,9 +447,11 @@ class WelfareApplicationController extends Controller
             'recommended_amount' => [
                 'required_if:decision,approve',
                 'nullable',
+                'string',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'numeric',
                 'min:0.01',
-                'max:9999999999999.99',
+                'max:999999999999.99',
             ],
             'notes' => [
                 'required',
@@ -457,7 +483,7 @@ class WelfareApplicationController extends Controller
             };
 
             $amount = $decision === 'approve'
-                ? (float) $data['recommended_amount']
+                ? Money::decimal(Money::minor($data['recommended_amount']))
                 : null;
 
             $this->recordApplicationReview(
@@ -591,9 +617,11 @@ class WelfareApplicationController extends Controller
             'approved_amount' => [
                 'required_if:decision,approve',
                 'nullable',
+                'string',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'numeric',
                 'min:0.01',
-                'max:9999999999999.99',
+                'max:999999999999.99',
             ],
             'notes' => [
                 'required',
@@ -625,7 +653,7 @@ class WelfareApplicationController extends Controller
             };
 
             $amount = $decision === 'approve'
-                ? (float) $data['approved_amount']
+                ? Money::decimal(Money::minor($data['approved_amount']))
                 : null;
 
             $this->recordApplicationReview(
@@ -736,7 +764,7 @@ class WelfareApplicationController extends Controller
         WelfareApplication $application,
         string $stage,
         string $decision,
-        ?float $amount,
+        ?string $amount,
         string $notes,
         array $metadata = []
     ): WelfareApplicationReview {
