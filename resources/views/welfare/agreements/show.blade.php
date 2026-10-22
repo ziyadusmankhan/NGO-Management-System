@@ -5,6 +5,20 @@
 @section('content')
 <div style="max-width:900px;margin:0 auto;padding:24px 0;">
 
+    @if ($errors->any())
+        <div class="alert alert-danger" role="alert">
+            <strong>The agreement action could not be completed.</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            @if (old('signature_party') && !$agreementActionError)
+                <p class="mb-0 mt-2">Your name has been kept in the submitted form. If you retry, select the evidence file again.</p>
+            @endif
+        </div>
+    @endif
+
     @if (session('success'))
         <div style="padding:14px;margin-bottom:18px;border:1px solid #b7dfca;border-radius:8px;background:#f1fbf5;color:#176b4d;">
             {{ session('success') }}
@@ -38,7 +52,7 @@
 
         <p>
             <strong>Final approved amount:</strong>
-            PKR {{ number_format((float) $agreement->approved_amount, 2) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($agreement->approved_amount) }}
         </p>
 
         <p>
@@ -187,7 +201,11 @@
 
                 <h2 style="font-size:18px;margin-top:0;">Agreement Actions</h2>
 
-                @if ($agreement->status === 'draft')
+                @if ($agreementActionError)
+                    <div class="alert alert-warning" role="alert">
+                        {{ $agreementActionError }}
+                    </div>
+                @elseif ($agreement->status === 'draft')
 
                     <p style="line-height:1.6;color:#6d7571;">
                         Mark the draft as prepared only after its contents have been reviewed
@@ -240,7 +258,7 @@
                                 name="signatory_name"
                                 maxlength="255"
                                 required
-                                value="{{ old('signatory_name') }}"
+                                value="{{ old('signature_party') === 'beneficiary' ? old('signatory_name') : '' }}"
                                 style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccd5d0;border-radius:7px;margin:8px 0 14px;"
                             >
                             <label for="beneficiary_document">
@@ -308,7 +326,7 @@
                                 name="signatory_name"
                                 maxlength="255"
                                 required
-                                value="{{ old('signatory_name') }}"
+                                value="{{ old('signature_party') === 'organization' ? old('signatory_name') : '' }}"
                                 style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccd5d0;border-radius:7px;margin:8px 0 14px;"
                             >
 
@@ -393,4 +411,23 @@
         &larr; Return to application
     </a>
 </div>
+    @can('welfare.assistance.view')
+        <div class="card mt-4"><div class="card-body">
+            <h2 class="h5">Welfare assistance</h2>
+            @if($assistance)
+                @if($assistance->trashed())
+                    <p>Assistance {{ $assistance->assistance_number }} is archived. This application cannot create another assistance.</p>
+                @else
+                    <a href="{{ route('welfare.assistance.show', $assistance) }}">{{ $assistance->assistance_number }} · {{ ucfirst($assistance->status) }}</a>
+                @endif
+            @elseif($assistanceError)
+                <p>{{ $assistanceError }}</p>
+            @else
+                @can('welfare.assistance.manage')
+                    <p>Create a pending assistance using this agreement's amount and the application's beneficiary, purpose and authorized fund. No payment is created.</p>
+                    <a class="btn btn-success" href="{{ route('welfare.assistance.create', ['application_id' => $application->id]) }}">Create assistance</a>
+                @endcan
+            @endif
+        </div></div>
+    @endcan
 @endsection

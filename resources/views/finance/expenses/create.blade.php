@@ -870,7 +870,7 @@
                                     @selected((string) old('fund_id') === (string) $fund->id)
                                 >
                                     {{ $fund->name }}
-                                    — PKR {{ number_format($fundBalances[$fund->id] ?? 0, 0) }}
+                                    — PKR {{ \App\Domain\Finance\Support\Money::format($fundBalances[$fund->id] ?? 0) }}
                                 </option>
 
                             @endforeach
@@ -1764,9 +1764,7 @@
 
     function money(value) {
         return 'PKR ' +
-            Number(value || 0).toLocaleString('en-PK', {
-                maximumFractionDigits: 0
-            });
+            FoundationMoney.formatMinor(value);
     }
 
     function getSelectedFund() {
@@ -1860,22 +1858,19 @@
         const fundId = fund.value;
 
         return fundId && fundBalances[fundId]
-            ? Number(fundBalances[fundId])
-            : 0;
+            ? FoundationMoney.minor(fundBalances[fundId])
+            : 0n;
     }
 
     function updateAmount() {
         const expense =
-            Number(amount.value || 0);
+            FoundationMoney.minor(amount.value);
 
         const availableBalance =
             getAvailableBalance();
 
         const after =
-            Math.max(
-                availableBalance - expense,
-                0
-            );
+            (availableBalance > expense ? availableBalance - expense : 0n);
 
         document.getElementById('previewAmount')
             .textContent = money(expense);

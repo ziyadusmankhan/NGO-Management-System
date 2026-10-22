@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WelfareApplicationReview extends Model
 {
+    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+
+    protected array $moneyColumns = ['recommended_amount'];
+
     use HasFactory;
 
     protected $fillable = [

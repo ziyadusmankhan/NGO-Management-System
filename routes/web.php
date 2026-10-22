@@ -165,6 +165,13 @@ Route::prefix('welfare/applications')
             ->name('committee-decision');
 
         Route::get(
+            '/{application}/documents/{document}',
+            [WelfareApplicationController::class, 'document']
+        )
+            ->middleware('permission:welfare.assistance.view')
+            ->name('documents.show');
+
+        Route::get(
             '/{application}',
             [WelfareApplicationController::class, 'show']
         )
@@ -326,155 +333,101 @@ Route::prefix('welfare/verification')
 
 
 Route::get('/business/applications', function () {
-    return view('business.applications.index');
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.index');
 
 Route::get('/business/applications/create', function () {
-    return view('business.applications.create');
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.create');
 
 Route::get('/business/applications/{id}/viability', function ($id) {
-    return view('business.applications.viability', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.viability');
 
 Route::get('/business/applications/{id}/recommendation', function ($id) {
-    return view('business.applications.recommendation', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.recommendation');
 
 Route::get('/business/applications/{id}/approval', function ($id) {
-    return view('business.applications.approval', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.approval');
 
 Route::get('/business/applications/{id}/agreement', function ($id) {
-    return view('business.applications.agreement', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.agreement');
 
 Route::get('/business/applications/{id}/disbursement', function ($id) {
-    return view('business.applications.disbursement', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.disbursement');
 
 Route::get('/business/applications/{id}/monitoring', function ($id) {
-    return view('business.applications.monitoring', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.monitoring');
 
 Route::get('/business/applications/{id}', function ($id) {
-    return view('business.applications.show', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
 })->name('business.applications.show');
 
-Route::get('/qard', function () {
-    return view('qard.index');
-})->name('qard.index');
-
-Route::get('/qard/create', function () {
-    return view('qard.create');
-})->name('qard.create');
-
-Route::get('/qard/{id}/repayment', function ($id) {
-    return view('qard.repayment', [
-        'id' => $id
-    ]);
-})->name('qard.repayment');
-
-Route::get('/qard/{id}/recovery', function ($id) {
-    return view('qard.recovery', [
-        'id' => $id
-    ]);
-})->name('qard.recovery');
-
-Route::get('/qard/{id}/recycling', function ($id) {
-    return view('qard.recycling', [
-        'id' => $id
-    ]);
-})->name('qard.recycling');
-
-Route::get('/qard/{id}', function ($id) {
-    return view('qard.show', [
-        'id' => $id
-    ]);
-})->name('qard.show');
+require __DIR__.'/qard.php';
 
 Route::get('/operations/tasks', function () {
-    return view('operations.tasks.index');
+    return view('shared.module-pending', ['moduleTitle' => 'Tasks']);
 })->name('operations.tasks.index');
 
 Route::get('/operations/tasks/create', function () {
-    return view('operations.tasks.create');
+    return view('shared.module-pending', ['moduleTitle' => 'Tasks']);
 })->name('operations.tasks.create');
 
 Route::get('/operations/tasks/{id}', function ($id) {
-    return view('operations.tasks.show', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Tasks']);
 })->name('operations.tasks.show');
 
 Route::get('/operations/procurement', function () {
-    return view('operations.procurement.index');
+    return view('shared.module-pending', ['moduleTitle' => 'Procurement']);
 })->name('operations.procurement.index');
 
 Route::get('/operations/procurement/create', function () {
-    return view('operations.procurement.create');
+    return view('shared.module-pending', ['moduleTitle' => 'Procurement']);
 })->name('operations.procurement.create');
 
 Route::get('/operations/procurement/{id}', function ($id) {
-    return view('operations.procurement.show', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Procurement']);
 })->name('operations.procurement.show');
 
 Route::get('/operations/meetings', function () {
-    return view('operations.meetings.index');
+    return view('shared.module-pending', ['moduleTitle' => 'Meetings']);
 })->name('operations.meetings.index');
 
 Route::get('/operations/meetings/create', function () {
-    return view('operations.meetings.create');
+    return view('shared.module-pending', ['moduleTitle' => 'Meetings']);
 })->name('operations.meetings.create');
 
 Route::get('/operations/meetings/{id}', function ($id) {
-    return view('operations.meetings.show', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Meetings']);
 })->name('operations.meetings.show');
 
 Route::get('/records/documents', function () {
-    return view('records.documents.index');
+    return view('shared.module-pending', ['moduleTitle' => 'Documents']);
 })->name('records.documents.index');
 
 Route::get('/records/documents/create', function () {
-    return view('records.documents.create');
+    return view('shared.module-pending', ['moduleTitle' => 'Documents']);
 })->name('records.documents.create');
 
 Route::get('/records/documents/{id}', function ($id) {
-    return view('records.documents.show', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Documents']);
 })->name('records.documents.show');
 
 Route::get('/records/reports', function () {
-    return view('records.reports.index');
+    return view('shared.module-pending', ['moduleTitle' => 'Reports']);
 })->name('records.reports.index');
 
 Route::get('/records/reports/{id}', function ($id) {
-    return view('records.reports.show', [
-        'id' => $id
-    ]);
+    return view('shared.module-pending', ['moduleTitle' => 'Reports']);
 })->name('records.reports.show');
 
 Route::get('/records/audit', function () {
-    return view('records.audit.index');
+    return view('shared.module-pending', ['moduleTitle' => 'Audit Trail']);
 })->name('records.audit.index');
 
 use App\Http\Controllers\Members\MemberController;
@@ -504,8 +457,11 @@ Route::resource(
     'show',
     'edit',
     'update',
-    'destroy',
 ]);
+
+Route::delete('/committees/{committee}', [CommitteeController::class, 'destroy'])
+    ->middleware(['auth', 'permission:committees.delete'])
+    ->name('committees.destroy');
 
 Route::post(
     '/committees/{committee}/members',
@@ -702,7 +658,7 @@ Route::prefix('finance/funds')
         Route::get(
             '/{fund}',
             [FundController::class, 'show']
-        )->name('show');
+        )->withTrashed()->name('show');
 
         Route::get(
             '/{fund}/edit',
@@ -842,7 +798,7 @@ Route::middleware([
             TransactionController::class,
             'show',
         ]
-    )->name('finance.transactions.show');
+    )->withTrashed()->name('finance.transactions.show');
 });
 
 use App\Http\Controllers\Finance\FinanceReportController;
@@ -900,6 +856,12 @@ Route::middleware(['auth'])->group(function () {
                     )->name('update');
                 });
 
+            Route::post('/{assistance}/resubmit', [WelfareAssistanceController::class, 'resubmit'])
+                ->middleware('permission:welfare.assistance.manage')->name('resubmit');
+
+            Route::post('/{assistance}/close', [WelfareAssistanceController::class, 'close'])
+                ->middleware(['permission:welfare.reviews.view', 'permission:welfare.reviews.close'])->name('close');
+
             Route::middleware('permission:welfare.assistance.approve')
                 ->group(function () {
 
@@ -914,32 +876,15 @@ Route::middleware(['auth'])->group(function () {
                     )->name('reject');
                 });
 
-            Route::middleware([
-                'auth',
-                'permission:welfare.assistance.view',
-            ])->group(function () {
-
-                Route::get(
-                    '/reviews',
-                    [WelfareAssistanceReviewController::class, 'index']
-                )->name('reviews.index');
-
+            Route::middleware('permission:welfare.reviews.view')->group(function () {
+                Route::get('/reviews', [WelfareAssistanceReviewController::class, 'index'])->name('reviews.index');
+                Route::middleware('permission:welfare.reviews.manage')->group(function () {
+                    Route::get('/{assistance}/reviews/create', [WelfareAssistanceReviewController::class, 'create'])->name('reviews.create');
+                    Route::post('/{assistance}/reviews', [WelfareAssistanceReviewController::class, 'store'])->name('reviews.store');
+                });
             });
 
-            Route::middleware(
-                'permission:welfare.assistance.manage'
-            )->group(function () {
-
-                Route::get(
-                    '/{assistance}/reviews/create',
-                    [WelfareAssistanceReviewController::class, 'create']
-                )->name('reviews.create');
-
-                Route::post(
-                    '/{assistance}/reviews',
-                    [WelfareAssistanceReviewController::class, 'store']
-                )->name('reviews.store');
-
+            Route::middleware('permission:welfare.assistance.manage')->group(function () {
                 Route::get(
                     '/{assistance}/payments/create',
                     [WelfareAssistancePaymentController::class, 'create']

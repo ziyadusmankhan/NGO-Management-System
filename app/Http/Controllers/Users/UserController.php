@@ -16,12 +16,13 @@ class UserController
     public function index(): View
     {
         $users = User::query()
-            ->with('roles')
+            ->with(['roles', 'member.committees'])
             ->latest('id')
             ->paginate(15)
             ->withQueryString();
 
         $totalUsers = User::count();
+        $totalRoles = Role::count();
 
         $activeUsers = User::where(
             'status',
@@ -39,7 +40,8 @@ class UserController
                 'users',
                 'totalUsers',
                 'activeUsers',
-                'inactiveUsers'
+                'inactiveUsers',
+                'totalRoles'
             )
         );
     }
@@ -214,7 +216,7 @@ class UserController
         ) {
             return back()->withErrors([
                 'user' =>
-                    'You cannot delete your own account.',
+                    'You cannot archive your own account.',
             ]);
         }
 
@@ -225,7 +227,7 @@ class UserController
             ->route('users.index')
             ->with(
                 'success',
-                'User deleted successfully.'
+                'User archived successfully. They can no longer sign in.'
             );
     }
 }

@@ -9,7 +9,16 @@ class StoreFundRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->hasPermission('finance.funds.manage') ?? false;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        foreach (\App\Domain\Finance\Funds\Models\Fund::CONTROL_FLAGS as $flag) {
+            if (! $this->exists($flag)) {
+                $this->merge([$flag => false]);
+            }
+        }
     }
 
     public function rules(): array
@@ -40,7 +49,7 @@ class StoreFundRequest extends FormRequest
             'purpose' => [
                 'required',
                 'string',
-                'max:100',
+                Rule::in(['general_welfare', 'small_business', 'qard', 'education', 'emergency', 'community_development']),
             ],
 
             'description' => [
@@ -61,7 +70,9 @@ class StoreFundRequest extends FormRequest
 
             'opening_balance' => [
                 'nullable',
+                'string',
                 'numeric',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'min:0',
             ],
 

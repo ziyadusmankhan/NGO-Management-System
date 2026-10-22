@@ -693,6 +693,20 @@
 
 @section('content')
 
+@php
+    $linkedAssistance = $application->assistanceIncludingArchived;
+@endphp
+@if($linkedAssistance)
+    <div class="alert alert-info">
+        @if($linkedAssistance->trashed())
+            Assistance {{ $linkedAssistance->assistance_number }} is archived. Another assistance cannot be created for this application.
+        @else
+            Related assistance: <a href="{{ route('welfare.assistance.show', $linkedAssistance) }}">{{ $linkedAssistance->assistance_number }} · {{ ucfirst($linkedAssistance->status) }}</a>
+        @endif
+    </div>
+@endif
+
+
 <div class="page-header">
 
     <div class="identity">
@@ -787,7 +801,7 @@
 
                     <div class="overview-item">
                         <label>Requested Amount</label>
-                        <strong>PKR {{ number_format($application->requested_amount) }}</strong>
+                        <strong>PKR {{ \App\Domain\Finance\Support\Money::format($application->requested_amount) }}</strong>
                     </div>
 
                     <div class="overview-item">
@@ -843,7 +857,7 @@
                                     <div class="overview-item">
                                         <label>Approved Amount</label>
                                         <strong>
-                                            PKR {{ number_format((float) $application->agreement->approved_amount, 2) }}
+                                            PKR {{ \App\Domain\Finance\Support\Money::format($application->agreement->approved_amount) }}
                                         </strong>
                                     </div>
 
@@ -863,7 +877,7 @@
                                     </a>
                                 </div>
 
-                            @elseif ($application->application_number === 'APP-00010')
+                            @elseif ($application->isTestApplication())
                                 <p style="margin:0;color:#6d7571;">
                                     This is a reserved test-only application. Agreement creation is disabled.
                                 </p>
@@ -1089,7 +1103,7 @@
                         <label>Required Investment</label>
 
                         <strong>
-                            PKR {{ number_format($application->requested_amount) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($application->requested_amount) }}
                         </strong>
 
                     </div>
@@ -1100,7 +1114,7 @@
                         <label>Applicant Contribution</label>
 
                         <strong>
-                            PKR {{ number_format($application->applicant_contribution) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($application->applicant_contribution) }}
                         </strong>
 
                     </div>
@@ -1111,7 +1125,7 @@
                         <label>Organization Contribution</label>
 
                         <strong>
-                            PKR {{ number_format($application->organization_contribution) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($application->organization_contribution) }}
                         </strong>
 
                     </div>
@@ -1768,7 +1782,7 @@
                             $review->review_number,
                             $review->notes,
                             $review->recommended_amount !== null
-                                ? 'Amount: PKR ' . number_format((float) $review->recommended_amount, 2)
+                                ? 'Amount: PKR ' . \App\Domain\Finance\Support\Money::format($review->recommended_amount)
                                 : null,
                         ])->filter()->implode(' · ');
 
@@ -1833,7 +1847,7 @@
                 <div class="side-stat">
 
                     <div class="side-number">
-                        PKR {{ number_format($application->requested_amount) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($application->requested_amount) }}
                     </div>
 
                     <div class="side-label">

@@ -19,7 +19,7 @@ class CheckPermission
             abort(403, 'Unauthorized.');
         }
 
-        if (!$user->hasPermission($permission)) {
+        if (!$user->isActive() || !$user->hasPermission($permission)) {
             abort(403, 'You do not have permission to perform this action.');
         }
 

@@ -457,6 +457,8 @@
 
 @section('content')
 
+@include('shared.action-feedback')
+
 <div class="users-header">
 
     <div>
@@ -496,26 +498,26 @@
 
     <div class="summary-card">
         <div class="summary-label">Total Users</div>
-        <div class="summary-value">27</div>
+        <div class="summary-value">{{ number_format($totalUsers) }}</div>
         <div class="summary-meta">All registered accounts</div>
     </div>
 
     <div class="summary-card">
         <div class="summary-label">Active Users</div>
-        <div class="summary-value">24</div>
+        <div class="summary-value">{{ number_format($activeUsers) }}</div>
         <div class="summary-meta">Currently enabled</div>
     </div>
 
     <div class="summary-card">
         <div class="summary-label">Roles</div>
-        <div class="summary-value">7</div>
+        <div class="summary-value">{{ number_format($totalRoles) }}</div>
         <div class="summary-meta">Configured access roles</div>
     </div>
 
     <div class="summary-card">
-        <div class="summary-label">Pending Access</div>
-        <div class="summary-value">3</div>
-        <div class="summary-meta">Awaiting authorization</div>
+        <div class="summary-label">Inactive Users</div>
+        <div class="summary-value">{{ number_format($inactiveUsers) }}</div>
+        <div class="summary-meta">Sign-in disabled</div>
     </div>
 
 </div>
@@ -595,7 +597,7 @@
                     <th>Status</th>
                     <th>Last Active</th>
                     <th>Joined</th>
-                    <th></th>
+                    <th>Actions</th>
                 </tr>
 
             </thead>
@@ -688,7 +690,7 @@
 
 
                         <td>
-                            —
+                            {{ $user->member?->committees->where('pivot.status', 'active')->pluck('name')->join(', ') ?: '—' }}
                         </td>
 
 
@@ -701,7 +703,7 @@
                                     : 'status-inactive'
                                 }}"
                             >
-                                {{ number_format($activeUsers) }}
+                                {{ ucfirst($user->status) }}
                             </span>
 
                         </td>
@@ -709,13 +711,13 @@
 
                         <td class="last-active">
 
-                            @if ($user->updated_at)
+                            @if ($user->last_active_at)
 
-                                {{ $user->updated_at->diffForHumans() }}
+                                <time datetime="{{ $user->last_active_at->toIso8601String() }}" title="{{ $user->last_active_at->toIso8601String() }}">{{ $user->last_active_at->diffForHumans() }}</time>
 
                             @else
 
-                                Never
+                                Not recorded
 
                             @endif
 
@@ -729,6 +731,7 @@
 
                         <td>
 
+                            <div style="display:flex;align-items:center;gap:8px;">
                             <a
                                 href="{{ route('users.show', $user) }}"
                                 class="action-btn"
@@ -736,6 +739,8 @@
                             >
                                 <i class="bi bi-eye"></i>
                             </a>
+                                @include('shared.archive-user', ['buttonClass' => 'users-btn secondary'])
+                            </div>
 
                         </td>
 
@@ -781,39 +786,10 @@
     <!-- FOOTER -->
 
     <div class="table-footer">
-
         <div class="result-count">
-            Showing 1–7 of 27 users
+            Showing {{ $users->firstItem() ?? 0 }}-{{ $users->lastItem() ?? 0 }} of {{ $users->total() }} users
         </div>
-
-        <div class="pagination">
-
-            <button class="page-btn">
-                <i class="bi bi-chevron-left"></i>
-            </button>
-
-            <button class="page-btn active">
-                1
-            </button>
-
-            <button class="page-btn">
-                2
-            </button>
-
-            <button class="page-btn">
-                3
-            </button>
-
-            <button class="page-btn">
-                4
-            </button>
-
-            <button class="page-btn">
-                <i class="bi bi-chevron-right"></i>
-            </button>
-
-        </div>
-
+        {{ $users->links('pagination::bootstrap-5') }}
     </div>
 
 </div>

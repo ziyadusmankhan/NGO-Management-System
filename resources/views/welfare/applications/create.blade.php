@@ -1417,13 +1417,7 @@
 
     function formatPKR(value) {
 
-        const number = Number(value || 0);
-
-        return 'PKR ' +
-            number.toLocaleString('en-PK', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            });
+        return 'PKR ' + FoundationMoney.formatMinor(value);
 
     }
 
@@ -1431,16 +1425,13 @@
     function updateFinancialPreview() {
 
         const amount =
-            Number(requestedAmount.value || 0);
+            FoundationMoney.minor(requestedAmount.value);
 
         const contribution =
-            Number(applicantContribution.value || 0);
+            FoundationMoney.minor(applicantContribution.value);
 
         const organization =
-            Math.max(
-                0,
-                amount - contribution
-            );
+            (amount > contribution ? amount - contribution : 0n);
 
         previewAmount.textContent =
             amount > 0

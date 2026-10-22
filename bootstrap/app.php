@@ -36,6 +36,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust VS Code tunnel proxy headers for HTTPS & redirects
         $middleware->trustProxies(at: '*');
 
+        $middleware->appendToGroup(
+            'web',
+            \App\Http\Middleware\EnsureActiveUser::class
+        );
+
         $middleware->alias([
             'permission' => \App\Http\Middleware\CheckPermission::class,
         ]);

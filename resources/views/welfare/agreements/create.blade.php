@@ -38,7 +38,7 @@
 
         <p>
             <strong>Final approved amount:</strong>
-            PKR {{ number_format((float) $application->recommended_amount, 2) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($application->recommended_amount) }}
         </p>
 
         <p style="margin-bottom:0;">

@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Beneficiary extends Model
 {
+    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+
+    protected array $moneyColumns = ['monthly_income'];
+
     use HasFactory;
     use SoftDeletes;
 

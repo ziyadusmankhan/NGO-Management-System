@@ -417,6 +417,8 @@
 
 @section('content')
 
+@include('shared.action-feedback')
+
 <div class="details-header">
 
     <div class="committee-identity-large">
@@ -466,6 +468,8 @@
             <i class="bi bi-pencil"></i>
             Edit Committee
         </a>
+
+        @include('shared.archive-committee', ['buttonClass' => 'details-btn'])
 
     </div>
 

@@ -94,6 +94,8 @@ class StoreBeneficiaryRequest extends FormRequest
 
             'monthly_income' => [
                 'nullable',
+                'string',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'numeric',
                 'min:0',
                 'max:999999999999.99',

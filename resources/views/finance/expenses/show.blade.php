@@ -759,7 +759,7 @@
                     <div class="summary-box highlight">
                         <label>Expense Amount</label>
                         <strong>
-                            PKR {{ number_format($expense->amount, 0) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($expense->amount) }}
                         </strong>
                     </div>
 
@@ -978,7 +978,7 @@
                             <label>Balance Before</label>
 
                             <strong>
-                                PKR {{ number_format($balanceBefore, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($balanceBefore) }}
                             </strong>
                         </div>
 
@@ -986,7 +986,7 @@
                             <label>Expense</label>
 
                             <strong>
-                                PKR {{ number_format($expense->amount, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($expense->amount) }}
                             </strong>
                         </div>
 
@@ -994,7 +994,7 @@
                             <label>Balance After</label>
 
                             <strong>
-                                PKR {{ number_format($balanceAfter, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($balanceAfter) }}
                             </strong>
                         </div>
 
@@ -1173,7 +1173,7 @@
                     </strong>
 
                     <span>
-                        PKR {{ number_format($balanceBefore, 0) }} before
+                        PKR {{ \App\Domain\Finance\Support\Money::format($balanceBefore) }} before
                     </span>
                 </div>
 
@@ -1191,7 +1191,7 @@
                     </strong>
 
                     <span>
-                        PKR {{ number_format($expense->amount, 0) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($expense->amount) }}
                     </span>
                 </div>
 
@@ -1227,7 +1227,7 @@
                     </strong>
 
                     <span>
-                        PKR {{ number_format($balanceAfter, 0) }} after
+                        PKR {{ \App\Domain\Finance\Support\Money::format($balanceAfter) }} after
                     </span>
                 </div>
 
@@ -1273,7 +1273,7 @@
                             </div>
 
                             <div class="timeline-note">
-                                PKR {{ number_format($expense->amount, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($expense->amount) }}
                                 recorded as paid
                                 {{ $fund ? 'from ' . $fund->name : '' }}.
                             </div>
@@ -1402,7 +1402,7 @@
             <div class="card-body">
 
                 <div class="side-number">
-                    PKR {{ number_format($expense->amount, 0) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($expense->amount) }}
                 </div>
 
                 <div class="side-label">

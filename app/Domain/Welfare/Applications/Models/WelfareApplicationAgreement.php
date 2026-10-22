@@ -8,6 +8,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WelfareApplicationAgreement extends Model
 {
+    public function newModelQuery()
+    {
+        $query = parent::newModelQuery();
+        if ($this->getConnection()->getDriverName() === 'sqlite') {
+            // Read fixed-scale text before PDO/PHP can shorten SQLite REAL values.
+            $query->select('welfare_application_agreements.*')->selectRaw(
+                "CASE WHEN welfare_application_agreements.approved_amount IS NULL THEN NULL ELSE printf('%.2f', welfare_application_agreements.approved_amount) END AS approved_amount"
+            );
+        }
+
+        return $query;
+    }
+
     protected $fillable = [
         'agreement_number',
         'application_id',

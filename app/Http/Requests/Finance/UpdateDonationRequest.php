@@ -44,6 +44,8 @@ class UpdateDonationRequest extends FormRequest
 
             'amount' => [
                 'required',
+                'string',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'numeric',
                 'gt:0',
             ],

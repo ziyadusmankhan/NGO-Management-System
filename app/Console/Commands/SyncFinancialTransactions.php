@@ -5,9 +5,13 @@ namespace App\Console\Commands;
 use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
-use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Finance\Transactions\Services\TransactionService;
 use Illuminate\Console\Command;
+use App\Domain\Finance\Support\Money;
+use App\Domain\Finance\Funds\Services\FundBalanceService;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment;
+use App\Domain\Qard\Models\QardMovement;
+use Illuminate\Validation\ValidationException;
 
 class SyncFinancialTransactions extends Command
 {
@@ -49,9 +53,7 @@ class SyncFinancialTransactions extends Command
                 if (!$eligible) {
 
                     if ($transaction && $transaction->status !== 'void') {
-                        $transaction->update([
-                            'status' => 'void',
-                        ]);
+                        $service->voidForSource($donation);
 
                         $donationsVoided++;
                     }
@@ -127,9 +129,7 @@ class SyncFinancialTransactions extends Command
                 if (!$eligible) {
 
                     if ($transaction && $transaction->status !== 'void') {
-                        $transaction->update([
-                            'status' => 'void',
-                        ]);
+                        $service->voidForSource($expense);
 
                         $expensesVoided++;
                     }
@@ -186,55 +186,48 @@ class SyncFinancialTransactions extends Command
 
         $mismatches = 0;
 
+        QardMovement::with('transaction')->each(function (QardMovement $movement) use ($service, &$mismatches) {
+            try {
+                $service->assertMatchesQard($movement->transaction, $movement);
+            } catch (ValidationException $exception) {
+                $mismatches++;
+                $this->warn('Qard movement #'.$movement->id.': missing or inconsistent payment ledger entry.');
+            }
+        });
+
+        // Audit welfare entries without silently recreating or reversing payments.
+        WelfareAssistancePayment::query()->with(['transaction' => fn ($query) => $query->withTrashed()])
+            ->each(function (WelfareAssistancePayment $payment) use ($service, &$mismatches) {
+                try {
+                    $service->assertMatchesPayment($payment->transaction, $payment);
+                } catch (ValidationException $exception) {
+                    $mismatches++;
+                    $this->warn($payment->payment_number.': missing or inconsistent payment ledger entry.');
+                }
+            });
+
+
         Fund::query()
             ->withTrashed()
             ->orderBy('id')
             ->get()
             ->each(function (Fund $fund) use (&$mismatches) {
 
-                $sourceCredits = $fund->donations()
-                    ->whereIn('status', [
-                        'received',
-                        'restricted',
-                    ])
-                    ->sum('amount');
+                $sourceCredits = Money::sumMinor($fund->donations()->getQuery()
+                    ->whereIn('status', ['received', 'restricted']));
+                $sourceDebits = Money::sumMinor($fund->expenses()->getQuery()
+                    ->whereIn('status', ['approved', 'paid']));
+                $welfareDebits = Money::sumMinor(WelfareAssistancePayment::query()
+                    ->where('fund_id', $fund->id)->where('status', 'posted'));
+                $sourceBalance = Money::add(Money::minor($fund->opening_balance),
+                    Money::add($sourceCredits, -Money::add($sourceDebits, $welfareDebits)));
+                $qardCredits = Money::sumMinor(QardMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'repayment'));
+                $qardDebits = Money::sumMinor(QardMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'disbursement'));
+                $sourceBalance = Money::add($sourceBalance, Money::add($qardCredits, -$qardDebits));
+                $ledgerBalance = app(FundBalanceService::class)->balanceMinor($fund);
+                $difference = Money::add($sourceBalance, -$ledgerBalance);
 
-                $sourceDebits = $fund->expenses()
-                    ->whereIn('status', [
-                        'approved',
-                        'paid',
-                    ])
-                    ->sum('amount');
-
-                $sourceBalance =
-                    (float) $fund->opening_balance
-                    + (float) $sourceCredits
-                    - (float) $sourceDebits;
-
-                $ledgerCredits = Transaction::query()
-                    ->where('fund_id', $fund->id)
-                    ->where('status', 'posted')
-                    ->where('direction', 'credit')
-                    ->sum('amount');
-
-                $ledgerDebits = Transaction::query()
-                    ->where('fund_id', $fund->id)
-                    ->where('status', 'posted')
-                    ->where('direction', 'debit')
-                    ->sum('amount');
-
-                $ledgerBalance =
-                    (float) $fund->opening_balance
-                    + (float) $ledgerCredits
-                    - (float) $ledgerDebits;
-
-                $difference =
-                    round(
-                        $sourceBalance - $ledgerBalance,
-                        2
-                    );
-
-                if (abs($difference) > 0.01) {
+                if ($difference !== 0) {
 
                     $mismatches++;
 
@@ -243,9 +236,9 @@ class SyncFinancialTransactions extends Command
                             '%s (%s): mismatch PKR %s | source=%s | ledger=%s',
                             $fund->name,
                             $fund->fund_reference,
-                            number_format($difference, 2),
-                            number_format($sourceBalance, 2),
-                            number_format($ledgerBalance, 2)
+                            Money::format(Money::decimal($difference)),
+                            Money::format(Money::decimal($sourceBalance)),
+                            Money::format(Money::decimal($ledgerBalance))
                         )
                     );
 
@@ -257,7 +250,7 @@ class SyncFinancialTransactions extends Command
                         '%s (%s): reconciled at PKR %s',
                         $fund->name,
                         $fund->fund_reference,
-                        number_format($sourceBalance, 2)
+                        Money::format(Money::decimal($sourceBalance))
                     )
                 );
             });

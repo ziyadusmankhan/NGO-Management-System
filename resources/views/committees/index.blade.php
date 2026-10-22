@@ -492,6 +492,8 @@
 
 @section('content')
 
+@include('shared.action-feedback')
+
 <!-- =========================================
      PAGE HEADER
 ========================================== -->
@@ -754,6 +756,8 @@
                     </span>
                 </div>
 
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    @include('shared.archive-committee', ['buttonClass' => 'committee-btn secondary'])
                 <a
                     href="{{ route('committees.show', $committee) }}"
                     class="view-committee"
@@ -761,6 +765,7 @@
                     View committee
                     <i class="bi bi-arrow-right"></i>
                 </a>
+                </div>
 
             </div>
 

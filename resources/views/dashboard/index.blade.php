@@ -645,7 +645,7 @@
                 </div>
 
                 <div class="stat-trend">
-                    Live
+                    In development
                 </div>
 
             </div>
@@ -656,11 +656,11 @@
             </div>
 
             <div class="stat-value">
-                {{ number_format($activeProjects) }}
+                &mdash;
             </div>
 
             <div class="stat-description">
-                {{ number_format($projectStatusCounts['in_progress'] ?? 0) }} currently in progress
+                Project tracking is coming soon
             </div>
 
         </div>
@@ -687,11 +687,11 @@
             </div>
 
             <div class="stat-value">
-                PKR {{ number_format($donationsThisMonth, 0) }}
+                PKR {{ \App\Domain\Finance\Support\Money::format($donationsThisMonth) }}
             </div>
 
             <div class="stat-description">
-                {{ number_format($donationsCountThisMonth) }} donations recorded
+                {{ \App\Domain\Finance\Support\Money::format($donationsCountThisMonth) }} donations recorded
             </div>
 
         </div>
@@ -718,7 +718,7 @@
             </div>
 
             <div class="stat-value">
-                PKR {{ number_format($totalFundBalance, 0) }}
+                PKR {{ \App\Domain\Finance\Support\Money::format($totalFundBalance) }}
             </div>
 
             <div class="stat-description">
@@ -777,13 +777,13 @@
                         '#8c77a3',
                     ];
 
-                    $chartTotal = max((float) $totalFundBalance, 0);
+                    $chartTotal = max(\App\Domain\Finance\Support\Money::minor($totalFundBalance), 0);
                     $chartSegments = [];
                     $currentDegree = 0;
 
                     if ($chartTotal > 0) {
                         foreach ($fundOverview as $index => $fund) {
-                            $balance = max((float) $fund['balance'], 0);
+                            $balance = max(\App\Domain\Finance\Support\Money::minor($fund['balance']), 0);
 
                             if ($balance <= 0) {
                                 continue;
@@ -820,19 +820,7 @@
                         'conic-gradient('
                         . implode(', ', $chartSegments)
                         . ')';
-                $fundTotalDisplay = match (true) {
-                $chartTotal >= 1000000000 =>
-                    number_format($chartTotal / 1000000000, 2) . 'B',
-
-                $chartTotal >= 1000000 =>
-                    number_format($chartTotal / 1000000, 2) . 'M',
-
-                $chartTotal >= 1000 =>
-                    number_format($chartTotal / 1000, 1) . 'K',
-
-                default =>
-                    number_format($chartTotal, 0),
-            };
+                $fundTotalDisplay = \App\Domain\Finance\Support\Money::format($totalFundBalance);
                 @endphp
 
                 <div class="fund-layout">
@@ -879,7 +867,7 @@
                                 </div>
 
                                 <div class="fund-amount">
-                                    PKR {{ number_format($fund['balance'], 0) }}
+                                    PKR {{ \App\Domain\Finance\Support\Money::format($fund['balance']) }}
                                 </div>
 
                             </div>
@@ -905,128 +893,10 @@
         </div>
 
 
-        <!-- Project Status -->
-
-        <div class="dashboard-card">
-
-            <div class="card-header-custom">
-
-                <div>
-
-                    <div class="card-header-title">
-                        Project Status
-                    </div>
-
-                    <div class="card-header-subtitle">
-                        Projects grouped by current status
-                    </div>
-
-                </div>
-
-                <a href="#" class="view-all">
-                    View projects
-                </a>
-
-            </div>
-
-            <div class="card-body-custom">
-
-                <div class="status-chart">
-
-                    <div class="status-bar-item">
-
-                        <div
-                            class="status-bar"
-                            style="height:55px;"
-                        >
-                            <div class="status-count">
-                                3
-                            </div>
-                        </div>
-
-                        <div class="status-label">
-                            Draft
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-bar-item">
-
-                        <div
-                            class="status-bar review"
-                            style="height:88px;"
-                        >
-                            <div class="status-count">
-                                6
-                            </div>
-                        </div>
-
-                        <div class="status-label">
-                            Review
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-bar-item">
-
-                        <div
-                            class="status-bar approved"
-                            style="height:112px;"
-                        >
-                            <div class="status-count">
-                                8
-                            </div>
-                        </div>
-
-                        <div class="status-label">
-                            Approved
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-bar-item">
-
-                        <div
-                            class="status-bar progress"
-                            style="height:155px;"
-                        >
-                            <div class="status-count">
-                                12
-                            </div>
-                        </div>
-
-                        <div class="status-label">
-                            In Progress
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-bar-item">
-
-                        <div
-                            class="status-bar completed"
-                            style="height:92px;"
-                        >
-                            <div class="status-count">
-                                7
-                            </div>
-                        </div>
-
-                        <div class="status-label">
-                            Completed
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
+        @include('dashboard.partials.in-development', [
+            'title' => 'Project Status',
+            'message' => 'Project status tracking is in development. Updates will appear here when this feature is available.',
+        ])
 
     </div>
 
@@ -1137,7 +1007,7 @@
 
                             <td class="amount">
                                 {{ $amountPrefix }}
-                                PKR {{ number_format($transaction->amount, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($transaction->amount) }}
                             </td>
 
                             <td>
@@ -1183,210 +1053,14 @@
     ========================================== -->
 
     <div class="lower-grid">
-
-        <!-- Tasks -->
-
-        <div class="dashboard-card">
-
-            <div class="card-header-custom">
-
-                <div>
-
-                    <div class="card-header-title">
-                        Upcoming Tasks
-                    </div>
-
-                    <div class="card-header-subtitle">
-                        Items that require attention
-                    </div>
-
-                </div>
-
-                <a href="#" class="view-all">
-                    View all
-                </a>
-
-            </div>
-
-            <div class="card-body-custom">
-
-                <div class="task-item">
-
-                    <div class="task-check"></div>
-
-                    <div class="task-info">
-
-                        <div class="task-title">
-                            Review Small Business Application
-                        </div>
-
-                        <div class="task-meta">
-
-                            <span>
-                                Business Assistance
-                            </span>
-
-                            <span class="task-date">
-                                Due 14 Aug
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="task-item">
-
-                    <div class="task-check"></div>
-
-                    <div class="task-info">
-
-                        <div class="task-title">
-                            Verify Beneficiary Documents
-                        </div>
-
-                        <div class="task-meta">
-
-                            <span>
-                                Welfare
-                            </span>
-
-                            <span class="task-date">
-                                Due 15 Aug
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="task-item">
-
-                    <div class="task-check"></div>
-
-                    <div class="task-info">
-
-                        <div class="task-title">
-                            Prepare Monthly Financial Report
-                        </div>
-
-                        <div class="task-meta">
-
-                            <span>
-                                Finance
-                            </span>
-
-                            <span class="task-date">
-                                Due 18 Aug
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Notifications -->
-
-        <div class="dashboard-card">
-
-            <div class="card-header-custom">
-
-                <div>
-
-                    <div class="card-header-title">
-                        Recent Activity
-                    </div>
-
-                    <div class="card-header-subtitle">
-                        Latest organizational updates
-                    </div>
-
-                </div>
-
-                <a href="#" class="view-all">
-                    View all
-                </a>
-
-            </div>
-
-            <div class="card-body-custom">
-
-                <div class="task-item">
-
-                    <div class="task-check"
-                         style="background:#edf7f0; border-color: #6c776f;">
-                    </div>
-
-                    <div class="task-info">
-
-                        <div class="task-title">
-                            Donation of PKR 50,000 recorded
-                        </div>
-
-                        <div class="task-meta">
-                            18 minutes ago
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="task-item">
-
-                    <div class="task-check"
-                         style="background:#f7f2e8; border-color: #7a7260;">
-                    </div>
-
-                    <div class="task-info">
-
-                        <div class="task-title">
-                            Project submitted for review
-                        </div>
-
-                        <div class="task-meta">
-                            1 hour ago
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="task-item">
-
-                    <div class="task-check"
-                         style="background:#edf3f8; border-color: #6f7579;">
-                    </div>
-
-                    <div class="task-info">
-
-                        <div class="task-title">
-                            Qard-e-Hasana installment recorded
-                        </div>
-
-                        <div class="task-meta">
-                            3 hours ago
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
+        @include('dashboard.partials.in-development', [
+            'title' => 'Upcoming Tasks',
+            'message' => 'Task scheduling is in development. Upcoming tasks will appear here when this feature is available.',
+        ])
+        @include('dashboard.partials.in-development', [
+            'title' => 'Recent Activity',
+            'message' => 'The activity feed is in development. Organization updates will appear here when this feature is available.',
+        ])
     </div>
 
 @endsection

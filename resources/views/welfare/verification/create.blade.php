@@ -429,7 +429,7 @@
                                         data-beneficiary-number="{{ $application->beneficiary?->beneficiary_number }}"
                                         data-category="{{ ucfirst($application->category ?? '') }}"
                                         data-request-type="{{ str_replace('_', ' ', ucfirst($application->request_type ?? '')) }}"
-                                        data-amount="{{ number_format((float) $application->requested_amount, 2) }}"
+                                        data-amount="{{ \App\Domain\Finance\Support\Money::format($application->requested_amount) }}"
                                         @selected(
                                             old('application_id', request('application_id'))
                                             == $application->id
@@ -444,7 +444,7 @@
 
                                         ·
 
-                                        PKR {{ number_format((float) $application->requested_amount, 2) }}
+                                        PKR {{ \App\Domain\Finance\Support\Money::format($application->requested_amount) }}
 
                                     </option>
 

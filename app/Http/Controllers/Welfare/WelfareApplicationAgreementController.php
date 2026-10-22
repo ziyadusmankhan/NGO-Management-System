@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Welfare;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Applications\Models\WelfareApplicationAgreement;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Welfare\RecordWelfareAgreementSignatureRequest;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Http\RedirectResponse;
@@ -111,7 +112,7 @@ class WelfareApplicationAgreementController extends Controller
                     ]);
                 }
 
-                $amount = (float) $locked->recommended_amount;
+                $amount = $locked->recommended_amount;
 
                 return WelfareApplicationAgreement::create([
                     'agreement_number' =>
@@ -158,12 +159,17 @@ class WelfareApplicationAgreementController extends Controller
             ])
             ->firstOrFail();
 
+        $assistance = $application->assistanceIncludingArchived()->first();
+        $assistanceError = app(\App\Domain\Welfare\Assistance\Services\WelfareAssistanceService::class)->eligibilityError($application);
+        $agreementActionError = in_array($agreement->status, ['draft', 'prepared'], true)
+            ? $this->agreementEligibilityError($application) : null;
+
         return view(
             'welfare.agreements.show',
-            compact('application', 'agreement')
+            compact('application', 'agreement', 'assistance', 'assistanceError', 'agreementActionError')
         );
     }
-    
+
     /**
      * Mark a draft agreement as prepared for signing.
      */
@@ -210,7 +216,7 @@ class WelfareApplicationAgreementController extends Controller
             );
     }
 
-    
+
     /**
      * Record a signatory after receiving and verifying the signed document.
      *
@@ -218,7 +224,7 @@ class WelfareApplicationAgreementController extends Controller
      * electronic signature.
      */
     public function recordSignature(
-        Request $request,
+        RecordWelfareAgreementSignatureRequest $request,
         WelfareApplication $application,
         string $party
     ): RedirectResponse {
@@ -226,23 +232,7 @@ class WelfareApplicationAgreementController extends Controller
             abort(404);
         }
 
-        $data = $request->validate([
-            'signatory_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'confirmed' => [
-                'required',
-                'accepted',
-            ],
-            'document' => [
-                'required',
-                'file',
-                'mimes:pdf,jpg,jpeg,png',
-                'max:10240',
-            ],
-        ]);
+        $data = $request->validated();
 
         $storedPath = null;
 
@@ -378,7 +368,7 @@ class WelfareApplicationAgreementController extends Controller
             ->with('success', $message);
     }
 
-    
+
     /**
      * Display a print-ready copy of an existing agreement.
      */
@@ -457,13 +447,9 @@ class WelfareApplicationAgreementController extends Controller
     private function agreementEligibilityError(
         WelfareApplication $application
     ): ?string {
-        if (in_array(
-                $application->application_number,
-                ['APP-00005', 'APP-00010'],
-                true
-            )) {
-                return 'This application is reserved for workflow testing and cannot be used for agreement signing or disbursement.';
-            }
+        if ($application->isTestApplication()) {
+            return 'This application is reserved for workflow testing and cannot be used for agreement signing or disbursement.';
+        }
         if (
             $application->status !== 'approved'
             || !$application->approved_at
@@ -474,7 +460,7 @@ class WelfareApplicationAgreementController extends Controller
 
         if (
             !is_numeric($application->recommended_amount)
-            || (float) $application->recommended_amount <= 0
+            || ! \Brick\Math\BigDecimal::of($application->recommended_amount)->isPositive()
         ) {
             return 'The application must have a valid final approved amount.';
         }
@@ -492,7 +478,7 @@ class WelfareApplicationAgreementController extends Controller
         if (
             (int) $application->submitted_by === (int) auth()->id()
         ) {
-            return 'You cannot prepare an agreement for an application you submitted.';
+            return 'The application submitter cannot prepare or verify signatures for this agreement. Ask another authorized staff member to complete this step.';
         }
 
         return null;

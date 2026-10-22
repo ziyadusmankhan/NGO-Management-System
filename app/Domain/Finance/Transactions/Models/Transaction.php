@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaction extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Domain\Finance\Support\ReadsDecimalMoney;
 
     protected $fillable = [
         'transaction_number',
@@ -43,7 +43,7 @@ class Transaction extends Model
 
     public function fund(): BelongsTo
     {
-        return $this->belongsTo(Fund::class, 'fund_id');
+        return $this->belongsTo(Fund::class, 'fund_id')->withTrashed();
     }
 
     public function recordedBy(): BelongsTo

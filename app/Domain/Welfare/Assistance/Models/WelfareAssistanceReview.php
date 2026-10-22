@@ -18,6 +18,8 @@ class WelfareAssistanceReview extends Model
         'outcome',
         'next_review_date',
         'notes',
+        'idempotency_key',
+        'follow_up_action',
     ];
 
     protected function casts(): array
@@ -33,7 +35,7 @@ class WelfareAssistanceReview extends Model
         return $this->belongsTo(
             WelfareAssistance::class,
             'assistance_id'
-        );
+        )->withTrashed();
     }
 
     public function reviewedBy(): BelongsTo
@@ -41,6 +43,6 @@ class WelfareAssistanceReview extends Model
         return $this->belongsTo(
             User::class,
             'reviewed_by'
-        );
+        )->withTrashed();
     }
 }

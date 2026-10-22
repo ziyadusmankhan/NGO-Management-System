@@ -336,7 +336,7 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($totalCredits, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($totalCredits) }}
         </div>
 
         <div class="summary-meta">
@@ -353,7 +353,7 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($totalDebits, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($totalDebits) }}
         </div>
 
         <div class="summary-meta">
@@ -370,7 +370,7 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($netMovement, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($netMovement) }}
         </div>
 
         <div class="summary-meta">
@@ -454,6 +454,10 @@
             >
                 Expense
             </option>
+
+            <option value="qard_disbursement" @selected(request('type') === 'qard_disbursement')>Qard Disbursement</option>
+            <option value="recovery" @selected(request('type') === 'recovery')>Principal Recovery</option>
+            <option value="welfare_assistance" @selected(request('type') === 'welfare_assistance')>Welfare Assistance</option>
 
         </select>
 
@@ -656,7 +660,7 @@
 
                                 {{ $transaction->direction === 'credit' ? '+' : '-' }}
 
-                                PKR {{ number_format($transaction->amount, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($transaction->amount) }}
 
                             </span>
 
@@ -667,10 +671,7 @@
 
                             @if($transaction->running_balance !== null)
 
-                                PKR {{ number_format(
-                                    $transaction->running_balance,
-                                    0
-                                ) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($transaction->running_balance) }}
 
                             @else
                                 —

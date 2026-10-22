@@ -421,7 +421,7 @@
                 </label>
 
                 <strong>
-                    PKR {{ number_format($overview['current_balance'], 2) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($overview['current_balance']) }}
                 </strong>
 
             </div>
@@ -434,7 +434,7 @@
                 </label>
 
                 <strong class="credit">
-                    PKR {{ number_format($overview['total_credits'], 2) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($overview['total_credits']) }}
                 </strong>
 
             </div>
@@ -447,7 +447,7 @@
                 </label>
 
                 <strong class="debit">
-                    PKR {{ number_format($overview['total_debits'], 2) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($overview['total_debits']) }}
                 </strong>
 
             </div>
@@ -460,7 +460,7 @@
                 </label>
 
                 <strong>
-                    PKR {{ number_format($overview['net_movement'], 2) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($overview['net_movement']) }}
                 </strong>
 
             </div>
@@ -473,7 +473,7 @@
                 </label>
 
                 <strong>
-                    PKR {{ number_format($overview['restricted_balance'], 2) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($overview['restricted_balance']) }}
                 </strong>
 
             </div>
@@ -560,32 +560,20 @@
                             </td>
 
                             <td>
-                                PKR {{ number_format(
-                                    $row['opening_balance'],
-                                    2
-                                ) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($row['opening_balance']) }}
                             </td>
 
                             <td class="credit">
-                                + PKR {{ number_format(
-                                    $row['credits'],
-                                    2
-                                ) }}
+                                + PKR {{ \App\Domain\Finance\Support\Money::format($row['credits']) }}
                             </td>
 
                             <td class="debit">
-                                - PKR {{ number_format(
-                                    $row['debits'],
-                                    2
-                                ) }}
+                                - PKR {{ \App\Domain\Finance\Support\Money::format($row['debits']) }}
                             </td>
 
                             <td>
                                 <strong>
-                                    PKR {{ number_format(
-                                        $row['balance'],
-                                        2
-                                    ) }}
+                                    PKR {{ \App\Domain\Finance\Support\Money::format($row['balance']) }}
                                 </strong>
                             </td>
 
@@ -731,10 +719,7 @@
                                     : '-'
                                 }}
 
-                                PKR {{ number_format(
-                                    $transaction->amount,
-                                    2
-                                ) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($transaction->amount) }}
 
                             </td>
 

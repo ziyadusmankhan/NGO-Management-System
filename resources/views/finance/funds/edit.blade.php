@@ -437,6 +437,9 @@
     <div>
 
         <h1>Edit Fund</h1>
+        @if($designationLocked)
+            <p role="status">This fund has activity or linked commitments. Its opening balance, opening date, type, purpose, spending restriction and designation protection are locked. You can still update its name, description and other details.</p>
+        @endif
 
         <p>
             Update the identity, purpose, restrictions and financial controls
@@ -756,6 +759,9 @@
                             class="select"
                             required
                         >
+                            @if(! in_array($fund->purpose, ['general_welfare', 'small_business', 'qard', 'education', 'emergency', 'community_development'], true))
+                                <option value="{{ $fund->purpose }}" @selected(old('purpose', $fund->purpose) === $fund->purpose)>{{ \Illuminate\Support\Str::headline($fund->purpose) }} (existing purpose)</option>
+                            @endif
 
                             <option
                                 value="general_welfare"
@@ -1020,11 +1026,11 @@
                     <div class="balance-box">
 
                         <label>
-                            Opening
+                            Current Ledger Balance
                         </label>
 
-                        <strong id="balanceOpening">
-                            PKR {{ number_format($fund->opening_balance, 0) }}
+                        <strong>
+                            PKR {{ \App\Domain\Finance\Support\Money::format($summary['balance']) }}
                         </strong>
 
                     </div>
@@ -1033,11 +1039,11 @@
                     <div class="balance-box">
 
                         <label>
-                            Allocated
+                            Allocated (unpaid)
                         </label>
 
                         <strong>
-                            PKR 0
+                            PKR {{ \App\Domain\Finance\Support\Money::format($summary['allocated']) }}
                         </strong>
 
                     </div>
@@ -1046,11 +1052,11 @@
                     <div class="balance-box highlight">
 
                         <label>
-                            Available
+                            Available after allocations
                         </label>
 
-                        <strong id="balanceAvailable">
-                            PKR {{ number_format($fund->opening_balance, 0) }}
+                        <strong>
+                            PKR {{ \App\Domain\Finance\Support\Money::format($summary['available']) }}
                         </strong>
 
                     </div>
@@ -1270,7 +1276,7 @@
                 </span>
 
                 <span id="previewOpening">
-                    PKR {{ number_format($fund->opening_balance, 0) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($fund->opening_balance) }}
                 </span>
 
             </div>
@@ -1506,8 +1512,7 @@
     function money(value) {
 
         return 'PKR ' +
-            Number(value || 0)
-                .toLocaleString('en-PK');
+            FoundationMoney.format(value);
 
     }
 
@@ -1535,16 +1540,10 @@
     openingBalance.addEventListener('input', function () {
 
         const value =
-            Number(this.value || 0);
+            this.value || '0';
 
         const formatted =
             money(value);
-
-        document.getElementById('balanceOpening')
-            .textContent = formatted;
-
-        document.getElementById('balanceAvailable')
-            .textContent = formatted;
 
         document.getElementById('previewOpening')
             .textContent = formatted;

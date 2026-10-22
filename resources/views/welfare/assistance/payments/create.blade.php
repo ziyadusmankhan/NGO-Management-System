@@ -255,25 +255,35 @@
                     <div class="summary-box">
                         <label>Approved Assistance</label>
                         <strong>
-                            PKR {{ number_format((float) $assistance->amount, 2) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($assistance->amount) }}
                         </strong>
                     </div>
 
                     <div class="summary-box">
                         <label>Paid So Far</label>
                         <strong>
-                            PKR {{ number_format((float) $paidSoFar, 2) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($paidSoFar) }}
                         </strong>
                     </div>
 
                     <div class="summary-box">
-                        <label>Current Remaining</label>
+                        <label>Remaining Approved Amount</label>
                         <strong>
-                            PKR {{ number_format((float) $remaining, 2) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($remaining) }}
                         </strong>
                     </div>
 
                 </div>
+
+                <p class="text-muted">
+                    Remaining approval equals the approved amount minus all posted payments.
+                    Weekly or monthly frequency does not reset this amount. Voided payments are excluded.
+                </p>
+                @if(\App\Domain\Finance\Support\Money::minor($remaining) === 0)
+                    <div class="alert alert-warning" role="alert">
+                        The approved amount has already been fully paid or exceeded. No additional payment can be recorded.
+                    </div>
+                @endif
 
                 <form
                     method="POST"
@@ -302,9 +312,10 @@
                                 class="form-control"
                                 min="0.01"
                                 step="0.01"
+                                max="{{ $maximumPayment }}"
                                 value="{{ old(
                                     'amount',
-                                    $assistance->amount
+                                    $maximumPayment
                                 ) }}"
                                 required
                             >
@@ -453,6 +464,7 @@
                             type="submit"
                             class="ui-btn primary"
                             onclick="return confirm('Record and post this payment?')"
+                            @disabled(\App\Domain\Finance\Support\Money::minor($maximumPayment) === 0)
                         >
                             <i class="bi bi-wallet2"></i>
                             Record Payment
@@ -475,11 +487,11 @@
             <div class="card-body">
 
                 <div class="side-number">
-                    PKR {{ number_format((float) $fund->opening_balance, 0) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($availableBalance) }}
                 </div>
 
                 <div class="side-label">
-                    Fund Opening Balance
+                    Available Fund Balance
                 </div>
 
                 <div style="

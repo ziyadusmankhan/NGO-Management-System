@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Finance;
 
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
@@ -79,39 +80,35 @@ class ExpenseController extends Controller
             ->where('direction', 'debit')
             ->where('status', 'posted');
 
-        $thisMonth = (clone $postedDebits)
+        $thisMonth = Money::sum((clone $postedDebits)
             ->whereBetween('transaction_date', [
                 now()->startOfMonth()->toDateString(),
                 now()->endOfMonth()->toDateString(),
-            ])
-            ->sum('amount');
+            ]));
 
-        $thisYear = (clone $postedDebits)
-            ->whereYear('transaction_date', now()->year)
-            ->sum('amount');
+        $thisYear = Money::sum((clone $postedDebits)
+            ->whereYear('transaction_date', now()->year));
 
         /*
         * Category totals need the linked Expense record.
         */
-        $welfare = (clone $postedDebits)
+        $welfare = Money::sum((clone $postedDebits)
             ->whereHasMorph(
                 'source',
                 [Expense::class],
                 function ($query) {
                     $query->where('category', 'welfare');
                 }
-            )
-            ->sum('amount');
+            ));
 
-        $projects = (clone $postedDebits)
+        $projects = Money::sum((clone $postedDebits)
             ->whereHasMorph(
                 'source',
                 [Expense::class],
                 function ($query) {
                     $query->where('category', 'project');
                 }
-            )
-            ->sum('amount');
+            ));
 
         $pending = Expense::query()
             ->where('status', 'pending')
@@ -140,46 +137,8 @@ class ExpenseController extends Controller
         Fund $fund,
         string $category
     ): bool {
-        /*
-        * General funds do not have a purpose-specific restriction.
-        */
-        if ($fund->type === 'general') {
-            return true;
-        }
-
-        /*
-        * Restricted/designated funds are matched against
-        * their configured purpose.
-        */
-        return match ($fund->purpose) {
-            'general_welfare' => in_array($category, [
-                'welfare',
-                'medical',
-                'education',
-            ], true),
-
-            'small_business' => in_array($category, [
-                'project',
-                'other',
-            ], true),
-
-            'qard' => in_array($category, [
-                'welfare',
-                'medical',
-                'education',
-            ], true),
-
-            'education' => $category === 'education',
-
-            'emergency' => in_array($category, [
-                'medical',
-                'welfare',
-            ], true),
-
-            'community_development' => $category === 'project',
-
-            default => false,
-        };
+        return app(\App\Domain\Finance\Funds\Services\FundPurposeService::class)
+            ->allowsExpense($fund, $category);
     }
 
     public function create(
@@ -246,14 +205,14 @@ class ExpenseController extends Controller
 
         if (
             $fund->prevent_negative_balance &&
-            (float) $data['amount'] > $availableBalance
+            Money::minor($data['amount']) > Money::minor($availableBalance)
         ) {
             return back()
                 ->withInput()
                 ->withErrors([
                     'amount' => sprintf(
                         'This expense exceeds the available balance of PKR %s.',
-                        number_format($availableBalance, 0)
+                        Money::format($availableBalance)
                     ),
                 ]);
         }
@@ -318,7 +277,7 @@ class ExpenseController extends Controller
                 ->orderBy('id')
                 ->get();
 
-            $runningBalance = (float) $fund->opening_balance;
+            $runningBalance = Money::minor($fund->opening_balance);
 
             foreach ($ledgerTransactions as $transaction) {
                 if (
@@ -328,23 +287,23 @@ class ExpenseController extends Controller
                     /*
                     * The balance immediately before this expense.
                     */
-                    $balanceBefore = $runningBalance;
+                    $balanceBefore = Money::decimal($runningBalance);
 
                     if ($transaction->direction === 'credit') {
-                        $runningBalance += (float) $transaction->amount;
+                        $runningBalance = Money::add($runningBalance, Money::minor($transaction->amount));
                     } else {
-                        $runningBalance -= (float) $transaction->amount;
+                        $runningBalance = Money::add($runningBalance, -Money::minor($transaction->amount));
                     }
 
-                    $balanceAfter = $runningBalance;
+                    $balanceAfter = Money::decimal($runningBalance);
 
                     break;
                 }
 
                 if ($transaction->direction === 'credit') {
-                    $runningBalance += (float) $transaction->amount;
+                    $runningBalance = Money::add($runningBalance, Money::minor($transaction->amount));
                 } else {
-                    $runningBalance -= (float) $transaction->amount;
+                    $runningBalance = Money::add($runningBalance, -Money::minor($transaction->amount));
                 }
             }
 
@@ -455,7 +414,7 @@ class ExpenseController extends Controller
             in_array($expense->status, ['approved', 'paid'], true)
             && (int) $expense->fund_id === (int) $fund->id
         ) {
-            $currentBalance += (float) $expense->amount;
+            $currentBalance = Money::total([$currentBalance, $expense->amount]);
         }
 
         $availableBalance = $currentBalance;
@@ -466,14 +425,14 @@ class ExpenseController extends Controller
                 'paid',
             ], true)
             && $fund->prevent_negative_balance
-            && (float) $data['amount'] > $availableBalance
+            && Money::minor($data['amount']) > Money::minor($availableBalance)
         ) {
             return back()
                 ->withInput()
                 ->withErrors([
                     'amount' => sprintf(
                         'This expense exceeds the available balance of PKR %s.',
-                        number_format($availableBalance, 0)
+                        Money::format($availableBalance)
                     ),
                 ]);
         }
@@ -651,13 +610,13 @@ class ExpenseController extends Controller
 
         if (
             $fund->prevent_negative_balance
-            && (float) $expense->amount > $availableBalance
+            && Money::minor($expense->amount) > Money::minor($availableBalance)
         ) {
             return back()
                 ->withErrors([
                     'amount' => sprintf(
                         'Approval would exceed the available balance of PKR %s.',
-                        number_format($availableBalance, 0)
+                        Money::format($availableBalance)
                     ),
                 ]);
         }

@@ -3,223 +3,69 @@
 namespace App\Http\Controllers\Welfare;
 
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
-use App\Domain\Welfare\Assistance\Models\WelfareAssistanceReview;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistanceReminder;
+use App\Domain\Welfare\Assistance\Services\WelfareMonitoringService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Welfare\StoreWelfareAssistanceReviewRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class WelfareAssistanceReviewController extends Controller
 {
-    public function index(): View
+    public function index(WelfareMonitoringService $monitoring): View
     {
-        $baseQuery = WelfareAssistance::query()
-            ->where('status', 'approved');
-
-        $today = now()->toDateString();
-
-        $overdue = (clone $baseQuery)
-            ->whereNotNull('next_review_date')
-            ->whereDate('next_review_date', '<', $today)
-            ->count();
-
-        $dueToday = (clone $baseQuery)
-            ->whereDate('next_review_date', $today)
-            ->count();
-
-        $upcoming = (clone $baseQuery)
-            ->whereNotNull('next_review_date')
-            ->whereBetween('next_review_date', [
-                now()->addDay()->toDateString(),
-                now()->addDays(30)->toDateString(),
-            ])
-            ->count();
-
-        $noReviewDate = (clone $baseQuery)
-            ->whereNull('next_review_date')
-            ->count();
-
-        $query = WelfareAssistance::query()
-            ->where('status', 'approved')
-            ->with([
-                'beneficiary',
-                'fund',
-                'reviews.reviewedBy',
-            ]);
-
-        $filter = request('filter');
-
-        if ($filter === 'overdue') {
-
-            $query->whereNotNull('next_review_date')
-                ->whereDate(
-                    'next_review_date',
-                    '<',
-                    $today
-                );
-
-        } elseif ($filter === 'today') {
-
-            $query->whereDate(
-                'next_review_date',
-                $today
-            );
-
-        } elseif ($filter === 'upcoming') {
-
-            $query->whereNotNull('next_review_date')
-                ->whereBetween('next_review_date', [
-                    now()->addDay()->toDateString(),
-                    now()->addDays(30)->toDateString(),
-                ]);
-
-        } elseif ($filter === 'none') {
-
-            $query->whereNull('next_review_date');
+        $today = $monitoring->today();
+        $base = WelfareAssistance::where('status', 'approved');
+        $filters = [
+            'overdue' => fn ($query) => $query->whereDate('next_review_date', '<', $today->toDateString()),
+            'today' => fn ($query) => $query->whereDate('next_review_date', $today->toDateString()),
+            'upcoming' => fn ($query) => $query->whereBetween('next_review_date', [$today->addDay()->toDateString(), $today->addDays(30)->toDateString()]),
+            'none' => fn ($query) => $query->whereNull('next_review_date'),
+            'follow_up' => fn ($query) => $query->whereHas('latestReview', fn ($review) => $review->where('outcome', 'follow_up_required')),
+            'closure' => fn ($query) => $query->whereHas('latestReview', fn ($review) => $review->where('outcome', 'no_longer_needed')),
+            'ended' => fn ($query) => $query->whereDate('end_date', '<', $today->toDateString()),
+        ];
+        $counts = [];
+        foreach ($filters as $key => $filter) {
+            $counts[$key] = $filter(clone $base)->count();
         }
-
+        $query = (clone $base)->with(['beneficiary', 'fund', 'latestReview.reviewedBy']);
+        if (isset($filters[request('filter')])) {
+            $filters[request('filter')]($query);
+        }
         if (request()->filled('search')) {
-
-            $search = trim(
-                request('search')
-            );
-
-            $query->where(function ($q) use ($search) {
-
-                $q->where(
-                    'assistance_number',
-                    'like',
-                    "%{$search}%"
-                );
-
-                $q->orWhereHas(
-                    'beneficiary',
-                    function ($beneficiaryQuery) use ($search) {
-
-                        $beneficiaryQuery
-                            ->where(
-                                'full_name',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'beneficiary_number',
-                                'like',
-                                "%{$search}%"
-                            );
-                    }
-                );
-
-            });
+            $search = trim(request('search'));
+            $query->where(fn ($query) => $query->where('assistance_number', 'like', "%{$search}%")
+                ->orWhereHas('beneficiary', fn ($beneficiary) => $beneficiary->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('beneficiary_number', 'like', "%{$search}%")));
         }
+        $assistances = $query->orderByRaw('CASE WHEN next_review_date IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('next_review_date')->orderBy('id')->paginate(15)->withQueryString();
+        // The queue above always reads current dates; reminders show the scheduler's retained work items.
+        $reminders = WelfareAssistanceReminder::whereNull('resolved_at')
+            ->whereHas('assistance', fn ($query) => $query->whereNull('deleted_at')->where('status', 'approved'))
+            ->with('assistance')->orderBy('due_date')->orderBy('id')->paginate(10, ['*'], 'reminders_page')->withQueryString();
 
-        $assistances = $query
-            ->orderByRaw(
-                'CASE
-                    WHEN next_review_date IS NULL THEN 3
-                    WHEN next_review_date < ? THEN 0
-                    WHEN next_review_date = ? THEN 1
-                    ELSE 2
-                 END',
-                [
-                    $today,
-                    $today,
-                ]
-            )
-            ->orderBy('next_review_date')
-            ->orderBy('id')
-            ->paginate(15)
-            ->withQueryString();
-
-        return view(
-            'welfare.assistance.reviews.index',
-            compact(
-                'assistances',
-                'overdue',
-                'dueToday',
-                'upcoming',
-                'noReviewDate'
-            )
-        );
+        return view('welfare.assistance.reviews.index', compact('assistances', 'counts', 'today', 'reminders'));
     }
 
-    public function create(
-        WelfareAssistance $assistance
-    ): View {
+    public function create(WelfareAssistance $assistance, WelfareMonitoringService $monitoring): View
+    {
+        abort_unless($assistance->status === 'approved', 403, 'Only approved assistance can be reviewed.');
+        $assistance->load(['beneficiary', 'fund', 'latestReview']);
+        $suggestedReviewDate = $monitoring->suggestedReviewDate($assistance);
+        $today = $monitoring->today()->toDateString();
 
-        if ($assistance->status !== 'approved') {
-            abort(
-                403,
-                'Only approved assistance can be reviewed.'
-            );
-        }
-
-        $assistance->load([
-            'beneficiary',
-            'fund',
-        ]);
-
-        return view(
-            'welfare.assistance.reviews.create',
-            compact('assistance')
-        );
+        return view('welfare.assistance.reviews.create', compact('assistance', 'suggestedReviewDate', 'today'));
     }
 
-    public function store(
-        StoreWelfareAssistanceReviewRequest $request,
-        WelfareAssistance $assistance
-    ): RedirectResponse {
+    public function store(StoreWelfareAssistanceReviewRequest $request, WelfareAssistance $assistance, WelfareMonitoringService $monitoring): RedirectResponse
+    {
+        $review = $monitoring->recordReview($assistance, $request->validated(), $request->user());
 
-        if ($assistance->status !== 'approved') {
-            return back()
-                ->withErrors([
-                    'status' =>
-                        'Only approved assistance can be reviewed.',
-                ]);
-        }
-
-        $data = $request->validated();
-
-        DB::transaction(function () use (
-            $data,
-            $assistance
-        ) {
-
-            WelfareAssistanceReview::create([
-                'assistance_id' =>
-                    $assistance->id,
-
-                'reviewed_by' =>
-                    auth()->id(),
-
-                'review_date' =>
-                    $data['review_date'],
-
-                'outcome' =>
-                    $data['outcome'],
-
-                'next_review_date' =>
-                    $data['next_review_date'] ?? null,
-
-                'notes' =>
-                    $data['notes'] ?? null,
-            ]);
-
-            $assistance->update([
-                'next_review_date' =>
-                    $data['next_review_date'] ?? null,
-            ]);
-        });
-
-        return redirect()
-            ->route(
-                'welfare.assistance.show',
-                $assistance
-            )
-            ->with(
-                'success',
-                'Welfare assistance review recorded successfully.'
-            );
+        return redirect()->route('welfare.assistance.show', $assistance)->with('success',
+            $review->outcome === 'no_longer_needed'
+                ? 'Review recorded. An approver must confirm closure; the assistance remains approved until then.'
+                : 'Review recorded and the next review date updated.');
     }
 }

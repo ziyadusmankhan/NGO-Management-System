@@ -46,6 +46,8 @@ class StoreWelfareApplicationRequest extends FormRequest
 
             'requested_amount' => [
                 'required',
+                'string',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'numeric',
                 'min:0.01',
                 'max:999999999999.99',
@@ -53,6 +55,8 @@ class StoreWelfareApplicationRequest extends FormRequest
 
             'applicant_contribution' => [
                 'nullable',
+                'string',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'numeric',
                 'min:0',
                 'max:999999999999.99',
@@ -60,6 +64,8 @@ class StoreWelfareApplicationRequest extends FormRequest
 
             'organization_contribution' => [
                 'nullable',
+                'string',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'numeric',
                 'min:0',
                 'max:999999999999.99',

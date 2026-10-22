@@ -407,6 +407,8 @@
                     <input
                         type="text"
                         name="void_reason"
+                        value="{{ old('void_reason') }}"
+                        maxlength="2000"
                         placeholder="Reason for voiding"
                         required
                         minlength="5"
@@ -455,6 +457,20 @@
 </div>
 
 
+@if(session('success'))
+    <div class="alert alert-success" role="status">{{ session('success') }}</div>
+@endif
+@if($errors->any())
+    <div class="alert alert-danger" role="alert">
+        <strong>The payment could not be updated.</strong>
+        <ul class="mb-0">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="layout">
 
     <main>
@@ -486,7 +502,7 @@
                     </div>
 
                     <div class="amount-value">
-                        PKR {{ number_format($payment->amount, 2) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($payment->amount) }}
                     </div>
 
                 </div>
@@ -709,7 +725,7 @@
                         <span>
                             {{ $assistanceTypeLabel }}
                             ·
-                            PKR {{ number_format($assistance->amount, 2) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($assistance->amount) }}
                             ·
                             {{ $assistance->beneficiary->full_name }}
                         </span>
@@ -848,7 +864,7 @@
                                 ·
                                 {{ ucfirst($payment->transaction->direction) }}
                                 ·
-                                PKR {{ number_format($payment->transaction->amount, 2) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($payment->transaction->amount) }}
                             </span>
 
                         </div>
@@ -934,7 +950,7 @@
             <div class="card-body">
 
                 <div class="side-number">
-                    PKR {{ number_format($payment->amount, 0) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($payment->amount) }}
                 </div>
 
                 <div class="side-label">

@@ -12,6 +12,10 @@ use App\Domain\Finance\Funds\Models\Fund;
 
 class Donation extends Model
 {
+    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+
+    protected array $moneyColumns = ['amount'];
+
     use HasFactory, SoftDeletes;
 
     protected $table = 'donations';

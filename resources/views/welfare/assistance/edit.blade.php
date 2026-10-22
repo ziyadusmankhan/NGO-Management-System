@@ -33,6 +33,13 @@
             @method('PUT')
 
             <div class="row g-4">
+                @if($assistance->application_id)
+                    <div class="col-12">
+                        <div class="alert alert-info">The beneficiary, fund, amount, purpose and schedule come from the signed agreement and application. Only review dates and administrative notes can be edited.</div>
+                        <p><strong>{{ $assistance->beneficiary?->full_name }}</strong> · {{ $assistance->fund?->name }} · PKR {{ $assistance->amount }}</p>
+                        <p>{{ $assistance->purpose_notes }}</p>
+                    </div>
+                @else
 
                 <div class="col-12">
                     <label class="form-label">Beneficiary</label>
@@ -182,6 +189,8 @@
                     >
                 </div>
 
+                @endif
+
                 <div class="col-md-4">
                     <label class="form-label">Next Review Date</label>
 
@@ -196,6 +205,7 @@
                     >
                 </div>
 
+                @if(!$assistance->application_id)
                 <div class="col-12">
                     <label class="form-label">Purpose Notes</label>
 
@@ -205,6 +215,8 @@
                         class="form-control"
                     >{{ old('purpose_notes', $assistance->purpose_notes) }}</textarea>
                 </div>
+
+                @endif
 
                 <div class="col-12">
                     <label class="form-label">Internal Notes</label>
@@ -226,6 +238,7 @@
                     >{{ old('notes', $assistance->notes) }}</textarea>
                 </div>
 
+                @if(!$assistance->application_id)
                 <div class="col-12">
                     <div class="form-check">
 
@@ -250,6 +263,8 @@
 
                     </div>
                 </div>
+
+                @endif
 
             </div>
 

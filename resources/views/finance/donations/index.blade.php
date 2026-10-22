@@ -510,7 +510,7 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($donationsThisMonth, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($donationsThisMonth) }}
         </div>
 
         <div class="summary-meta">
@@ -544,7 +544,7 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($restrictedFunds, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($restrictedFunds) }}
         </div>
 
         <div class="summary-meta">
@@ -561,7 +561,7 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($unrestrictedFunds, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($unrestrictedFunds) }}
         </div>
 
         <div class="summary-meta">
@@ -785,7 +785,7 @@
                         </td>
 
                         <td class="amount">
-                            PKR {{ number_format($donation->amount, 0) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($donation->amount) }}
                         </td>
 
                         <td class="purpose">

@@ -900,7 +900,7 @@
                 <div class="side-row">
                     <span>Amount</span>
                     <span>
-                        PKR {{ number_format($donation->amount, 0) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($donation->amount) }}
                     </span>
                 </div>
 

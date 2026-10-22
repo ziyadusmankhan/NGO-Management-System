@@ -6,6 +6,8 @@
 # Dependencies
 /vendor/
 /node_modules/
+/.phpunit.cache/
+/storage/framework/testing/
 
 # Generated Laravel files
 /bootstrap/cache/*.php
@@ -13,6 +15,14 @@
 /storage/framework/cache/*
 /storage/framework/sessions/*
 /storage/framework/views/*
+/storage/app/backups/
+
+# Local data and generated review files
+/database/database.sqlite
+/database/*.sqlite-wal
+/database/*.sqlite-shm
+/tmp/
+/output/
 
 # Local editor and OS files
 /.idea/

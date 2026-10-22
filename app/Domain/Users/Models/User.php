@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -30,6 +31,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_active_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -58,6 +60,35 @@ class User extends Authenticatable
         return $this->status === 'active';
     }
 
+    public function recordActivity(bool $force = false): void
+    {
+        if (! $this->isActive() || $this->trashed()) {
+            return;
+        }
+
+        $now = now();
+        $cutoff = $now->copy()->subMinute();
+
+        if (! $force && $this->last_active_at?->greaterThan($cutoff)) {
+            return;
+        }
+
+        // Activity is independent of profile edits. Throttle writes across sessions.
+        $updated = static::query()
+            ->whereKey($this->getKey())
+            ->where('status', 'active')
+            ->when(! $force, fn ($query) => $query->where(function ($query) use ($cutoff) {
+                $query->whereNull('last_active_at')->orWhere('last_active_at', '<=', $cutoff);
+            }))
+            ->toBase()
+            ->update(['last_active_at' => $now]);
+
+        if ($updated) {
+            $this->last_active_at = $now;
+            $this->syncOriginalAttribute('last_active_at');
+        }
+    }
+
     public function hasAnyRole(array $roles): bool
     {
         return $this->roles()
@@ -67,6 +98,10 @@ class User extends Authenticatable
 
     public function hasPermission(string $permission): bool
     {
+        if (! $this->isActive()) {
+            return false;
+        }
+
         /*
          * Administrators always have full access. Without this,
          * an administrator can lose access to a feature whenever a

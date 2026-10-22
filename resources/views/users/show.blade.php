@@ -312,6 +312,8 @@
 
 @section('content')
 
+@include('shared.action-feedback')
+
 <div class="header">
 
     <div class="identity">
@@ -355,6 +357,8 @@
             Edit User
         </a>
 
+        @include('shared.archive-user', ['buttonClass' => 'btn-ui'])
+
     </div>
 
 </div>
@@ -385,6 +389,11 @@
                     <div class="item">
                         <label>Full Name</label>
                         <strong>{{ $user->name }}</strong>
+                    </div>
+
+                    <div class="item">
+                        <label>Last active</label>
+                        <strong title="{{ $user->last_active_at?->toIso8601String() }}">{{ $user->last_active_at?->diffForHumans() ?? 'Not recorded' }}</strong>
                     </div>
 
                     <div class="item">

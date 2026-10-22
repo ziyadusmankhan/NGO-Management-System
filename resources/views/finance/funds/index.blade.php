@@ -450,11 +450,11 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($totalBalance, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($totalBalance) }}
         </div>
 
         <div class="summary-meta">
-            Opening balances + received donations
+            Active funds: opening + posted credits − posted debits
         </div>
 
     </div>
@@ -467,7 +467,7 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($restrictedBalance, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($restrictedBalance) }}
         </div>
 
         <div class="summary-meta">
@@ -484,11 +484,11 @@
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($allocated, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($allocated) }}
         </div>
 
         <div class="summary-meta">
-            Awaiting Transactions module
+            Unpaid approved welfare assistance
         </div>
 
     </div>
@@ -497,15 +497,15 @@
     <div class="summary-card">
 
         <div class="summary-label">
-            Available
+            Available After Allocations
         </div>
 
         <div class="summary-value">
-            PKR {{ number_format($available, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($available) }}
         </div>
 
         <div class="summary-meta">
-            Current calculated balance
+            Ledger balance less unpaid approvals
         </div>
 
     </div>
@@ -596,6 +596,8 @@
                 Inactive
             </option>
 
+            <option value="archived" @selected(request('status') === 'archived')>Archived</option>
+
         </select>
 
 
@@ -682,18 +684,11 @@
                     ),
             };
 
-            $openingBalance = (float) $fund->opening_balance;
-            $receivedDonations = (float) ($fund->received_donations ?? 0);
-            $spent = (float) ($fund->spent_expenses ?? 0);
-            $allocated = 0;
-
-            $balance =
-                $openingBalance
-                + $receivedDonations
-                - $spent
-                - $allocated;
-
-            $utilization = 0;
+            $openingBalance = $fund->financial_summary['opening_balance'];
+            $receivedDonations = $fund->financial_summary['received'];
+            $spent = $fund->financial_summary['spent'];
+            $balance = $fund->financial_summary['balance'];
+            $utilization = $fund->financial_summary['utilization_percent'];
 
             $icon = match ($fund->purpose) {
 
@@ -733,7 +728,7 @@
                 <span
                     class="fund-badge {{ $typeClass }}"
                 >
-                    {{ $typeLabel }}
+                    {{ $fund->trashed() ? 'Archived · ' : '' }}{{ $typeLabel }}
                 </span>
 
             </div>
@@ -762,7 +757,7 @@
                 </label>
 
                 <strong>
-                    PKR {{ number_format($balance, 0) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($balance) }}
                 </strong>
 
             </div>
@@ -777,7 +772,7 @@
                     </label>
 
                     <strong>
-                        PKR {{ number_format($openingBalance, 0) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($openingBalance) }}
                     </strong>
 
                 </div>
@@ -790,7 +785,7 @@
                     </label>
 
                     <strong>
-                        PKR {{ number_format($receivedDonations, 0) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($receivedDonations) }}
                     </strong>
 
                 </div>
@@ -803,7 +798,7 @@
                     </label>
 
                     <strong>
-                        PKR {{ number_format($spent, 0) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($spent) }}
                     </strong>
 
                 </div>
@@ -813,10 +808,13 @@
 
             <div class="fund-progress">
 
+                <div class="progress-top"><span>Allocated (unpaid)</span><strong>PKR {{ \App\Domain\Finance\Support\Money::format($fund->financial_summary['allocated']) }}</strong></div>
+                <div class="progress-top"><span>Available after allocations</span><strong>PKR {{ \App\Domain\Finance\Support\Money::format($fund->financial_summary['available']) }}</strong></div>
+
                 <div class="progress-top">
 
                     <span>
-                        Utilization
+                        Spent or allocated
                     </span>
 
                     <span>

@@ -243,21 +243,21 @@
     <div class="summary-card">
         <div class="summary-label">Total Received</div>
         <div class="summary-value">
-            PKR {{ number_format($totalReceived, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($totalReceived) }}
         </div>
     </div>
 
     <div class="summary-card">
         <div class="summary-label">Total Spent</div>
         <div class="summary-value">
-            PKR {{ number_format($totalSpent, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($totalSpent) }}
         </div>
     </div>
 
     <div class="summary-card">
-        <div class="summary-label">Available Balance</div>
+        <div class="summary-label">Ledger Balance</div>
         <div class="summary-value">
-            PKR {{ number_format($totalBalance, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($totalBalance) }}
         </div>
     </div>
 
@@ -300,13 +300,9 @@
     @forelse($funds as $fund)
 
         @php
-            $received = (float) ($fund->received_donations ?? 0);
-            $spent = (float) ($fund->spent_expenses ?? 0);
-
-            $balance =
-                (float) $fund->opening_balance
-                + $received
-                - $spent;
+            $received = $fund->financial_summary['received'];
+            $spent = $fund->financial_summary['spent'];
+            $balance = $fund->financial_summary['balance'];
         @endphp
 
         <div class="fund-card">
@@ -315,7 +311,7 @@
 
                 <div>
                     <div class="fund-name">
-                        {{ $fund->name }}
+                        <a href="{{ route('finance.funds.show', $fund) }}">{{ $fund->name }}</a>
                     </div>
 
                     <div class="fund-reference">
@@ -332,11 +328,11 @@
             <div class="balance">
 
                 <div class="balance-label">
-                    Available Balance
+                    Ledger Balance
                 </div>
 
                 <div class="balance-value">
-                    PKR {{ number_format($balance, 0) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($balance) }}
                 </div>
 
             </div>
@@ -346,21 +342,21 @@
                 <div class="stat">
                     <span>Opening</span>
                     <strong>
-                        PKR {{ number_format($fund->opening_balance, 0) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($fund->opening_balance) }}
                     </strong>
                 </div>
 
                 <div class="stat">
                     <span>Received</span>
                     <strong>
-                        PKR {{ number_format($received, 0) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($received) }}
                     </strong>
                 </div>
 
                 <div class="stat">
                     <span>Spent</span>
                     <strong>
-                        PKR {{ number_format($spent, 0) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($spent) }}
                     </strong>
                 </div>
 
@@ -368,14 +364,17 @@
 
             <div class="controls">
 
+                <p>Allocated (unpaid): <strong>PKR {{ \App\Domain\Finance\Support\Money::format($fund->financial_summary['allocated']) }}</strong></p>
+                <p>Available after allocations: <strong>PKR {{ \App\Domain\Finance\Support\Money::format($fund->financial_summary['available']) }}</strong></p>
+
                 <div class="controls-title">
                     Financial Controls
                 </div>
 
                 <div class="control-list">
 
-                    <div class="control-item {{ $fund->restrict_spending ? 'enabled' : '' }}">
-                        {{ $fund->restrict_spending ? '✓' : '—' }}
+                    <div class="control-item enabled">
+                        ✓
                         Spending Restricted
                     </div>
 

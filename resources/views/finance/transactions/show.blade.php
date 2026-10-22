@@ -266,7 +266,9 @@
     $sourceUrl = null;
 
     if ($transaction->source) {
-        if ($transaction->type === 'donation') {
+        if ($transaction->source instanceof \App\Domain\Qard\Models\QardMovement) {
+            $sourceUrl = auth()->user()->hasPermission('qard.view') ? route('qard.show', $transaction->source->loan) : null;
+        } elseif ($transaction->type === 'donation') {
             $sourceUrl = route(
                 'finance.donations.show',
                 $transaction->source
@@ -354,10 +356,7 @@
 
                             {{ $isCredit ? '+' : '-' }}
 
-                            PKR {{ number_format(
-                                $transaction->amount,
-                                0
-                            ) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($transaction->amount) }}
 
                         </strong>
 
@@ -383,10 +382,7 @@
 
                         <strong>
                             @if($runningBalance !== null)
-                                PKR {{ number_format(
-                                    $runningBalance,
-                                    0
-                                ) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($runningBalance) }}
                             @else
                                 —
                             @endif
@@ -547,10 +543,7 @@
                         ">
                             Opening Balance:
                             <strong>
-                                PKR {{ number_format(
-                                    $transaction->fund->opening_balance,
-                                    0
-                                ) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($transaction->fund->opening_balance) }}
                             </strong>
                         </div>
 
@@ -632,10 +625,7 @@
 
                     {{ $isCredit ? '+' : '-' }}
 
-                    PKR {{ number_format(
-                        $transaction->amount,
-                        0
-                    ) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($transaction->amount) }}
 
                 </div>
 
@@ -688,10 +678,7 @@
                     <span>Balance After</span>
                     <span>
                         @if($runningBalance !== null)
-                            PKR {{ number_format(
-                                $runningBalance,
-                                0
-                            ) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($runningBalance) }}
                         @else
                             —
                         @endif

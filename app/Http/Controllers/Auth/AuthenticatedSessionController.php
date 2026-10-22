@@ -28,8 +28,12 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (Auth::attempt(
+            $credentials + ['status' => 'active'],
+            $request->boolean('remember')
+        )) {
             $request->session()->regenerate();
+            $request->user()->recordActivity(force: true);
 
             return redirect()->intended('/');
         }

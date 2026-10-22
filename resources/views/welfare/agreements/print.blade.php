@@ -476,7 +476,7 @@
             <div class="title-rule"></div>
         </div>
 
-        @if (in_array($application->application_number, ['APP-00005', 'APP-00010'], true))
+        @if ($application->isTestApplication())
             <div class="warning">
                 TEST RECORD — NOT A LEGAL AGREEMENT.
                 DO NOT SIGN OR USE TO AUTHORIZE DISBURSEMENT.
@@ -511,7 +511,7 @@
             <div class="amount">
                 <span class="field-label">Approved amount</span>
                 <div class="field-value">
-                    PKR {{ number_format((float) $agreement->approved_amount, 2) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($agreement->approved_amount) }}
                 </div>
             </div>
 

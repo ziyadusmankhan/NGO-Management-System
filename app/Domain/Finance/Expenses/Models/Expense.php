@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Expense extends Model
 {
+    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+
+    protected array $moneyColumns = ['amount'];
+
     use HasFactory, SoftDeletes;
 
     protected $fillable = [

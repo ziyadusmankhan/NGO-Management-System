@@ -724,7 +724,7 @@
                         </label>
 
                         <strong>
-                            PKR {{ number_format($donation->amount, 0) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($donation->amount) }}
                         </strong>
 
                     </div>
@@ -1086,7 +1086,7 @@
                             </label>
 
                             <strong>
-                                PKR {{ number_format($donation->amount, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($donation->amount) }}
                             </strong>
 
                         </div>
@@ -1108,7 +1108,7 @@
 
                             <strong>
                                 {{ $fundBalance !== null
-                                    ? 'PKR ' . number_format($fundBalance, 0)
+                                    ? 'PKR ' . \App\Domain\Finance\Support\Money::format($fundBalance)
                                     : '—'
                                 }}
                             </strong>
@@ -1230,7 +1230,7 @@
                         <div class="timeline-note">
 
                             PKR
-                            {{ number_format($donation->amount, 0) }}
+                            {{ \App\Domain\Finance\Support\Money::format($donation->amount) }}
                             received from
                             {{ $donation->donor_name }}.
 
@@ -1477,7 +1477,7 @@
             <div class="card-body">
 
                 <div class="side-number">
-                    PKR {{ number_format($donation->amount, 0) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($donation->amount) }}
                 </div>
 
                 <div class="side-label">

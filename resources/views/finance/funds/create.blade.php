@@ -1485,8 +1485,7 @@
     function money(value) {
 
         return 'PKR ' +
-            Number(value || 0)
-                .toLocaleString('en-PK');
+            FoundationMoney.format(value);
 
     }
 
@@ -1514,7 +1513,7 @@
     openingBalance.addEventListener('input', function () {
 
         const value =
-            Number(this.value || 0);
+            this.value || '0';
 
         const formatted =
             money(value);

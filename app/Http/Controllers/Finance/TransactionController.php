@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Finance;
 
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
 use App\Domain\Finance\Transactions\Models\Transaction;
@@ -168,20 +169,17 @@ class TransactionController
             );
         }
 
-        $totalCredits = (clone $summaryQuery)
-            ->where('direction', 'credit')
-            ->sum('amount');
+        $totalCredits = Money::sum((clone $summaryQuery)
+            ->where('direction', 'credit'));
 
-        $totalDebits = (clone $summaryQuery)
-            ->where('direction', 'debit')
-            ->sum('amount');
+        $totalDebits = Money::sum((clone $summaryQuery)
+            ->where('direction', 'debit'));
 
         $transactionCount = (clone $summaryQuery)
             ->count();
 
         $netMovement =
-            (float) $totalCredits
-            - (float) $totalDebits;
+            Money::decimal(Money::add(Money::minor($totalCredits), -Money::minor($totalDebits)));
 
         $funds = Fund::query()
             ->where('status', 'active')

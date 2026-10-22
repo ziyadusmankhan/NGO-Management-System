@@ -180,6 +180,7 @@
             grid-template-columns:1fr;
         }
     }
+    .badge-soft.closed { background:#eef0ef; color:#59635d; }
 </style>
 @endpush
 
@@ -190,6 +191,9 @@
     <div>
         <h1>Welfare Assistance</h1>
         <p>Manage welfare assistance requests, approvals and review dates.</p>
+        @can('welfare.reviews.view')
+        <a href="{{ route('welfare.assistance.reviews.index') }}">Review and follow-up queue</a>
+        @endcan
     </div>
 
     @can('welfare.assistance.manage')
@@ -224,7 +228,7 @@
     <div class="stat">
         <div class="stat-label">This Month</div>
         <div class="stat-value">
-            PKR {{ number_format($thisMonthAmount, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($thisMonthAmount) }}
         </div>
     </div>
 
@@ -248,12 +252,9 @@
 
                 <select name="assistance_type" class="form-select">
                     <option value="">All Types</option>
-                    <option value="monthly_assistance" {{ request('assistance_type') === 'monthly_assistance' ? 'selected' : '' }}>Monthly Assistance</option>
-                    <option value="food_ration" {{ request('assistance_type') === 'food_ration' ? 'selected' : '' }}>Food / Ration</option>
-                    <option value="medical_assistance" {{ request('assistance_type') === 'medical_assistance' ? 'selected' : '' }}>Medical Assistance</option>
-                    <option value="education_support" {{ request('assistance_type') === 'education_support' ? 'selected' : '' }}>Education Support</option>
-                    <option value="emergency_assistance" {{ request('assistance_type') === 'emergency_assistance' ? 'selected' : '' }}>Emergency Assistance</option>
-                    <option value="one_time_support" {{ request('assistance_type') === 'one_time_support' ? 'selected' : '' }}>One-Time Support</option>
+                    @foreach($assistanceTypes as $type)
+                        <option value="{{ $type }}" @selected(request('assistance_type') === $type)>{{ ucfirst(str_replace('_', ' ', $type)) }}</option>
+                    @endforeach
                 </select>
 
                 <select name="status" class="form-select">
@@ -263,6 +264,7 @@
                     <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
                     <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>Paid</option>
                     <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
+                    <option value="closed" {{ request('status') === 'closed' ? 'selected' : '' }}>Closed</option>
                 </select>
 
                 <select name="fund_id" class="form-select">
@@ -335,6 +337,7 @@
                             $statusClass = match ($assistance->status) {
                                 'approved' => 'approved',
                                 'rejected' => 'rejected',
+                                'closed' => 'closed',
                                 'paid', 'completed' => 'approved',
                                 default => 'pending',
                             };
@@ -367,7 +370,7 @@
                             <td>{{ $assistance->fund?->name ?? 'Unassigned' }}</td>
 
                             <td>
-                                PKR {{ number_format((float) $assistance->amount, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($assistance->amount) }}
                             </td>
 
                             <td>

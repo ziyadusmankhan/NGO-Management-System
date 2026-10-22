@@ -69,12 +69,6 @@
         font-weight:750;
     }
 
-    .stat-meta {
-        margin-top:3px;
-        color:#8a938e;
-        font-size:12px;
-    }
-
     .toolbar {
         background:#fff;
         border:1px solid var(--border);
@@ -147,43 +141,10 @@
         border-bottom:none;
     }
 
-    .number {
-        font-weight:700;
-    }
-
     .sub {
         margin-top:3px;
         color:#7b8580;
         font-size:12px;
-    }
-
-    .badge {
-        display:inline-flex;
-        padding:5px 9px;
-        border-radius:20px;
-        font-size:12px;
-        font-weight:700;
-        white-space:nowrap;
-    }
-
-    .overdue {
-        background:#fceeee;
-        color:#a34f4f;
-    }
-
-    .today {
-        background:#fff6e8;
-        color:#9b6c2e;
-    }
-
-    .upcoming {
-        background:#edf3f8;
-        color:#52718b;
-    }
-
-    .none {
-        background:#f1f3f2;
-        color:#6b7570;
     }
 
     .action {
@@ -228,364 +189,83 @@
 
 
 @section('content')
-
+@php
+    $labels = ['overdue' => 'Overdue reviews', 'today' => 'Due today', 'upcoming' => 'Next 30 days', 'none' => 'No review date', 'follow_up' => 'Follow-up required', 'closure' => 'Awaiting closure', 'ended' => 'Period ended'];
+@endphp
 <div class="page-header">
-
-    <div>
-        <h1>Assistance Reviews</h1>
-
-        <p>
-            Monitor welfare assistance review dates and record follow-up decisions.
-        </p>
-    </div>
-
-    <a
-        href="{{ route('welfare.assistance.index') }}"
-        class="ui-btn"
-    >
-        <i class="bi bi-arrow-left"></i>
-        Welfare Assistance
-    </a>
-
+    <div><h1>Assistance Reviews</h1><p>Review dates, follow-up actions and closure decisions · {{ $today->format('d M Y') }} ({{ config('welfare.timezone') }})</p></div>
+    <a href="{{ route('welfare.assistance.index') }}" class="ui-btn">Welfare Assistance</a>
 </div>
-
-
 <div class="stats">
-
-    <a
-        href="{{ route(
-            'welfare.assistance.reviews.index',
-            ['filter' => 'overdue']
-        ) }}"
-        class="stat"
-    >
-        <div class="stat-label">
-            Overdue
-        </div>
-
-        <div class="stat-value">
-            {{ $overdue }}
-        </div>
-
-        <div class="stat-meta">
-            Review date has passed
-        </div>
-    </a>
-
-
-    <a
-        href="{{ route(
-            'welfare.assistance.reviews.index',
-            ['filter' => 'today']
-        ) }}"
-        class="stat"
-    >
-        <div class="stat-label">
-            Due Today
-        </div>
-
-        <div class="stat-value">
-            {{ $dueToday }}
-        </div>
-
-        <div class="stat-meta">
-            Requires attention today
-        </div>
-    </a>
-
-
-    <a
-        href="{{ route(
-            'welfare.assistance.reviews.index',
-            ['filter' => 'upcoming']
-        ) }}"
-        class="stat"
-    >
-        <div class="stat-label">
-            Upcoming
-        </div>
-
-        <div class="stat-value">
-            {{ $upcoming }}
-        </div>
-
-        <div class="stat-meta">
-            Next 30 days
-        </div>
-    </a>
-
-
-    <a
-        href="{{ route(
-            'welfare.assistance.reviews.index',
-            ['filter' => 'none']
-        ) }}"
-        class="stat"
-    >
-        <div class="stat-label">
-            No Review Date
-        </div>
-
-        <div class="stat-value">
-            {{ $noReviewDate }}
-        </div>
-
-        <div class="stat-meta">
-            Approved assistance
-        </div>
-    </a>
-
+    @foreach($labels as $filter => $label)
+        <a href="{{ route('welfare.assistance.reviews.index', ['filter' => $filter]) }}" class="stat">
+            <div class="stat-label">{{ $label }}</div><div class="stat-value">{{ $counts[$filter] }}</div>
+        </a>
+    @endforeach
 </div>
-
-
-<form
-    method="GET"
-    action="{{ route('welfare.assistance.reviews.index') }}"
-    class="toolbar"
->
-
-    <input
-        type="search"
-        name="search"
-        class="search"
-        value="{{ request('search') }}"
-        placeholder="Search assistance or beneficiary..."
-    >
-
-
-    <select
-        name="filter"
-        class="filter"
-    >
-
-        <option value="">
-            All Reviews
-        </option>
-
-        <option
-            value="overdue"
-            @selected(request('filter') === 'overdue')
-        >
-            Overdue
-        </option>
-
-        <option
-            value="today"
-            @selected(request('filter') === 'today')
-        >
-            Due Today
-        </option>
-
-        <option
-            value="upcoming"
-            @selected(request('filter') === 'upcoming')
-        >
-            Upcoming
-        </option>
-
-        <option
-            value="none"
-            @selected(request('filter') === 'none')
-        >
-            No Review Date
-        </option>
-
+<form method="GET" action="{{ route('welfare.assistance.reviews.index') }}" class="toolbar">
+    <input type="search" name="search" class="search" value="{{ request('search') }}" placeholder="Search assistance or beneficiary..." aria-label="Search assistance or beneficiary">
+    <select name="filter" class="filter" aria-label="Monitoring status">
+        <option value="">All approved assistance</option>
+        @foreach($labels as $filter => $label)<option value="{{ $filter }}" @selected(request('filter') === $filter)>{{ $label }}</option>@endforeach
     </select>
-
-
-    <button
-        type="submit"
-        class="ui-btn"
-    >
-        <i class="bi bi-search"></i>
-        Filter
-    </button>
-
+    <button type="submit" class="ui-btn">Filter</button>
 </form>
-
-
-<div class="card">
-
-    <div class="table-wrap">
-
-        <table>
-
-            <thead>
-
-                <tr>
-                    <th>Assistance</th>
-                    <th>Beneficiary</th>
-                    <th>Fund</th>
-                    <th>Amount</th>
-                    <th>Next Review</th>
-                    <th>Last Review</th>
-                    <th></th>
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                @forelse($assistances as $assistance)
-
-                    @php
-                        $reviewDate = $assistance->next_review_date;
-
-                        if (!$reviewDate) {
-                            $reviewLabel = 'No date';
-                            $reviewClass = 'none';
-                        } elseif ($reviewDate->isBefore(today())) {
-                            $reviewLabel = 'Overdue';
-                            $reviewClass = 'overdue';
-                        } elseif ($reviewDate->isToday()) {
-                            $reviewLabel = 'Due Today';
-                            $reviewClass = 'today';
-                        } else {
-                            $reviewLabel = 'Upcoming';
-                            $reviewClass = 'upcoming';
-                        }
-
-                        $lastReview = $assistance->reviews
-                            ->sortByDesc('review_date')
-                            ->first();
-                    @endphp
-
-
-                    <tr>
-
-                        <td>
-
-                            <div class="number">
-                                {{ $assistance->assistance_number }}
-                            </div>
-
-                            <div class="sub">
-                                {{ str_replace(
-                                    '_',
-                                    ' ',
-                                    ucfirst($assistance->assistance_type)
-                                ) }}
-                            </div>
-
-                        </td>
-
-
-                        <td>
-
-                            <div class="number">
-                                {{ $assistance->beneficiary->full_name }}
-                            </div>
-
-                            <div class="sub">
-                                {{ $assistance->beneficiary->beneficiary_number }}
-                            </div>
-
-                        </td>
-
-
-                        <td>
-                            {{ $assistance->fund?->name ?: '—' }}
-                        </td>
-
-
-                        <td>
-                            PKR {{ number_format($assistance->amount, 0) }}
-                        </td>
-
-
-                        <td>
-
-                            @if($reviewDate)
-                                <div>
-                                    {{ $reviewDate->format('d M Y') }}
-                                </div>
-                            @endif
-
-                            <div
-                                class="badge {{ $reviewClass }}"
-                                style="margin-top:4px;"
-                            >
-                                {{ $reviewLabel }}
-                            </div>
-
-                        </td>
-
-
-                        <td>
-
-                            @if($lastReview)
-
-                                <div>
-                                    {{ $lastReview->review_date->format('d M Y') }}
-                                </div>
-
-                                <div class="sub">
-                                    {{ ucfirst(
-                                        str_replace(
-                                            '_',
-                                            ' ',
-                                            $lastReview->outcome
-                                        )
-                                    ) }}
-                                </div>
-
-                            @else
-
-                                —
-                                
-                            @endif
-
-                        </td>
-
-
-                        <td>
-
-                            <a
-                                href="{{ route(
-                                    'welfare.assistance.reviews.create',
-                                    $assistance
-                                ) }}"
-                                class="action"
-                            >
-                                <i class="bi bi-clipboard-check"></i>
-                                Review
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                @empty
-
-                    <tr>
-
-                        <td
-                            colspan="7"
-                            class="empty"
-                        >
-                            No approved welfare assistance matches this review queue.
-                        </td>
-
-                    </tr>
-
-                @endforelse
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-    @if($assistances->hasPages())
-
-        <div class="pagination">
-            {{ $assistances->links() }}
-        </div>
-
-    @endif
-
+<div class="card"><div class="table-wrap"><table>
+    <thead><tr><th>Assistance</th><th>Beneficiary / Fund</th><th>Total approved</th><th>Next review / End date</th><th>Latest findings and action</th><th></th></tr></thead>
+    <tbody>
+        @forelse($assistances as $assistance)
+            <tr>
+                <td><a href="{{ route('welfare.assistance.show', $assistance) }}">{{ $assistance->assistance_number }}</a><div class="sub">{{ \Illuminate\Support\Str::headline($assistance->frequency ?? 'one_time') }}</div></td>
+                <td>{{ $assistance->beneficiary?->full_name ?? 'Unavailable' }}<div class="sub">{{ $assistance->fund?->name ?? 'Unavailable fund' }}</div></td>
+                <td>PKR {{ \App\Domain\Finance\Support\Money::format($assistance->amount ?? '0.00') }}</td>
+                <td>
+                    @if($assistance->next_review_date)
+                        {{ $assistance->next_review_date->format('d M Y') }}
+                        <div class="sub">{{ $assistance->next_review_date->toDateString() < $today->toDateString() ? 'Overdue' : ($assistance->next_review_date->toDateString() === $today->toDateString() ? 'Due today' : 'Upcoming') }}</div>
+                    @else
+                        Not scheduled
+                    @endif
+                    @if($assistance->end_date)
+                        <div class="sub">Ends {{ $assistance->end_date->format('d M Y') }}{{ $assistance->end_date->toDateString() < $today->toDateString() ? ' · Period ended — review for closure' : '' }}</div>
+                    @endif
+                </td>
+                <td>
+                    @if($assistance->latestReview)
+                        <strong>{{ $assistance->latestReview->outcome === 'no_longer_needed' ? 'Awaiting approver closure' : \Illuminate\Support\Str::headline($assistance->latestReview->outcome) }}</strong>
+                        <div class="sub">{{ $assistance->latestReview->review_date->format('d M Y') }} · {{ $assistance->latestReview->reviewedBy?->name ?? 'Unavailable reviewer' }}</div>
+                        <div>{{ \Illuminate\Support\Str::limit($assistance->latestReview->notes, 160) }}</div>
+                        @if($assistance->latestReview->follow_up_action)<div>Action: {{ \Illuminate\Support\Str::limit($assistance->latestReview->follow_up_action, 160) }}</div>@endif
+                    @else
+                        No review recorded
+                    @endif
+                </td>
+                <td>
+                    @if(auth()->user()->hasPermission('welfare.reviews.manage'))
+                        <a href="{{ route('welfare.assistance.reviews.create', $assistance) }}" class="action">Record review</a>
+                    @else
+                        <a href="{{ route('welfare.assistance.show', $assistance) }}" class="action">View</a>
+                    @endif
+                </td>
+            </tr>
+        @empty
+            <tr><td colspan="6" class="empty">No approved assistance matches this monitoring queue.</td></tr>
+        @endforelse
+    </tbody>
+</table></div><div class="pagination">{{ $assistances->links() }}</div></div>
+<div class="card p-3 mt-3">
+    <h2 class="h5">Scheduled reminders</h2>
+    <p>The daily reminder check runs at 08:00 {{ config('welfare.timezone') }} when the application scheduler is running. Review queues above always use current records.</p>
+    <ul>
+        @forelse($reminders as $reminder)
+            <li><a href="{{ route('welfare.assistance.show', $reminder->assistance_id) }}">{{ $reminder->assistance->assistance_number }}</a>
+                · {{ ['review_due' => 'Review due', 'period_ended' => 'Period ended — closure decision needed', 'closure_requested' => 'Closure recommendation awaiting approval'][$reminder->kind] ?? \Illuminate\Support\Str::headline($reminder->kind) }}
+                · {{ $reminder->due_date->format('d M Y') }}
+            </li>
+        @empty
+            <li>No open scheduled reminders.</li>
+        @endforelse
+    </ul>
+    {{ $reminders->links() }}
 </div>
-
 @endsection

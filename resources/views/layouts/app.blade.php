@@ -239,6 +239,7 @@
 
         .sidebar-bottom {
             padding: 12px;
+            flex-shrink: 0;
 
             border-top: 1px solid var(--border);
         }
@@ -257,6 +258,7 @@
         .sidebar-avatar {
             width: 34px;
             height: 34px;
+            flex-shrink: 0;
 
             border-radius: 50%;
 
@@ -295,6 +297,34 @@
             color: var(--muted);
 
             margin-top: 2px;
+            overflow-wrap: anywhere;
+            line-height: 1.35;
+        }
+
+        .sidebar-logout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 8px;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: white;
+            color: var(--primary);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .sidebar-logout:hover {
+            background: #edf5f1;
+        }
+
+        .sidebar-logout:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
         }
 
         /* ======================================
@@ -451,12 +481,13 @@
 
             margin-left: 14px;
 
-            cursor: pointer;
+            min-width: 0;
         }
 
         .profile-avatar {
             width: 36px;
             height: 36px;
+            flex-shrink: 0;
 
             border-radius: 50%;
 
@@ -475,6 +506,15 @@
         .profile-info {
             margin-left: 9px;
             margin-right: 7px;
+            min-width: 0;
+            max-width: 240px;
+        }
+
+        .profile-info strong,
+        .profile-info span {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
 
         .profile-info strong {
@@ -579,7 +619,7 @@
             }
 
             .profile-info {
-                display: none;
+                max-width: 140px;
             }
         }
 
@@ -619,6 +659,20 @@
 </head>
 
 <body>
+
+@php
+    $signedInUser = auth()->user();
+    $accountName = $signedInUser?->name ?? 'Guest';
+    $accountRoles = $signedInUser
+        ? $signedInUser->loadMissing('roles')->roles->sortBy('name')->pluck('name')->join(', ')
+        : '';
+    $accountRoleLabel = $accountRoles ?: ($signedInUser ? 'No role assigned' : 'Not signed in');
+    $accountNameParts = preg_split('/\s+/u', trim($accountName), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    $accountInitials = mb_strtoupper(
+        mb_substr($accountNameParts[0] ?? '', 0, 1)
+        . (count($accountNameParts) > 1 ? mb_substr(end($accountNameParts), 0, 1) : '')
+    ) ?: '?';
+@endphp
 
 <div class="app-shell">
 
@@ -789,11 +843,17 @@
 
             <a
                 href="{{ route('welfare.assistance.index') }}"
-                class="nav-item {{ request()->routeIs('welfare.assistance.*') ? 'active' : '' }}"
+                class="nav-item {{ request()->routeIs('welfare.assistance.*') && ! request()->routeIs('welfare.assistance.reviews.*') ? 'active' : '' }}"
             >
                 <i class="bi bi-hand-heart"></i>
                 <span>Welfare Assistance</span>
             </a>
+
+            @if(auth()->user()?->hasPermission('welfare.reviews.view'))
+                <a href="{{ route('welfare.assistance.reviews.index') }}" class="nav-item {{ request()->routeIs('welfare.assistance.reviews.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-check"></i><span>Reviews &amp; Follow-ups</span>
+                </a>
+            @endif
 
             <div class="nav-section">
                 Programs
@@ -898,22 +958,32 @@
             <div class="sidebar-user">
 
                 <div class="sidebar-avatar">
-                    YK
+                    {{ $accountInitials }}
                 </div>
 
                 <div class="sidebar-user-info">
 
-                    <strong>
-                        Yasir Khan
+                    <strong title="{{ $accountName }}">
+                        {{ $accountName }}
                     </strong>
 
-                    <span>
-                        Chairman
+                    <span title="{{ $accountRoleLabel }}">
+                        {{ $accountRoleLabel }}
                     </span>
 
                 </div>
 
             </div>
+
+            @auth
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="sidebar-logout">
+                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                        Log out
+                    </button>
+                </form>
+            @endauth
 
         </div>
 
@@ -970,25 +1040,23 @@
             </button>
 
 
-            <div class="profile-menu">
+            <div class="profile-menu" aria-label="Signed-in account">
 
                 <div class="profile-avatar">
-                    YK
+                    {{ $accountInitials }}
                 </div>
 
                 <div class="profile-info">
 
-                    <strong>
-                        Yasir Khan
+                    <strong title="{{ $accountName }}">
+                        {{ $accountName }}
                     </strong>
 
-                    <span>
-                        Chairman
+                    <span title="{{ $accountRoleLabel }}">
+                        {{ $accountRoleLabel }}
                     </span>
 
                 </div>
-
-                <i class="bi bi-chevron-down"></i>
 
             </div>
 
@@ -1016,6 +1084,7 @@
     });
 </script>
 
+<script src="{{ asset('js/money.js') }}"></script>
 @stack('scripts')
 
 </body>

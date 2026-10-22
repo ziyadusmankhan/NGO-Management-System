@@ -202,6 +202,7 @@
             grid-template-columns:1fr;
         }
     }
+    .status.closed { background:#eef0ef; color:#59635d; }
 </style>
 @endpush
 
@@ -221,6 +222,7 @@
     $statusClass = match ($assistance->status) {
         'approved', 'paid', 'completed' => 'approved',
         'rejected' => 'rejected',
+        'closed' => 'closed',
         default => 'pending',
     };
 @endphp
@@ -238,6 +240,7 @@
 
     <div class="actions">
 
+    @can('welfare.reviews.view')
     <a
         href="{{ route('welfare.assistance.reviews.index') }}"
         class="ui-btn"
@@ -245,6 +248,7 @@
         <i class="bi bi-clipboard-check"></i>
         Review Queue
     </a>
+    @endcan
 
         <a
             href="{{ route('welfare.assistance.index') }}"
@@ -281,7 +285,7 @@
 
         @if(
             $assistance->status === 'approved'
-            && auth()->user()->hasPermission('welfare.assistance.manage')
+            && auth()->user()->hasPermission('welfare.reviews.manage')
         )
 
             <a
@@ -321,6 +325,9 @@
                     action="{{ route('welfare.assistance.reject', $assistance) }}"
                 >
                     @csrf
+                    <label for="reject-reason" class="form-label">Reason (optional)</label>
+                    <input id="reject-reason" name="reason" class="form-control mb-2" maxlength="5000">
+
 
                     <button
                         type="submit"
@@ -339,11 +346,60 @@
 
 </div>
 
+@if($errors->any())
+    <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+@endif
+
+<div class="card mb-3"><div class="card-body">
+    @if($assistance->application)
+        <strong>Source application:</strong>
+        <a href="{{ route('welfare.applications.show', $assistance->application) }}">{{ $assistance->application->application_number }}</a>
+        @can('welfare.agreements.view')
+            @if($assistance->application->agreement)
+                · <a href="{{ route('welfare.applications.agreement.show', $assistance->application) }}">Signed agreement {{ $assistance->application->agreement->agreement_number }}</a>
+            @endif
+        @endcan
+    @elseif($assistance->application_id)
+        The source application is archived (reference #{{ $assistance->application_id }}).
+    @else
+        Legacy assistance: no linked application was recorded.
+    @endif
+    @can('welfare.assistance.manage')
+        @if($assistance->status === 'rejected')
+            <form method="POST" action="{{ route('welfare.assistance.resubmit', $assistance) }}" class="mt-3">
+                @csrf
+                <label for="resubmit-reason" class="form-label">Resubmission note (optional)</label>
+                <input id="resubmit-reason" name="reason" class="form-control mb-2" maxlength="5000">
+                <button class="ui-btn primary" type="submit">Resubmit for approval</button>
+            </form>
+        @endif
+    @endcan
+</div></div>
+
+<div class="card mb-3"><div class="card-body">
+    <h2 class="h5">Status history</h2>
+    <p>Approval authorizes payments up to the total cap. Full payment completes assistance; an approver may explicitly close approved or completed assistance with a reason.</p>
+    <ul class="mb-0">
+        @forelse($assistance->statusChanges as $change)
+            <li>{{ $change->from_status ? ucfirst($change->from_status) : 'Created' }} → {{ ucfirst($change->to_status) }}
+                by {{ $change->changedBy?->name ?? 'Unknown user' }} on {{ $change->changed_at->format('d M Y H:i') }}
+                @if($change->reason)<div>{{ $change->reason }}</div>@endif
+            </li>
+        @empty
+            <li>No status history was recorded before this workflow was introduced.</li>
+        @endforelse
+    </ul>
+</div></div>
+
 @if(session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
     </div>
 @endif
+
+@can('welfare.reviews.view')
+@include('welfare.assistance.partials.monitoring')
+@endcan
 
 <div class="layout">
 
@@ -398,7 +454,7 @@
                     <div class="item">
                         <label>Amount</label>
                         <strong>
-                            PKR {{ number_format((float) $assistance->amount, 2) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($assistance->amount) }}
                         </strong>
                     </div>
 
@@ -554,7 +610,7 @@
                                     color:#a34f4f;
                                     text-decoration:line-through;
                                 ">
-                                    PKR {{ number_format($payment->amount, 0) }}
+                                    PKR {{ \App\Domain\Finance\Support\Money::format($payment->amount) }}
                                 </span>
 
                                 <span style="
@@ -569,7 +625,7 @@
 
                             @else
 
-                                PKR {{ number_format($payment->amount, 0) }}
+                                PKR {{ \App\Domain\Finance\Support\Money::format($payment->amount) }}
 
                             @endif
 
@@ -616,6 +672,7 @@
 
         </div>
 
+        @can('welfare.reviews.view')
         <div class="card">
 
             <div class="card-head">
@@ -635,7 +692,7 @@
 
                 @if(
                     $assistance->status === 'approved'
-                    && auth()->user()->hasPermission('welfare.assistance.manage')
+                    && auth()->user()->hasPermission('welfare.reviews.manage')
                 )
 
                     <a
@@ -658,7 +715,7 @@
 
                 @forelse(
                     $assistance->reviews
-                        ->sortByDesc('review_date')
+                        ->sortByDesc('id')
                     as $review
                 )
 
@@ -711,6 +768,7 @@
                                 ·
 
                                 {{ $review->reviewedBy?->name ?: 'System' }}
+                                · Recorded {{ $review->created_at?->format('d M Y H:i') }}
                             </span>
 
 
@@ -743,6 +801,10 @@
 
                             @endif
 
+                            @if($review->follow_up_action)
+                                <p class="mt-2"><strong>Follow-up action:</strong> {{ $review->follow_up_action }}</p>
+                            @endif
+
                         </div>
 
                     </div>
@@ -764,6 +826,7 @@
             </div>
 
         </div>
+        @endcan
 
         
 
@@ -777,7 +840,7 @@
             <div class="card-body">
 
                 <div class="side-number">
-                    PKR {{ number_format((float) $assistance->amount, 0) }}
+                    PKR {{ \App\Domain\Finance\Support\Money::format($assistance->amount) }}
                 </div>
 
                 <div class="side-label">

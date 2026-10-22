@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Welfare;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreWelfareAssistancePaymentRequest extends FormRequest
 {
@@ -26,7 +25,9 @@ class StoreWelfareAssistancePaymentRequest extends FormRequest
 
             'amount' => [
                 'required',
+                'string',
                 'numeric',
+                'regex:/^\d{1,12}(?:\.\d{1,2})?$/',
                 'min:0.01',
                 'max:999999999999.99',
             ],
@@ -65,6 +66,20 @@ class StoreWelfareAssistancePaymentRequest extends FormRequest
                 'max:5000',
             ],
 
+            'fund_id' => ['missing'],
+            'assistance_id' => ['missing'],
+            'status' => ['missing'],
+            'recorded_by' => ['missing'],
+            'payment_number' => ['missing'],
+
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'amount.string' => 'Send the amount as decimal text, for example "10.25".',
+            'amount.regex' => 'Enter a positive amount with at most two decimal places (maximum 999999999999.99).',
         ];
     }
 }

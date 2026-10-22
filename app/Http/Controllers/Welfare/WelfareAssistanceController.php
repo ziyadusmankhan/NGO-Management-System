@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\Welfare;
 
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
+use App\Domain\Welfare\Assistance\Services\WelfareAssistanceService;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Welfare\StoreWelfareAssistanceRequest;
+use App\Http\Requests\Welfare\TransitionWelfareAssistanceRequest;
 use App\Http\Requests\Welfare\UpdateWelfareAssistanceRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class WelfareAssistanceController extends Controller
@@ -63,18 +66,20 @@ class WelfareAssistanceController extends Controller
             'approved'
         )->count();
 
-        $thisMonthAmount = WelfareAssistance::query()
+        $thisMonthAmount = Money::sum(WelfareAssistance::query()
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
-            ->whereIn('status', ['approved', 'paid', 'completed'])
-            ->sum('amount');
+            ->whereIn('status', ['approved', 'paid', 'completed', 'closed']));
 
         $funds = Fund::query()
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
 
+        $assistanceTypes = WelfareAssistance::query()->select('assistance_type')->distinct()->orderBy('assistance_type')->pluck('assistance_type');
+
         return view('welfare.assistance.index', compact(
+            'assistanceTypes',
             'assistances',
             'totalAssistance',
             'pendingAssistance',
@@ -84,206 +89,98 @@ class WelfareAssistanceController extends Controller
         ));
     }
 
-    public function create(): View
+    public function create(Request $request, WelfareAssistanceService $service): View
     {
-        $beneficiaries = Beneficiary::query()
-            ->where('verification_status', 'verified')
-            ->where('approval_status', 'approved')
-            ->orderBy('full_name')
-            ->get([
-                'id',
-                'beneficiary_number',
-                'full_name',
-                'category',
-                'location',
-            ]);
+        $selection = $request->validate(['application_id' => ['nullable', 'integer']]);
+        $applications = WelfareApplication::query()
+            ->with(['beneficiary', 'fund', 'agreement'])
+            ->where('status', 'approved')->where('is_test', false)
+            ->whereHas('agreement', fn ($q) => $q->where('status', 'signed'))
+            ->whereDoesntHave('assistanceIncludingArchived')
+            ->orderByDesc('id')->get()
+            ->filter(fn ($application) => $service->eligibilityError($application) === null);
+        $selected = $applications->firstWhere('id', $selection['application_id'] ?? $request->old('application_id'));
+        $selectionError = null;
+        if (! $selected && ! empty($selection['application_id'])) {
+            $selectionError = 'This application is unavailable. It may already have assistance or no longer meet the signed agreement requirements.';
+        }
 
-        $funds = Fund::query()
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
-
-        return view('welfare.assistance.create', compact(
-            'beneficiaries',
-            'funds'
-        ));
+        return view('welfare.assistance.create', compact('applications', 'selected', 'selectionError'));
     }
 
-    public function store(
-        StoreWelfareAssistanceRequest $request
-    ): RedirectResponse {
+    public function store(StoreWelfareAssistanceRequest $request, WelfareAssistanceService $service): RedirectResponse
+    {
         $data = $request->validated();
+        $assistance = $service->createFromApplication((int) $data['application_id'], $data, $request->user());
 
-        $beneficiary = Beneficiary::findOrFail(
-            $data['beneficiary_id']
-        );
-
-        abort_unless(
-            $beneficiary->verification_status === 'verified'
-            && $beneficiary->approval_status === 'approved',
-            422,
-            'Only verified and approved beneficiaries can receive welfare assistance.'
-        );
-
-        $data['status'] = 'pending';
-        $data['requested_at'] = now();
-        $data['has_supporting_document'] =
-            $request->boolean('has_supporting_document');
-
-        $assistance = DB::transaction(function () use ($data) {
-            $data['assistance_number'] = 'TEMP-' . Str::uuid();
-
-            $assistance = WelfareAssistance::create($data);
-
-            $assistance->update([
-                'assistance_number' => sprintf(
-                    'WFA-%05d',
-                    $assistance->id
-                ),
-            ]);
-
-            return $assistance;
-        });
-
-        return redirect()
-            ->route('welfare.assistance.show', $assistance)
-            ->with('success', 'Welfare assistance request created successfully.');
+        return redirect()->route('welfare.assistance.show', $assistance)
+            ->with('success', 'Assistance created from the signed agreement. It is pending approval; no payment was created.');
     }
 
     public function show(WelfareAssistance $assistance): View
     {
         $assistance->load([
-        'beneficiary',
-        'fund',
-        'approvedBy',
-        'payments.fund',
-        'payments.recordedBy',
-        'payments.transaction',
-        'reviews.reviewedBy',
-    ]);
+            'beneficiary', 'fund', 'approvedBy', 'application.agreement', 'statusChanges.changedBy',
+            'payments.fund', 'payments.recordedBy', 'payments.transaction', 'reviews.reviewedBy', 'latestReview', 'closedBy',
+        ]);
 
-        return view(
-            'welfare.assistance.show',
-            compact('assistance')
-        );
+        return view('welfare.assistance.show', compact('assistance'));
     }
 
     public function edit(WelfareAssistance $assistance): View
     {
-        abort_unless(
-            in_array($assistance->status, ['pending', 'rejected'], true),
-            403,
-            'Only pending or rejected assistance requests can be edited.'
-        );
+        abort_unless(in_array($assistance->status, ['pending', 'rejected'], true), 403,
+            'Only pending or rejected assistance requests can be edited.');
+        $beneficiaries = collect();
+        $funds = collect();
+        if ($assistance->application_id === null) {
+            $beneficiaries = Beneficiary::query()
+                ->where(fn ($q) => $q->where(fn ($q) => $q->where('verification_status', 'verified')
+                    ->where('approval_status', 'approved'))->orWhere('id', $assistance->beneficiary_id))
+                ->orderBy('full_name')->get();
+            $funds = Fund::query()->where('status', 'active')->orderBy('name')->get();
+        }
+        $assistance->load(['beneficiary', 'fund', 'application.agreement']);
 
-        $beneficiaries = Beneficiary::query()
-            ->where(function ($query) use ($assistance) {
-                $query
-                    ->where(function ($q) {
-                        $q->where('verification_status', 'verified')
-                            ->where('approval_status', 'approved');
-                    })
-                    ->orWhere('id', $assistance->beneficiary_id);
-            })
-            ->orderBy('full_name')
-            ->get([
-                'id',
-                'beneficiary_number',
-                'full_name',
-                'category',
-                'location',
-            ]);
-
-        $funds = Fund::query()
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
-
-        return view(
-            'welfare.assistance.edit',
-            compact('assistance', 'beneficiaries', 'funds')
-        );
+        return view('welfare.assistance.edit', compact('assistance', 'beneficiaries', 'funds'));
     }
 
-    public function update(
-        UpdateWelfareAssistanceRequest $request,
-        WelfareAssistance $assistance
-    ): RedirectResponse {
-        abort_unless(
-            in_array($assistance->status, ['pending', 'rejected'], true),
-            403,
-            'Only pending or rejected assistance requests can be edited.'
-        );
+    public function update(UpdateWelfareAssistanceRequest $request, WelfareAssistance $assistance, WelfareAssistanceService $service): RedirectResponse
+    {
+        $service->update($assistance, $request->validated(), $request->user());
 
-        $data = $request->validated();
-
-        $beneficiary = Beneficiary::findOrFail(
-            $data['beneficiary_id']
-        );
-
-        abort_unless(
-            $beneficiary->verification_status === 'verified'
-            && $beneficiary->approval_status === 'approved',
-            422,
-            'Only verified and approved beneficiaries can receive welfare assistance.'
-        );
-
-        $data['has_supporting_document'] =
-            $request->boolean('has_supporting_document');
-
-        $assistance->update($data);
-
-        return redirect()
-            ->route('welfare.assistance.show', $assistance)
-            ->with('success', 'Welfare assistance request updated successfully.');
+        return redirect()->route('welfare.assistance.show', $assistance)
+            ->with('success', 'Assistance details updated. Its status has not changed.');
     }
 
-    public function approve(
-        WelfareAssistance $assistance
-    ): RedirectResponse {
-        abort_unless(
-            $assistance->status === 'pending',
-            422,
-            'Only pending assistance requests can be approved.'
-        );
+    public function approve(TransitionWelfareAssistanceRequest $request, WelfareAssistance $assistance, WelfareAssistanceService $service): RedirectResponse
+    {
+        $service->transition($assistance, 'approved', $request->user(), $request->validated('reason'));
 
-        abort_unless(
-            $assistance->beneficiary->verification_status === 'verified'
-            && $assistance->beneficiary->approval_status === 'approved',
-            422,
-            'The beneficiary must be verified and approved first.'
-        );
-
-        $user = auth()->user();
-
-        $assistance->update([
-            'status' => 'approved',
-            'approved_by' => $user->id,
-            'approved_at' => now(),
-        ]);
-
-        return redirect()
-            ->route('welfare.assistance.show', $assistance)
-            ->with('success', 'Welfare assistance approved successfully.');
+        return redirect()->route('welfare.assistance.show', $assistance)->with('success', 'Welfare assistance approved.');
     }
 
-    public function reject(
-        WelfareAssistance $assistance
-    ): RedirectResponse {
-        abort_unless(
-            $assistance->status === 'pending',
-            422,
-            'Only pending assistance requests can be rejected.'
-        );
+    public function reject(TransitionWelfareAssistanceRequest $request, WelfareAssistance $assistance, WelfareAssistanceService $service): RedirectResponse
+    {
+        $service->transition($assistance, 'rejected', $request->user(), $request->validated('reason'));
 
-        $assistance->update([
-            'status' => 'rejected',
-            'approved_by' => auth()->id(),
-            'approved_at' => now(),
-        ]);
+        return redirect()->route('welfare.assistance.show', $assistance)->with('success', 'Welfare assistance rejected.');
+    }
 
-        return redirect()
-            ->route('welfare.assistance.show', $assistance)
-            ->with('success', 'Welfare assistance request rejected.');
+    public function resubmit(TransitionWelfareAssistanceRequest $request, WelfareAssistance $assistance, WelfareAssistanceService $service): RedirectResponse
+    {
+        $service->transition($assistance, 'pending', $request->user(), $request->validated('reason'));
+
+        return redirect()->route('welfare.assistance.show', $assistance)->with('success', 'Welfare assistance resubmitted for approval.');
+    }
+
+    public function close(\App\Http\Requests\Welfare\CloseWelfareAssistanceRequest $request, WelfareAssistance $assistance,
+        \App\Domain\Welfare\Assistance\Services\WelfareMonitoringService $monitoring): RedirectResponse
+    {
+        $changed = $monitoring->close($assistance, $request->validated('reason'), $request->user());
+
+        return redirect()->route('welfare.assistance.show', $assistance)->with('success', $changed
+            ? 'Assistance closed. Further payments are blocked and unpaid allocations have been released. Existing payments are unchanged.'
+            : 'This assistance was already closed. Its original closure record is unchanged.');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Finance;
 
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
@@ -13,6 +14,7 @@ use App\Http\Requests\Finance\StoreDonationRequest;
 use App\Http\Requests\Finance\UpdateDonationRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 
@@ -91,12 +93,11 @@ class DonationController
                 [Donation::class]
             );
 
-        $donationsThisMonth = (clone $postedDonations)
+        $donationsThisMonth = Money::sum((clone $postedDonations)
             ->whereBetween('transaction_date', [
                 now()->startOfMonth()->toDateString(),
                 now()->endOfMonth()->toDateString(),
-            ])
-            ->sum('amount');
+            ]));
 
         $totalDonations = (clone $postedDonations)
             ->whereBetween('transaction_date', [
@@ -105,25 +106,23 @@ class DonationController
             ])
             ->count();
 
-        $restrictedFunds = (clone $postedDonations)
+        $restrictedFunds = Money::sum((clone $postedDonations)
             ->whereHasMorph(
                 'source',
                 [Donation::class],
                 function ($query) {
                     $query->where('designation', 'restricted');
                 }
-            )
-            ->sum('amount');
+            ));
 
-        $unrestrictedFunds = (clone $postedDonations)
+        $unrestrictedFunds = Money::sum((clone $postedDonations)
             ->whereHasMorph(
                 'source',
                 [Donation::class],
                 function ($query) {
                     $query->where('designation', 'unrestricted');
                 }
-            )
-            ->sum('amount');
+            ));
 
         $pendingDonations = Donation::query()
             ->where('status', 'pending')
@@ -166,141 +165,37 @@ class DonationController
     }
 
 
-    public function store(
-            StoreDonationRequest $request
-        ): RedirectResponse {
+    public function store(StoreDonationRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+        $donation = DB::transaction(function () use ($validated) {
+            $donation = Donation::create(array_merge($validated, [
+                'donation_number' => 'DON-'.Str::ulid(),
+                'status' => 'received',
+                'recorded_by' => auth()->id(),
+            ]));
+            $donation->update(['donation_number' => sprintf('DON-%05d', $donation->id)]);
 
-            $validated = $request->validated();
-
-            $donation = DB::transaction(
-                function () use ($validated) {
-
-                    $nextId =
-                        (
-                            Donation::withTrashed()
-                                ->max('id')
-                            ?? 0
-                        ) + 1;
-
-                    $donationNumber =
-                        'DON-' .
-                        str_pad(
-                            $nextId,
-                            5,
-                            '0',
-                            STR_PAD_LEFT
-                        );
-
-                    return Donation::create([
-                        'donation_number' =>
-                            $donationNumber,
-
-                        'donor_type' =>
-                            $validated['donor_type'],
-
-                        'donor_name' =>
-                            $validated['donor_name'],
-
-                        'phone' =>
-                            $validated['phone']
-                            ?? null,
-
-                        'email' =>
-                            $validated['email']
-                            ?? null,
-
-                        'amount' =>
-                            $validated['amount'],
-
-                        'donation_date' =>
-                            $validated['donation_date'],
-
-                        'payment_method' =>
-                            $validated['payment_method'],
-
-                        'transaction_reference' =>
-                            $validated['transaction_reference']
-                            ?? null,
-
-                        'receipt_number' =>
-                            $validated['receipt_number']
-                            ?? null,
-
-                        'designation' =>
-                            $validated['designation'],
-
-                        'purpose' =>
-                            $validated['purpose'],
-
-                        'fund_id' =>
-                            $validated['fund_id']
-                            ?? null,
-
-                        'purpose_notes' =>
-                            $validated['purpose_notes']
-                            ?? null,
-
-                        'internal_notes' =>
-                            $validated['internal_notes']
-                            ?? null,
-
-                        'status' =>
-                            'received',
-
-                        'recorded_by' =>
-                            auth()->id(),
-                    ]);
-                }
-            );
-
-            /*
-            * Only donations linked to a fund can create
-            * a fund transaction.
-            */
             if ($donation->fund_id) {
-
-                app(TransactionService::class)
-                    ->createForSource(
-                        $donation,
-                        [
-                            'fund_id' =>
-                                $donation->fund_id,
-
-                            'type' =>
-                                'donation',
-
-                            'reference' =>
-                                $donation->donation_number,
-
-                            'description' =>
-                                'Donation from ' .
-                                $donation->donor_name,
-
-                            'amount' =>
-                                $donation->amount,
-
-                            'direction' =>
-                                'credit',
-
-                            'transaction_date' =>
-                                $donation->donation_date,
-
-                            'status' =>
-                                'posted',
-                        ]
-                    );
+                app(TransactionService::class)->createForSource($donation, [
+                    'fund_id' => $donation->fund_id,
+                    'type' => 'donation',
+                    'reference' => $donation->donation_number,
+                    'description' => 'Donation from '.$donation->donor_name,
+                    'amount' => $donation->amount,
+                    'direction' => 'credit',
+                    'transaction_date' => $donation->donation_date,
+                    'status' => 'posted',
+                ]);
             }
 
-            return redirect()
-                ->route(
-                    'finance.donations.show',
-                    $donation
-                )
-                ->with(
-                    'success',
-                    "Donation {$donation->donation_number} was recorded successfully."
-                );
-        }
+            return $donation;
+        }, 5);
+
+        return redirect()->route('finance.donations.show', $donation)
+            ->with('success', "Donation {$donation->donation_number} was recorded successfully.");
+    }
+
     public function edit(
             Donation $donation
         ): View {

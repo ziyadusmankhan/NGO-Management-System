@@ -5,6 +5,7 @@ namespace App\Domain\Finance\Funds\Services;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Transactions\Models\Transaction;
 use Illuminate\Support\Collection;
+use App\Domain\Finance\Support\Money;
 
 class FundBalanceService
 {
@@ -17,56 +18,41 @@ class FundBalanceService
      * + Posted Credits
      * - Posted Debits
      */
-    public function balance(Fund $fund): float
+    public function balance(Fund $fund): string
     {
-        $credits = $this->postedCredits($fund);
-        $debits = $this->postedDebits($fund);
-
-        return
-            (float) $fund->opening_balance
-            + $credits
-            - $debits;
+        return Money::decimal($this->balanceMinor($fund));
     }
 
-    /**
-     * Total posted credit movements for the fund.
-     */
-    public function postedCredits(Fund $fund): float
+    public function balanceMinor(Fund $fund): int
     {
-        return (float) Transaction::query()
-            ->where('fund_id', $fund->id)
-            ->where('status', 'posted')
-            ->where('direction', 'credit')
-            ->sum('amount');
+        return Money::add(Money::minor($fund->opening_balance), Money::add(
+            Money::minor($this->postedCredits($fund)), -Money::minor($this->postedDebits($fund))
+        ));
     }
 
-    /**
-     * Total posted debit movements for the fund.
-     */
-    public function postedDebits(Fund $fund): float
+    public function postedCredits(Fund $fund): string
     {
-        return (float) Transaction::query()
-            ->where('fund_id', $fund->id)
-            ->where('status', 'posted')
-            ->where('direction', 'debit')
-            ->sum('amount');
+        return Money::decimal(Money::sumMinor(Transaction::query()
+            ->where('fund_id', $fund->id)->where('status', 'posted')->where('direction', 'credit')));
     }
 
-    /**
-     * Get a complete financial summary for a fund.
-     */
+    public function postedDebits(Fund $fund): string
+    {
+        return Money::decimal(Money::sumMinor(Transaction::query()
+            ->where('fund_id', $fund->id)->where('status', 'posted')->where('direction', 'debit')));
+    }
+
     public function summary(Fund $fund): array
     {
         $credits = $this->postedCredits($fund);
         $debits = $this->postedDebits($fund);
 
-        $opening = (float) $fund->opening_balance;
-
         return [
-            'opening_balance' => $opening,
+            'opening_balance' => $fund->opening_balance,
             'total_credits' => $credits,
             'total_debits' => $debits,
-            'balance' => $opening + $credits - $debits,
+            'balance' => Money::decimal(Money::add(Money::minor($fund->opening_balance),
+                Money::add(Money::minor($credits), -Money::minor($debits)))),
         ];
     }
 
@@ -75,11 +61,11 @@ class FundBalanceService
      */
     public function balanceBeforeTransaction(
         Transaction $transaction
-    ): float {
+    ): string {
         $fund = $transaction->fund;
 
         if (! $fund) {
-            return 0.0;
+            return '0.00';
         }
 
         $query = Transaction::query()
@@ -107,41 +93,23 @@ class FundBalanceService
                     });
             });
 
-        $credits = (float) (clone $query)
-            ->where('direction', 'credit')
-            ->sum('amount');
+        $credits = Money::sumMinor((clone $query)->where('direction', 'credit'));
+        $debits = Money::sumMinor((clone $query)->where('direction', 'debit'));
 
-        $debits = (float) (clone $query)
-            ->where('direction', 'debit')
-            ->sum('amount');
-
-        return
-            (float) $fund->opening_balance
-            + $credits
-            - $debits;
+        return Money::decimal(Money::add(Money::minor($fund->opening_balance), Money::add($credits, -$debits)));
     }
 
-    /**
-     * Get the balance after a transaction.
-     */
-    public function balanceAfterTransaction(
-        Transaction $transaction
-    ): float {
-        $before = $this->balanceBeforeTransaction($transaction);
+    /** Get the balance after a transaction without rounding through floats. */
+    public function balanceAfterTransaction(Transaction $transaction): string
+    {
+        $before = Money::minor($this->balanceBeforeTransaction($transaction));
+        $movement = ! $transaction->trashed() && $transaction->status === 'posted' ? Money::minor($transaction->amount) : 0;
 
-        if ($transaction->status !== 'posted') {
-            return $before;
-        }
-
-        if ($transaction->direction === 'credit') {
-            return $before + (float) $transaction->amount;
-        }
-
-        if ($transaction->direction === 'debit') {
-            return $before - (float) $transaction->amount;
-        }
-
-        return $before;
+        return Money::decimal(Money::add($before, match ($transaction->direction) {
+            'credit' => $movement,
+            'debit' => -$movement,
+            default => 0,
+        }));
     }
 
     /**

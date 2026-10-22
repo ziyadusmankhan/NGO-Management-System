@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Welfare;
 
+use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,7 +15,22 @@ class UpdateWelfareAssistanceRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $administrative = [
+            'application_id' => ['missing'],
+            'status' => ['missing'],
+            'approved_by' => ['missing'],
+            'approved_at' => ['missing'],
+            'assistance_number' => ['missing'],
+            'next_review_date' => ['nullable', 'date'],
+            'internal_notes' => ['nullable', 'string', 'max:5000'],
+            'notes' => ['nullable', 'string', 'max:5000'],
+        ];
+
+        if ($this->route('assistance')->application_id !== null) {
+            return array_merge(array_fill_keys(WelfareAssistance::INHERITED_FIELDS, ['missing']), $administrative);
+        }
+
+        return array_merge([
             'beneficiary_id' => [
                 'required',
                 'integer',
@@ -42,6 +58,7 @@ class UpdateWelfareAssistanceRequest extends FormRequest
             'amount' => [
                 'required',
                 'numeric',
+                'regex:/^\d{1,13}(\.\d{1,2})?$/',
                 'min:0.01',
                 'max:999999999999.99',
             ],
@@ -95,6 +112,6 @@ class UpdateWelfareAssistanceRequest extends FormRequest
                 'string',
                 'max:5000',
             ],
-        ];
+        ], $administrative);
     }
 }

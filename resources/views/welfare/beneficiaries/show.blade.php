@@ -459,7 +459,7 @@
             $date = $assistance->start_date ?? $assistance->created_at;
             return $date && $date->year === now()->year;
         })
-        ->sum(fn ($assistance) => (float) $assistance->amount);
+        ->reduce(fn ($total, $assistance) => \App\Domain\Finance\Support\Money::total([$total, $assistance->amount]), '0.00');
 
     $verifications = $beneficiary->verifications
         ->sortByDesc(fn ($verification) => $verification->verification_date ?? $verification->created_at);
@@ -635,7 +635,7 @@
                         <label>Monthly Income</label>
                         <strong>
                             {{ $beneficiary->monthly_income !== null
-                                ? 'PKR ' . number_format((float) $beneficiary->monthly_income, 2)
+                                ? 'PKR ' . \App\Domain\Finance\Support\Money::format($beneficiary->monthly_income)
                                 : '—'
                             }}
                         </strong>
@@ -730,7 +730,7 @@
 
                         <div class="assistance-amount">
                             {{ $assistance->amount !== null
-                                ? 'PKR ' . number_format((float) $assistance->amount, 2)
+                                ? 'PKR ' . \App\Domain\Finance\Support\Money::format($assistance->amount)
                                 : '—'
                             }}
                         </div>
@@ -1086,7 +1086,7 @@
                 <div class="side-stat">
 
                     <div class="side-number">
-                        PKR {{ number_format((float) $assistanceThisYear, 2) }}
+                        PKR {{ \App\Domain\Finance\Support\Money::format($assistanceThisYear) }}
                     </div>
 
                     <div class="side-label">

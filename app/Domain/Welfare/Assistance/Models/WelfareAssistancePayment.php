@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class WelfareAssistancePayment extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Domain\Finance\Support\ReadsDecimalMoney;
 
     protected $fillable = [
         'payment_number',

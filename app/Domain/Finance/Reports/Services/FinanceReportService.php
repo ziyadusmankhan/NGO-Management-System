@@ -2,6 +2,7 @@
 
 namespace App\Domain\Finance\Reports\Services;
 
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
 use App\Domain\Finance\Transactions\Models\Transaction;
@@ -42,59 +43,25 @@ class FinanceReportService
             );
         }
 
-        $credits = (float) (clone $transactionQuery)
-            ->where('direction', 'credit')
-            ->sum('amount');
-
-        $debits = (float) (clone $transactionQuery)
-            ->where('direction', 'debit')
-            ->sum('amount');
-
+        $credits = Money::sum((clone $transactionQuery)->where('direction', 'credit'));
+        $debits = Money::sum((clone $transactionQuery)->where('direction', 'debit'));
         $transactionCount = (clone $transactionQuery)->count();
 
-        if ($fundId) {
-            $fund = Fund::find($fundId);
-
-            $openingBalance = $fund
-                ? (float) $fund->opening_balance
-                : 0.0;
-
-            $currentBalance = $fund
-                ? $this->balanceService->balance($fund)
-                : 0.0;
-        } else {
-            $activeFunds = Fund::query()
-                ->where('status', 'active')
-                ->get();
-
-            $openingBalance = $activeFunds->sum(
-                fn (Fund $fund) =>
-                    (float) $fund->opening_balance
-            );
-
-            $currentBalance = $activeFunds->sum(
-                fn (Fund $fund) =>
-                    $this->balanceService->balance($fund)
-            );
-        }
-
-        $restrictedBalance = Fund::query()
-            ->where('status', 'active')
-            ->whereIn('type', [
-                'restricted',
-                'designated',
-            ])
-            ->get()
-            ->sum(
-                fn (Fund $fund) =>
-                    $this->balanceService->balance($fund)
-            );
+        $funds = Fund::query()->when($fundId,
+            fn ($query) => $query->whereKey($fundId),
+            fn ($query) => $query->where('status', 'active')
+        )->get();
+        $openingBalance = Money::total($funds->map(fn (Fund $fund) => $fund->opening_balance));
+        $currentBalance = Money::total($funds->map(fn (Fund $fund) => $this->balanceService->balance($fund)));
+        $restrictedBalance = Money::total(Fund::query()->where('status', 'active')
+            ->whereIn('type', ['restricted', 'designated'])->get()
+            ->map(fn (Fund $fund) => $this->balanceService->balance($fund)));
 
         return [
             'opening_balance' => $openingBalance,
             'total_credits' => $credits,
             'total_debits' => $debits,
-            'net_movement' => $credits - $debits,
+            'net_movement' => Money::decimal(Money::add(Money::minor($credits), -Money::minor($debits))),
             'current_balance' => $currentBalance,
             'restricted_balance' => $restrictedBalance,
             'transaction_count' => $transactionCount,

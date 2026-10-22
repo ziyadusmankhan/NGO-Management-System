@@ -4,542 +4,45 @@
 
 @push('styles')
 <style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:22px;
+    .page-header { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:22px; }
+    .identity { display:flex; align-items:center; gap:14px; }
+    .icon-box { width:62px; height:62px; border-radius:17px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+    .title { font-size:23px; font-weight:700; letter-spacing:-.4px; }
+    .meta { margin-top:4px; color:#6e7773; font-size:15px; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .ui-btn { height:39px; padding:0 12px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid var(--border); background:#fff; color:#65726c; font-size:15px; font-weight:650; text-decoration:none; cursor:pointer; }
+    .ui-btn.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:18px; }
+    .card-head { padding:16px 19px; border-bottom:1px solid #eef1ef; display:flex; justify-content:space-between; align-items:center; gap:15px; }
+    .card-head strong { font-size:16px; }
+    .card-head span { display:block; margin-top:4px; color:#6c7470; font-size:14px; }
+    .card-body { padding:18px 19px; }
+    .status, .restricted { padding:5px 8px; border-radius:20px; font-size:13px; font-weight:650; white-space:nowrap; }
+    .status { background:#edf7f0; color:#397955; }
+    .restricted { background:#f1eef7; color:#77668c; }
+    .summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .summary-box { padding:13px; background:#fafcfb; border:1px solid #edf1ee; border-radius:10px; }
+    .summary-box.highlight { background:var(--primary-soft); border-color:#6f7673; }
+    .summary-box label { display:block; color:#6d7571; font-size:13px; text-transform:uppercase; letter-spacing:.5px; }
+    .summary-box strong { display:block; margin-top:5px; font-size:16px; overflow-wrap:anywhere; }
+    .summary-box.highlight strong { color:var(--primary); }
+    .table-wrap { overflow-x:auto; }
+    .transaction-table { width:100%; min-width:850px; border-collapse:collapse; }
+    .transaction-table th { padding:10px 12px; background:#fafcfb; border-bottom:1px solid #eef1ef; color:#6c7470; font-size:13px; text-transform:uppercase; letter-spacing:.5px; text-align:left; white-space:nowrap; }
+    .transaction-table td { padding:12px; border-bottom:1px solid #f0f3f1; font-size:14px; vertical-align:middle; }
+    .transaction-table tr:last-child td { border-bottom:none; }
+    @media(max-width:900px) {
+        .page-header { flex-direction:column; }
+        .summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
     }
-
-    .identity {
-        display:flex;
-        align-items:center;
-        gap:14px;
-    }
-
-    .icon-box {
-        width:62px;
-        height:62px;
-        border-radius:17px;
-        background:var(--primary-soft);
-        color:var(--primary);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size: 22px;
-    }
-
-    .title {
-        font-size: 23px;
-        font-weight:700;
-        letter-spacing:-.4px;
-    }
-
-    .meta {
-        margin-top:4px;
-        color: #6e7773;
-        font-size: 15px;
-    }
-
-    .actions {
-        display:flex;
-        gap:8px;
-        flex-wrap:wrap;
-    }
-
-    .ui-btn {
-        height:39px;
-        padding:0 12px;
-        border-radius:9px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        border:1px solid var(--border);
-        background:#fff;
-        color:#65726c;
-        font-size: 15px;
-        font-weight:650;
-        text-decoration:none;
-        cursor:pointer;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .layout {
-        display:grid;
-        grid-template-columns:minmax(0,1fr) 300px;
-        gap:18px;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-        margin-bottom:18px;
-    }
-
-    .card-head {
-        padding:16px 19px;
-        border-bottom:1px solid #eef1ef;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:15px;
-    }
-
-    .card-head strong {
-        font-size: 16px;
-    }
-
-    .card-head span {
-        display:block;
-        margin-top:4px;
-        color: #6c7470;
-        font-size: 14px;
-    }
-
-    .card-body {
-        padding:18px 19px;
-    }
-
-    .status {
-        display:inline-flex;
-        align-items:center;
-        gap:5px;
-        padding:5px 8px;
-        border-radius:20px;
-        background:#edf7f0;
-        color:#397955;
-        font-size: 13px;
-        font-weight:650;
-    }
-
-    .status::before {
-        content:"";
-        width:5px;
-        height:5px;
-        border-radius:50%;
-        background:#4c9a6c;
-    }
-
-    .restricted {
-        display:inline-flex;
-        align-items:center;
-        padding:5px 8px;
-        border-radius:20px;
-        background:#f1eef7;
-        color:#77668c;
-        font-size: 13px;
-        font-weight:650;
-    }
-
-    /* SUMMARY */
-
-    .summary-grid {
-        display:grid;
-        grid-template-columns:repeat(4,minmax(0,1fr));
-        gap:10px;
-    }
-
-    .summary-box {
-        padding:13px;
-        background:#fafcfb;
-        border:1px solid #edf1ee;
-        border-radius:10px;
-    }
-
-    .summary-box.highlight {
-        background:var(--primary-soft);
-        border-color: #6f7673;
-    }
-
-    .summary-box label {
-        display:block;
-        color: #6d7571;
-        font-size: 13px;
-        text-transform:uppercase;
-        letter-spacing:.5px;
-    }
-
-    .summary-box strong {
-        display:block;
-        margin-top:5px;
-        font-size: 16px;
-    }
-
-    .summary-box.highlight strong {
-        color:var(--primary);
-    }
-
-    /* FUND HEADER */
-
-    .fund-intro {
-        display:flex;
-        gap:13px;
-        align-items:center;
-    }
-
-    .fund-icon {
-        width:46px;
-        height:46px;
-        border-radius:12px;
-        background:var(--primary-soft);
-        color:var(--primary);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size: 18px;
-    }
-
-    .fund-name {
-        font-size: 16px;
-        font-weight:700;
-    }
-
-    .fund-description {
-        margin-top:3px;
-        color: #6c7470;
-        font-size: 13px;
-    }
-
-    /* BALANCE */
-
-    .balance-banner {
-        padding:18px;
-        background:linear-gradient(145deg,#f8faf9,#f2f6f4);
-        border:1px solid var(--border);
-        border-radius:12px;
-    }
-
-    .balance-label {
-        color: #6e7772;
-        font-size: 14px;
-        text-transform:uppercase;
-        letter-spacing:.7px;
-    }
-
-    .balance-value {
-        margin-top:6px;
-        color:var(--primary);
-        font-size: 30px;
-        font-weight:700;
-    }
-
-    .balance-sub {
-        margin-top:4px;
-        color: #6d7570;
-        font-size: 13px;
-    }
-
-    /* BARS */
-
-    .bar-row {
-        margin-bottom:16px;
-    }
-
-    .bar-row:last-child {
-        margin-bottom:0;
-    }
-
-    .bar-top {
-        display:flex;
-        justify-content:space-between;
-        gap:10px;
-        font-size: 14px;
-    }
-
-    .bar-top span:first-child {
-        color: #6b7671;
-    }
-
-    .bar-top span:last-child {
-        color:#4a5750;
-        font-weight:650;
-    }
-
-    .bar {
-        height:7px;
-        margin-top:7px;
-        background:#edf1ee;
-        border-radius:20px;
-        overflow:hidden;
-    }
-
-    .bar span {
-        display:block;
-        height:100%;
-        background:var(--primary);
-        border-radius:20px;
-    }
-
-    /* TABLE */
-
-    .table-wrap {
-        overflow-x:auto;
-    }
-
-    .transaction-table {
-        width:100%;
-        min-width:850px;
-        border-collapse:collapse;
-    }
-
-    .transaction-table th {
-        padding:10px 12px;
-        background:#fafcfb;
-        border-bottom:1px solid #eef1ef;
-        color: #6c7470;
-        font-size: 13px;
-        text-transform:uppercase;
-        letter-spacing:.5px;
-        text-align:left;
-        white-space:nowrap;
-    }
-
-    .transaction-table td {
-        padding:12px;
-        border-bottom:1px solid #f0f3f1;
-        font-size: 14px;
-        vertical-align:middle;
-    }
-
-    .transaction-table tr:last-child td {
-        border-bottom:none;
-    }
-
-    .credit {
-        color:#397955;
-        font-weight:650;
-    }
-
-    .debit {
-        color:#a85f58;
-        font-weight:650;
-    }
-
-    .neutral {
-        color:#6d7973;
-        font-weight:650;
-    }
-
-    .transaction-type {
-        display:inline-flex;
-        padding:5px 8px;
-        border-radius:20px;
-        font-size: 13px;
-        font-weight:650;
-    }
-
-    .transaction-type.donation {
-        background:#edf7f0;
-        color:#397955;
-    }
-
-    .transaction-type.expense {
-        background:#fff0ef;
-        color:#a85f58;
-    }
-
-    .transaction-type.allocation {
-        background:#f1eef7;
-        color:#77668c;
-    }
-
-    .transaction-type.recovery {
-        background:#eef3f8;
-        color:#55758d;
-    }
-
-    /* TRACE */
-
-    .trace {
-        display:flex;
-        align-items:center;
-        overflow-x:auto;
-        padding:4px 0;
-    }
-
-    .trace-step {
-        min-width:125px;
-        text-align:center;
-    }
-
-    .trace-icon {
-        width:37px;
-        height:37px;
-        margin:0 auto 7px;
-        border-radius:10px;
-        background:var(--primary-soft);
-        color:var(--primary);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-    }
-
-    .trace-step strong {
-        display:block;
-        font-size: 13px;
-    }
-
-    .trace-step span {
-        display:block;
-        margin-top:3px;
-        color: #6c7470;
-        font-size: 12px;
-    }
-
-    .trace-arrow {
-        min-width:25px;
-        color: #6e7471;
-        text-align:center;
-    }
-
-    /* TIMELINE */
-
-    .timeline-item {
-        display:flex;
-        gap:11px;
-        padding-bottom:18px;
-        position:relative;
-    }
-
-    .timeline-item:last-child {
-        padding-bottom:0;
-    }
-
-    .timeline-dot {
-        width:9px;
-        height:9px;
-        margin-top:4px;
-        border-radius:50%;
-        background:var(--primary);
-        flex-shrink:0;
-        position:relative;
-    }
-
-    .timeline-item:not(:last-child) .timeline-dot::after {
-        content:"";
-        position:absolute;
-        width:1px;
-        height:29px;
-        left:4px;
-        top:9px;
-        background:#dae3df;
-    }
-
-    .timeline-title {
-        font-size: 15px;
-        font-weight:650;
-    }
-
-    .timeline-meta {
-        margin-top:3px;
-        color: #6c7470;
-        font-size: 13px;
-    }
-
-    .timeline-note {
-        margin-top:6px;
-        color: #6b766f;
-        font-size: 13px;
-        line-height:1.5;
-    }
-
-    /* SIDEBAR */
-
-    .side-number {
-        text-align:center;
-        font-size: 30px;
-        font-weight:700;
-        color:var(--primary);
-    }
-
-    .side-label {
-        text-align:center;
-        margin-top:3px;
-        color: #6e7772;
-        font-size: 14px;
-    }
-
-    .side-row {
-        display:flex;
-        justify-content:space-between;
-        gap:10px;
-        padding:9px 0;
-        border-bottom:1px solid #f0f3f1;
-        font-size: 14px;
-    }
-
-    .side-row:last-child {
-        border-bottom:none;
-    }
-
-    .side-row span:first-child {
-        color: #6d7571;
-    }
-
-    .side-row span:last-child {
-        color:#4a5750;
-        font-weight:650;
-        text-align:right;
-    }
-
-    .notice {
-        display:flex;
-        gap:9px;
-        padding:12px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
-        border-radius:10px;
-    }
-
-    .notice i {
-        color:var(--primary);
-        font-size: 16px;
-    }
-
-    .notice p {
-        margin:0;
-        color: #6b766f;
-        font-size: 13px;
-        line-height:1.6;
-    }
-
-    @media(max-width:950px) {
-        .layout {
-            grid-template-columns:1fr;
-        }
-    }
-
-    @media(max-width:700px) {
-        .page-header {
-            flex-direction:column;
-        }
-
-        .actions {
-            width:100%;
-        }
-
-        .actions .ui-btn {
-            flex:1;
-        }
-
-        .summary-grid {
-            grid-template-columns:repeat(2,1fr);
-        }
-    }
-
     @media(max-width:450px) {
-        .summary-grid {
-            grid-template-columns:1fr;
-        }
+        .summary-grid { grid-template-columns:1fr; }
+        .card-head { align-items:flex-start; flex-direction:column; }
+    }
+    @media print {
+        .actions { display:none; }
+        .table-wrap { overflow:visible; }
+        .transaction-table { min-width:0; }
     }
 </style>
 @endpush
@@ -547,1081 +50,193 @@
 
 @section('content')
 @php
-    $typeLabel = match ($fund->type) {
-        'general' => 'General',
-        'restricted' => 'Restricted',
-        'designated' => 'Designated',
-        default => ucfirst($fund->type),
-    };
-
-    $purposeLabel = match ($fund->purpose) {
-        'general_welfare' => 'General Welfare',
-        'small_business' => 'Small Business Assistance',
-        'qard' => 'Qard-e-Hasana',
-        'education' => 'Education Support',
-        'emergency' => 'Emergency Assistance',
-        'community_development' => 'Community Development',
-        default => ucfirst(
-            str_replace('_', ' ', $fund->purpose)
-        ),
-    };
-
-    $utilization = $received > 0
-        ? round(
-            (($spent + $allocated) / $received) * 100
-        )
-        : 0;
-
-    $availablePercentage = max(
-        0,
-        min(100, 100 - $utilization)
-    );
+    $restricted = app(\App\Domain\Finance\Funds\Services\FundPurposeService::class)->isRestricted($fund);
+    $money = fn ($value) => \App\Domain\Finance\Support\Money::format($value);
 @endphp
 
 <div class="page-header">
-
     <div class="identity">
-
-        <div class="icon-box">
-            <i class="bi bi-wallet2"></i>
-        </div>
-
+        <div class="icon-box"><i class="bi bi-wallet2"></i></div>
         <div>
-
-            <div class="title">
-                {{ $fund->name }}
-            </div>
-
-
-            <div class="meta">
-                {{ $fund->fund_reference }}
-                ·
-                {{ $purposeLabel }}
-                ·
-                {{ ucfirst($fund->status) }}
-            </div>
-
+            <div class="title">{{ $fund->name }}</div>
+            <div class="meta">{{ $fund->fund_reference }} · {{ \Illuminate\Support\Str::headline($fund->purpose) }} · {{ $fund->trashed() ? 'Archived' : ucfirst($fund->status) }}</div>
         </div>
-
     </div>
-
     <div class="actions">
-
-        @if(auth()->user()->hasPermission('finance.funds.manage'))
-
-            <form
-                method="POST"
-                action="{{ route('finance.funds.destroy', $fund) }}"
-                onsubmit="return confirm(
-                    'Are you sure you want to archive this fund? The fund will be removed from the active list but retained in system history.'
-                )"
-                style="display:inline;"
-            >
+        <a href="{{ route('finance.funds.index') }}" class="ui-btn">Back</a>
+        <button type="button" class="ui-btn" onclick="window.print()">Print</button>
+        @if(! $fund->trashed() && auth()->user()->hasPermission('finance.funds.manage'))
+            <a href="{{ route('finance.funds.edit', $fund) }}" class="ui-btn primary">Edit Fund</a>
+            <form method="POST" action="{{ route('finance.funds.destroy', $fund) }}" onsubmit="return confirm('Archive this fund? Its financial history will be retained.');">
                 @csrf
                 @method('DELETE')
-
-                <button
-                    type="submit"
-                    class="ui-btn"
-                    style="
-                        color:#a85f58;
-                        border-color:#ead8d5;
-                    "
-                >
-                    <i class="bi bi-archive"></i>
-                    Archive
-                </button>
+                <button type="submit" class="ui-btn">Archive</button>
             </form>
-
         @endif
-
-        <a
-            href="{{ route('finance.funds.index') }}"
-            class="ui-btn"
-        >
-            <i class="bi bi-arrow-left"></i>
-            Back
-        </a>
-
-        <button
-            class="ui-btn"
-            onclick="window.print()"
-        >
-            <i class="bi bi-printer"></i>
-            Print
-        </button>
-
-        @if(auth()->user()->hasPermission('finance.funds.manage'))
-
-            <a
-                href="{{ route('finance.funds.edit', $fund) }}"
-                class="ui-btn primary"
-            >
-                <i class="bi bi-pencil"></i>
-                Edit Fund
-            </a>
-
-        @endif
-
     </div>
-
 </div>
 
+@if(session('success'))
+    <div class="alert alert-success" role="status">{{ session('success') }}</div>
+@endif
+@if($errors->any())
+    <div class="alert alert-danger" role="alert"><ul class="mb-0">
+        @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+    </ul></div>
+@endif
 
-<div class="layout">
-
-    <div>
-
-        <!-- FUND OVERVIEW -->
-
-        <div class="card">
-
-            <div class="card-head">
-
-                <div class="fund-intro">
-
-                    <div class="fund-icon">
-                        <i class="bi bi-wallet2"></i>
-                    </div>
-
-                    <div>
-
-                        <div class="fund-name">
-                            {{ $fund->name }}
-                        </div>
-
-                        <div class="fund-description">
-                            {{ $fund->description ?: 'No description provided.' }}
-                        </div>
-
-                    </div>
-
+<div class="card">
+    <div class="card-head">
+        <div><strong>Fund Overview</strong><span>{{ $fund->description ?: 'No description provided.' }}</span></div>
+        <span class="{{ $restricted ? 'restricted' : 'status' }}">{{ $restricted ? 'Purpose restricted' : 'General use' }}</span>
+    </div>
+    <div class="card-body">
+        <div class="summary-grid">
+            @foreach([
+                'balance' => 'Current Ledger Balance',
+                'original_received' => 'Original Funding (Opening + Receipts)',
+                'received' => 'New Receipts',
+                'spent' => 'Spent',
+                'allocated' => 'Allocated — Unpaid Approvals',
+                'available' => 'Available After Allocations',
+                'recovered' => 'Recoveries Received',
+                'refunded' => 'Refunds Returned to Fund',
+                'refunds_paid' => 'Refunds Paid Out',
+            ] as $key => $label)
+                <div class="summary-box {{ $key === 'balance' ? 'highlight' : '' }}">
+                    <label>{{ $label }}</label>
+                    <strong data-fund-total="{{ $key }}">PKR {{ $money($summary[$key]) }}</strong>
                 </div>
-
-                <span class="status">
-                    {{ ucfirst($fund->status) }}
-                </span>
-
-            </div>
-
-            <div class="card-body">
-
-                <div class="summary-grid">
-
-                    <div class="summary-box highlight">
-                        <label>Current Balance</label>
-                        <strong>
-                            PKR {{ number_format($balance, 0) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Total Received</label>
-                        <strong>
-                            PKR {{ number_format($received, 0) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Total Spent</label>
-                        <strong>
-                            PKR {{ number_format($spent, 0) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Allocated</label>
-                        <strong>
-                            PKR {{ number_format($allocated, 0) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Recovered</label>
-                        <strong>
-                            PKR {{ number_format($recovered, 0) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Refunded</label>
-                        <strong>
-                            PKR {{ number_format($refunded, 0) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Fund Type</label>
-                        <strong>
-                            {{ $typeLabel }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Fund Reference</label>
-                        <strong>
-                            {{ $fund->fund_reference }}
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
+            @endforeach
         </div>
-
-
-        <!-- BALANCE -->
-
-        <div class="card">
-
-            <div class="card-head">
-
-                <div>
-                    <strong>Balance Position</strong>
-
-                    <span>
-                        Current movement and utilization of fund resources.
-                    </span>
-                </div>
-
-            </div>
-
-            <div class="card-body">
-
-                <div class="balance-banner">
-
-                    <div class="balance-label">
-                        Available Balance
-                    </div>
-
-                    <div class="balance-value">
-                        PKR {{ number_format($balance, 0) }}
-                    </div>
-
-                    <div class="balance-sub">
-                        Total received PKR {{ number_format($received, 0) }}
-                        ·
-                        Total spent PKR {{ number_format($spent, 0) }}
-                    </div>
-
-                </div>
-
-                <div style="margin-top:18px;">
-
-                    <div class="bar-row">
-
-                        <div class="bar-top">
-
-                            <span>
-                                Fund Utilization
-                            </span>
-
-                            <span style="width:{{ $utilization }}%">{{ $utilization }}%</span>
-
-                        </div>
-
-                        <div class="bar">
-                            <span style="width:{{ $utilization }}%"></span>
-                        </div>
-
-                    </div>
-
-
-                    <div class="bar-row">
-
-                        <div class="bar-top">
-
-                            <span>
-                                Available
-                            </span>
-
-                            <span style="width:{{ $availablePercentage }}%">{{ $availablePercentage }}%</span>
-
-                        </div>
-
-                        <div class="bar">
-                            <span style="width:{{ $availablePercentage }}%"></span>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- FUND INFORMATION -->
-
-        <div class="card">
-
-            <div class="card-head">
-
-                <div>
-                    <strong>Fund Information</strong>
-
-                    <span>
-                        Purpose and administrative configuration.
-                    </span>
-                </div>
-
-            </div>
-
-            <div class="card-body">
-
-                <div class="summary-grid">
-
-                    <div class="summary-box">
-                        <label>Primary Purpose</label>
-                        <strong>
-                            {{ $purposeLabel }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Fund Type</label>
-                        <strong>
-                            {{ $typeLabel }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Status</label>
-                        <strong>
-                            {{ ucfirst($fund->status) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Responsible Authority</label>
-                        <strong>
-                            {{ $fund->responsible_authority ?: '—' }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Created</label>
-                        <strong>
-                            {{ $fund->created_at->format('d M Y') }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Last Updated</label>
-                        <strong>
-                            {{ $fund->updated_at->format('d M Y') }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Opening Balance</label>
-                        <strong>
-                            PKR {{ number_format($fund->opening_balance, 0) }}
-                        </strong>
-                    </div>
-
-                    <div class="summary-box">
-                        <label>Current Balance</label>
-                        <strong>
-                            PKR {{ number_format($balance, 0) }}
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- FINANCIAL TRANSACTIONS -->
-
-        <!-- FINANCIAL TRANSACTIONS -->
-
-            <div class="card">
-
-                <div class="card-head">
-
-                    <div>
-                        <strong>Financial Transactions</strong>
-
-                        <span>
-                            Complete posted and voided financial activity recorded for this fund.
-                        </span>
-                    </div>
-
-                    <a
-                        href="{{ route('finance.transactions.index', ['fund_id' => $fund->id]) }}"
-                        class="ui-btn"
-                    >
-                        <i class="bi bi-list-ul"></i>
-                        View All
-                    </a>
-
-                </div>
-
-                <div class="card-body" style="padding:0;">
-
-                    <div class="table-wrap">
-
-                        <table class="transaction-table">
-
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Reference</th>
-                                    <th>Type</th>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Balance</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                {{-- Opening Balance --}}
-
-                                <tr>
-
-                                    <td>
-                                        {{ $fund->opening_balance_date
-                                            ? $fund->opening_balance_date->format('d M Y')
-                                            : $fund->created_at->format('d M Y')
-                                        }}
-                                    </td>
-
-                                    <td>
-                                        {{ $fund->fund_reference }}
-                                    </td>
-
-                                    <td>
-                                        <span class="transaction-type allocation">
-                                            Opening
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        Fund opening balance
-                                    </td>
-
-                                    <td class="credit">
-                                        +
-                                        PKR {{ number_format($fund->opening_balance, 2) }}
-                                    </td>
-
-                                    <td>
-                                        <span class="status">
-                                            Active
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        PKR {{ number_format($fund->opening_balance, 2) }}
-                                    </td>
-
-                                </tr>
-
-
-                                @forelse($transactions as $transaction)
-
-                                    <tr>
-
-                                        <td>
-                                            {{ $transaction->transaction_date->format('d M Y') }}
-                                        </td>
-
-                                        <td>
-
-                                            <a
-                                                href="{{ route(
-                                                    'finance.transactions.show',
-                                                    $transaction
-                                                ) }}"
-                                                style="
-                                                    color:var(--primary);
-                                                    text-decoration:none;
-                                                    font-weight:650;
-                                                "
-                                            >
-                                                {{ $transaction->transaction_number }}
-                                            </a>
-
-                                            @if($transaction->reference)
-                                                <div style="
-                                                    margin-top:3px;
-                                                    color:#929b96;
-                                                    font-size:11px;
-                                                ">
-                                                    {{ $transaction->reference }}
-                                                </div>
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            <span class="transaction-type {{ $transaction->type }}">
-                                                {{ ucfirst($transaction->type) }}
-                                            </span>
-
-                                        </td>
-
-                                        <td>
-
-                                            {{ $transaction->description }}
-
-                                        </td>
-
-                                        <td class="
-                                            {{ $transaction->direction === 'credit'
-                                                ? 'credit'
-                                                : ($transaction->direction === 'debit'
-                                                    ? 'debit'
-                                                    : 'neutral')
-                                            }}
-                                        ">
-
-                                            @if($transaction->direction === 'credit')
-                                                +
-                                            @elseif($transaction->direction === 'debit')
-                                                -
-                                            @endif
-
-                                            PKR {{ number_format($transaction->amount, 2) }}
-
-                                        </td>
-
-                                        <td>
-
-                                            @if($transaction->status === 'posted')
-
-                                                <span class="status">
-                                                    Posted
-                                                </span>
-
-                                            @elseif($transaction->status === 'void')
-
-                                                <span
-                                                    class="restricted"
-                                                    style="
-                                                        background:#fff1ef;
-                                                        color:#a85f58;
-                                                    "
-                                                >
-                                                    Void
-                                                </span>
-
-                                            @else
-
-                                                <span class="restricted">
-                                                    {{ ucfirst($transaction->status) }}
-                                                </span>
-
-                                            @endif
-
-                                        </td>
-
-                                        <td>
-
-                                            @if($transaction->status === 'posted')
-
-                                                PKR
-                                                {{ number_format(
-                                                    $transaction->running_balance,
-                                                    2
-                                                ) }}
-
-                                            @else
-
-                                                <span class="neutral">
-                                                    —
-
-                                                </span>
-
-                                            @endif
-
-                                        </td>
-
-                                    </tr>
-
-                                @empty
-
-                                    <tr>
-
-                                        <td
-                                            colspan="7"
-                                            style="
-                                                text-align:center;
-                                                padding:30px;
-                                                color:#7a847f;
-                                            "
-                                        >
-                                            No financial transactions have been recorded
-                                            for this fund yet.
-
-                                        </td>
-
-                                    </tr>
-
-                                @endforelse
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        <!-- FUND TRACE -->
-
-        <!-- FUND TRACE -->
-
-        <div class="card">
-
-            <div class="card-head">
-
-                <div>
-                    <strong>Fund Traceability</strong>
-
-                    <span>
-                        Follow financial activity from source records through the ledger to reporting.
-                    </span>
-                </div>
-
-            </div>
-
-            <div class="card-body">
-
-                @php
-                    $sourceRecords =
-                        $fund->donations()->count()
-                        + $fund->expenses()->count();
-
-                    $postedTransactions = $transactions
-                        ->where('status', 'posted')
-                        ->count();
-
-                    $ledgerTransactions = $transactions->count();
-                @endphp
-
-                <div class="trace">
-
-                    <div class="trace-step">
-
-                        <div class="trace-icon">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </div>
-
-                        <strong>
-                            Source Records
-                        </strong>
-
-                        <span>
-                            {{ $sourceRecords }} recorded
-                        </span>
-
-                    </div>
-
-
-                    <div class="trace-arrow">
-                        <i class="bi bi-arrow-right"></i>
-                    </div>
-
-
-                    <div class="trace-step">
-
-                        <div class="trace-icon">
-                            <i class="bi bi-journal-text"></i>
-                        </div>
-
-                        <strong>
-                            Ledger
-                        </strong>
-
-                        <span>
-                            {{ $postedTransactions }} posted
-                        </span>
-
-                    </div>
-
-
-                    <div class="trace-arrow">
-                        <i class="bi bi-arrow-right"></i>
-                    </div>
-
-
-                    <div class="trace-step">
-
-                        <div class="trace-icon">
-                            <i class="bi bi-wallet2"></i>
-                        </div>
-
-                        <strong>
-                            Fund Balance
-                        </strong>
-
-                        <span>
-                            PKR {{ number_format($balance, 0) }}
-                        </span>
-
-                    </div>
-
-
-                    <div class="trace-arrow">
-                        <i class="bi bi-arrow-right"></i>
-                    </div>
-
-
-                    <div class="trace-step">
-
-                        <div class="trace-icon">
-                            <i class="bi bi-shield-check"></i>
-                        </div>
-
-                        <strong>
-                            Audit Trail
-                        </strong>
-
-                        <span>
-                            {{ $ledgerTransactions }} transactions
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ACTIVITY -->
-
-        <!-- ACTIVITY -->
-
-        <div class="card">
-
-            <div class="card-head">
-
-                <div>
-                    <strong>Fund Activity</strong>
-
-                    <span>
-                        Recent ledger movements and important fund events.
-                    </span>
-                </div>
-
-                <a
-                    href="{{ route('finance.transactions.index', ['fund_id' => $fund->id]) }}"
-                    class="ui-btn"
-                >
-                    <i class="bi bi-journal-text"></i>
-                    View Ledger
-                </a>
-
-            </div>
-
-            <div class="card-body">
-
-                {{-- Fund creation --}}
-
-                <div class="timeline-item">
-
-                    <div class="timeline-dot"></div>
-
-                    <div>
-
-                        <div class="timeline-title">
-                            Fund created
-                        </div>
-
-                        <div class="timeline-meta">
-                            {{ $fund->created_at->format('d M Y, h:i A') }}
-                        </div>
-
-                        <div class="timeline-note">
-                            {{ $fund->name }}
-                            was created with an opening balance of
-                            PKR {{ number_format($fund->opening_balance, 2) }}.
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- Recent financial transactions --}}
-
-                @forelse($recentTransactions as $transaction)
-
-                    <div class="timeline-item">
-
-                        <div class="timeline-dot"></div>
-
-                        <div style="width:100%;">
-
-                            <div class="timeline-title">
-
-                                @if($transaction->status === 'void')
-                                    Transaction voided
+        <p class="text-muted mt-3 mb-0">
+            Opening PKR {{ $money($summary['opening_balance']) }} + new receipts + recoveries + refunds returned − spending − refunds paid out = ledger balance.
+            Allocations include unpaid approved welfare assistance and undisbursed approved Qard principal; they are commitments, not additional ledger debits.
+            Available after allocations = ledger balance − allocations. Recoveries and refunds are included once.
+        </p>
+        @if(\App\Domain\Finance\Support\Money::minor($summary['available']) < 0)
+            <div class="alert alert-warning mt-3 mb-0" role="alert">Approved commitments exceed the ledger balance. The negative available amount shows the funding shortfall.</div>
+        @endif
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-head"><div><strong>Unpaid Approved Allocations</strong><span>Weekly and monthly assistance use the same total approved cap. Posted payments reduce allocations; voids restore the unpaid amount.</span></div></div>
+    <div class="table-wrap">
+        <table class="transaction-table">
+            <thead><tr><th>Assistance</th><th>Beneficiary</th><th>Approved</th><th>Paid</th><th>Outstanding</th></tr></thead>
+            <tbody>
+                @forelse($allocations as $assistance)
+                    <tr>
+                        <td>
+                            @if($assistance instanceof \App\Domain\Qard\Models\QardLoan)
+                                @if(auth()->user()->hasPermission('qard.view'))
+                                    <a href="{{ route('qard.show', $assistance) }}">{{ $assistance->number }}</a>
                                 @else
-                                    {{ ucfirst($transaction->type) }} recorded
+                                    {{ $assistance->number }}
                                 @endif
-
-                            </div>
-
-                            <div class="timeline-meta">
-
-                                {{ $transaction->transaction_date->format('d M Y') }}
-
-                                ·
-
-                                <a
-                                    href="{{ route(
-                                        'finance.transactions.show',
-                                        $transaction
-                                    ) }}"
-                                    style="
-                                        color:var(--primary);
-                                        text-decoration:none;
-                                        font-weight:650;
-                                    "
-                                >
-                                    {{ $transaction->transaction_number }}
-                                </a>
-
-                            </div>
-
-                            <div class="timeline-note">
-
-                                {{ $transaction->description }}
-
-                                ·
-
-                                <strong>
-                                    @if($transaction->direction === 'credit')
-                                        +
-                                    @elseif($transaction->direction === 'debit')
-                                        -
-                                    @endif
-
-                                    PKR {{ number_format($transaction->amount, 2) }}
-                                </strong>
-
-                                ·
-
-                                {{ ucfirst($transaction->status) }}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
+                            @elseif(auth()->user()->hasPermission('welfare.assistance.view'))
+                                <a href="{{ route('welfare.assistance.show', $assistance) }}">{{ $assistance->assistance_number }}</a>
+                            @else
+                                {{ $assistance->assistance_number }}
+                            @endif
+                        </td>
+                        <td>{{ $assistance->beneficiary?->full_name ?? 'Unavailable' }}</td>
+                        <td>PKR {{ $money($assistance->amount) }}</td>
+                        <td>PKR {{ $money($assistance->paid_amount) }}</td>
+                        <td>PKR {{ $money($assistance->outstanding_amount) }}</td>
+                    </tr>
                 @empty
-
-                    <div class="notice">
-
-                        <i class="bi bi-info-circle"></i>
-
-                        <p>
-                            No financial transactions have been recorded
-                            for this fund yet.
-                        </p>
-
-                    </div>
-
+                    <tr><td colspan="5">No unpaid approved allocations.</td></tr>
                 @endforelse
-
-
-                {{-- Fund update --}}
-
-                @if ($fund->updated_at->gt($fund->created_at))
-
-                    <div class="timeline-item">
-
-                        <div class="timeline-dot"></div>
-
-                        <div>
-
-                            <div class="timeline-title">
-                                Fund updated
-                            </div>
-
-                            <div class="timeline-meta">
-                                {{ $fund->updated_at->format('d M Y, h:i A') }}
-                            </div>
-
-                            <div class="timeline-note">
-                                Fund configuration or information was updated.
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                @endif
-
-            </div>
-
-        </div>
-
-
-        <!-- CONTROL -->
-
-        <div class="card">
-
-            <div class="card-head">
-
-                <div>
-                    <strong>Fund Controls</strong>
-
-                    <span>
-                        Current financial control configuration.
-                    </span>
-                </div>
-
-            </div>
-
-            <div class="card-body">
-
-                <div class="notice">
-
-                    <i class="bi bi-shield-check"></i>
-
-                    <p>
-                        This fund is configured with:
-
-                        @if($fund->prevent_negative_balance)
-                            negative-balance protection,
-                        @endif
-
-                        @if($fund->require_approval)
-                            approval requirements,
-                        @endif
-
-                        @if($fund->require_documents)
-                            supporting-document requirements,
-                        @endif
-
-                        @if($fund->protect_restricted_designation)
-                            restricted-designation protection
-                        @endif
-
-                        @if(
-                            !$fund->prevent_negative_balance &&
-                            !$fund->require_approval &&
-                            !$fund->require_documents &&
-                            !$fund->protect_restricted_designation
-                        )
-                            no additional financial restrictions
-                        @endif
-                        .
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
+            </tbody>
+        </table>
     </div>
-
-
-    <!-- SIDEBAR -->
-
-    <aside>
-
-        <div class="card">
-
-            <div class="card-body">
-
-                <div class="side-number">
-                    PKR {{ number_format($balance, 0) }}
-                </div>
-
-                <div class="side-label">
-                    Current Balance
-                </div>
-
-                <div style="
-                    height:1px;
-                    background:#eef1ef;
-                    margin:16px 0;
-                "></div>
-
-                <div class="side-row">
-                    <span>Fund</span>
-                    <span>{{ $fund->name }}</span>
-                </div>
-
-                <div class="side-row">
-                    <span>Type</span>
-                    <span>{{ $typeLabel }}</span>
-                </div>
-
-                <div class="side-row">
-                    <span>Status</span>
-                    <span>{{ ucfirst($fund->status) }}</span>
-                </div>
-
-                <div class="side-row">
-                    <span>Received</span>
-                    <span>
-                        PKR {{ number_format($received, 0) }}
-                    </span>
-                </div>
-
-                <div class="side-row">
-                    <span>Spent</span>
-                    <span>
-                        PKR {{ number_format($spent, 0) }}
-                    </span>
-                </div>
-
-                <div class="side-row">
-                    <span>Available</span>
-                    <span>
-                        PKR {{ number_format($balance, 0) }}
-                    </span>
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="card-head">
-                <strong>Fund Purpose</strong>
-            </div>
-
-            <div class="card-body">
-
-                <div class="notice">
-
-                    <i class="bi bi-wallet2"></i>
-
-                    <p>
-                        {{ $fund->description ?: 'No fund description has been recorded.' }}
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </aside>
-
 </div>
 
+<div class="card">
+    <div class="card-head"><div><strong>Complete Transaction History</strong><span>Ordered by transaction date, then ledger ID. Voided and archived entries remain visible and have no effect on the current balance.</span></div></div>
+    <div class="table-wrap">
+        <table class="transaction-table">
+            <thead><tr><th>Date</th><th>Ledger / Source</th><th>Type</th><th>Description / Audit</th><th>Credit</th><th>Debit</th><th>Status</th><th>Running Balance</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>{{ ($fund->opening_balance_date ?? $fund->created_at)?->format('d M Y') }}</td>
+                    <td>{{ $fund->fund_reference }}</td><td>Opening</td><td>Opening balance</td>
+                    <td>PKR {{ $money($summary['opening_balance']) }}</td><td>—</td><td>Opening</td>
+                    <td>PKR {{ $money($summary['opening_balance']) }}</td>
+                </tr>
+                @foreach($transactions as $transaction)
+                    <tr>
+                        <td>{{ $transaction->transaction_date->format('d M Y') }}</td>
+                        <td>
+                            <a href="{{ route('finance.transactions.show', $transaction) }}">{{ $transaction->transaction_number }}</a>
+                            <div>
+                                @if($transaction->source_url)
+                                    <a href="{{ $transaction->source_url }}">{{ $transaction->source_label }}</a>
+                                @else
+                                    {{ $transaction->source_label ?? $transaction->reference ?? 'Source unavailable' }}
+                                @endif
+                            </div>
+                            @if($transaction->assistance_number)<small>{{ $transaction->assistance_number }}</small>@endif
+                        </td>
+                        <td>{{ \Illuminate\Support\Str::headline($transaction->type) }}</td>
+                        <td>
+                            {{ $transaction->description }}
+                            <div class="text-muted">Recorded by {{ $transaction->recordedBy?->name ?? 'System / unavailable' }}</div>
+                            @if($transaction->void_reason)
+                                <div>Void: {{ $transaction->void_reason }}</div>
+                                <small>{{ $transaction->void_actor ?? 'Unavailable' }} · {{ $transaction->voided_at?->format('d M Y H:i') }}</small>
+                            @endif
+                        </td>
+                        <td>{{ $transaction->direction === 'credit' ? 'PKR '.$money($transaction->amount) : '—' }}</td>
+                        <td>{{ $transaction->direction === 'debit' ? 'PKR '.$money($transaction->amount) : '—' }}</td>
+                        <td>{{ $transaction->trashed() ? 'Archived' : ucfirst($transaction->status) }}{{ $transaction->affects_balance ? '' : ' (excluded)' }}</td>
+                        <td>PKR {{ $money($transaction->running_balance) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-head"><div><strong>Designation and Controls</strong><span>Spending must match the approved purpose when the fund is restricted, designated, or has spending restrictions enabled.</span></div></div>
+    <div class="card-body">
+        <p><strong>Type:</strong> {{ ucfirst($fund->type) }} · <strong>Purpose:</strong> {{ \Illuminate\Support\Str::headline($fund->purpose) }}</p>
+        <p><strong>Responsible authority:</strong> {{ $fund->responsible_authority ?: 'Not assigned' }}</p>
+        <p><strong>Usage rules:</strong> {{ $fund->usage_rules ?: 'No additional usage rules recorded.' }}</p>
+        <p><strong>Internal notes:</strong> {{ $fund->internal_notes ?: 'None' }}</p>
+        <p class="text-muted mb-0">Opening balance and designation cannot be rewritten after financial activity or linked commitments. Fund changes are recorded below.</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-head"><div><strong>Fund Change History</strong><span>Actor, time, and before/after values for changes recorded from Phase 3 onward.</span></div></div>
+    <div class="table-wrap">
+        <table class="transaction-table">
+            <thead><tr><th>When</th><th>Action</th><th>Changed By</th><th>Changes</th></tr></thead>
+            <tbody>
+                @forelse($changes as $change)
+                    <tr>
+                        <td>{{ $change->changed_at->format('d M Y H:i') }}</td>
+                        <td>{{ ucfirst($change->action) }}</td>
+                        <td>{{ $change->changedBy?->name ?? 'Unavailable' }}</td>
+                        <td>
+                            @foreach($change->after_values as $field => $value)
+                                @if(! array_key_exists($field, $change->before_values) || $change->before_values[$field] !== $value)
+                                    <div><strong>{{ \Illuminate\Support\Str::headline($field) }}:</strong>
+                                        {{ json_encode($change->before_values[$field] ?? null, JSON_UNESCAPED_UNICODE) }} → {{ json_encode($value, JSON_UNESCAPED_UNICODE) }}
+                                    </div>
+                                @endif
+                            @endforeach
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4">No fund changes recorded since audit tracking was enabled.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 @endsection

@@ -482,7 +482,7 @@
         <div class="summary-label">This Month</div>
 
         <div class="summary-value">
-            PKR {{ number_format($thisMonth, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($thisMonth) }}
         </div>
 
         <div class="summary-meta">
@@ -495,7 +495,7 @@
         <div class="summary-label">This Year</div>
 
         <div class="summary-value">
-            PKR {{ number_format($thisYear, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($thisYear) }}
         </div>
 
         <div class="summary-meta">
@@ -508,7 +508,7 @@
         <div class="summary-label">Welfare</div>
 
         <div class="summary-value">
-            PKR {{ number_format($welfare, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($welfare) }}
         </div>
 
         <div class="summary-meta">
@@ -521,7 +521,7 @@
         <div class="summary-label">Projects</div>
 
         <div class="summary-value">
-            PKR {{ number_format($projects, 0) }}
+            PKR {{ \App\Domain\Finance\Support\Money::format($projects) }}
         </div>
 
         <div class="summary-meta">
@@ -821,7 +821,7 @@
 
 
                         <td class="amount">
-                            PKR {{ number_format($expense->amount, 0) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($expense->amount) }}
                         </td>
 
 

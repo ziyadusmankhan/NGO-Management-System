@@ -12,7 +12,21 @@ use App\Domain\Finance\Expenses\Models\Expense;
 
 class Fund extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Domain\Finance\Support\ReadsDecimalMoney;
+
+    protected array $moneyColumns = ['opening_balance'];
+
+    protected $attributes = ['opening_balance' => '0.00'];
+
+    public const CONTROL_FLAGS = [
+        'restrict_spending', 'require_approval', 'require_documents', 'monitor_balance',
+        'record_transactions', 'prevent_negative_balance', 'maintain_audit_history', 'protect_restricted_designation',
+    ];
+
+    public function changes(): HasMany
+    {
+        return $this->hasMany(FundChange::class)->orderByDesc('id');
+    }
 
     
 

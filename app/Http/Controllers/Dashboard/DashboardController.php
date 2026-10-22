@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
@@ -55,13 +56,12 @@ class DashboardController extends Controller
         /*
          * Donations this month
          */
-        $donationsThisMonth = (clone $postedCredits)
+        $donationsThisMonth = Money::sum((clone $postedCredits)
             ->where('type', 'donation')
             ->whereBetween('transaction_date', [
                 now()->startOfMonth()->toDateString(),
                 now()->endOfMonth()->toDateString(),
-            ])
-            ->sum('amount');
+            ]));
 
 
         /*
@@ -93,7 +93,7 @@ class DashboardController extends Controller
         );
 
 
-        $totalFundBalance = (float) $fundBalances->sum();
+        $totalFundBalance = Money::total($fundBalances);
 
 
         /*
@@ -103,7 +103,7 @@ class DashboardController extends Controller
         $unrestrictedFundBalance = 0;
 
         foreach ($activeFunds as $fund) {
-            $balance = (float) ($fundBalances[$fund->id] ?? 0);
+            $balance = Money::minor($fundBalances[$fund->id] ?? 0);
 
             if (
                 in_array(
@@ -112,9 +112,9 @@ class DashboardController extends Controller
                     true
                 )
             ) {
-                $restrictedFundBalance += $balance;
+                $restrictedFundBalance = Money::add($restrictedFundBalance, $balance);
             } else {
-                $unrestrictedFundBalance += $balance;
+                $unrestrictedFundBalance = Money::add($unrestrictedFundBalance, $balance);
             }
         }
 
@@ -122,9 +122,11 @@ class DashboardController extends Controller
         /*
          * Total posted expenses
          */
-        $totalExpenses = (clone $postedDebits)
-            ->where('type', 'expense')
-            ->sum('amount');
+        $restrictedFundBalance = Money::decimal($restrictedFundBalance);
+        $unrestrictedFundBalance = Money::decimal($unrestrictedFundBalance);
+
+        $totalExpenses = Money::sum((clone $postedDebits)
+            ->where('type', 'expense'));
 
 
         /*
@@ -139,9 +141,7 @@ class DashboardController extends Controller
                     'id' => $fund->id,
                     'name' => $fund->name,
                     'type' => $fund->type,
-                    'balance' => (float) (
-                        $fundBalances[$fund->id] ?? 0
-                    ),
+                    'balance' => $fundBalances[$fund->id] ?? '0.00',
                 ];
             }
         );

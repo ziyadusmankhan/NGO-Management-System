@@ -698,7 +698,7 @@
                         </td>
 
                         <td class="amount">
-                            PKR {{ number_format($application->requested_amount) }}
+                            PKR {{ \App\Domain\Finance\Support\Money::format($application->requested_amount) }}
                         </td>
 
                         <td>

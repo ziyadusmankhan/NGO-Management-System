@@ -1,21 +1,24 @@
 <?php
 
 namespace App\Domain\Welfare\Applications\Models;
-use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Users\Models\User;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
-use Illuminate\Database\Eloquent\Model;
 use App\Domain\Welfare\Verification\Models\BeneficiaryVerification;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Domain\Welfare\Applications\Models\WelfareApplicationReview;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WelfareApplication extends Model
 {
+    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+
+    protected array $moneyColumns = ['requested_amount','applicant_contribution','organization_contribution','recommended_amount'];
+
     use SoftDeletes;
 
     protected $fillable = [
@@ -51,6 +54,7 @@ class WelfareApplication extends Model
     protected function casts(): array
     {
         return [
+            'is_test' => 'boolean',
             'requested_amount' => 'decimal:2',
             'applicant_contribution' => 'decimal:2',
             'organization_contribution' => 'decimal:2',
@@ -67,6 +71,7 @@ class WelfareApplication extends Model
             'has_supporting_document' => 'boolean',
         ];
     }
+
     /**
      * Field verification records associated with this application.
      */
@@ -89,7 +94,6 @@ class WelfareApplication extends Model
         );
     }
 
-    
     public function agreement(): HasOne
     {
         return $this->hasOne(
@@ -105,6 +109,17 @@ class WelfareApplication extends Model
             'application_id'
         );
     }
+
+    public function assistanceIncludingArchived(): HasOne
+    {
+        return $this->hasOne(WelfareAssistance::class, 'application_id')->withTrashed();
+    }
+
+    public function isTestApplication(): bool
+    {
+        return $this->is_test;
+    }
+
     public function beneficiary(): BelongsTo
     {
         return $this->belongsTo(
@@ -124,7 +139,7 @@ class WelfareApplication extends Model
     public function submittedBy(): BelongsTo
     {
         return $this->belongsTo(
-            \App\Domain\Users\Models\User::class,
+            User::class,
             'submitted_by'
         );
     }
@@ -132,7 +147,7 @@ class WelfareApplication extends Model
     public function recommendedBy(): BelongsTo
     {
         return $this->belongsTo(
-            \App\Domain\Users\Models\User::class,
+            User::class,
             'recommended_by'
         );
     }
@@ -140,7 +155,7 @@ class WelfareApplication extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(
-            \App\Domain\Users\Models\User::class,
+            User::class,
             'approved_by'
         );
     }
@@ -148,7 +163,7 @@ class WelfareApplication extends Model
     public function rejectedBy(): BelongsTo
     {
         return $this->belongsTo(
-            \App\Domain\Users\Models\User::class,
+            User::class,
             'rejected_by'
         );
     }
