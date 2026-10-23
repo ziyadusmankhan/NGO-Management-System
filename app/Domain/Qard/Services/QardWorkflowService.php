@@ -163,16 +163,7 @@ class QardWorkflowService
 
     public function schedule(QardLoan $loan): array
     {
-        $total = Money::minor($loan->principal);
-        $count = (int) $loan->installment_count;
-        $base = intdiv($total, $count);
-        $first = CarbonImmutable::parse($loan->first_due_date->toDateString(), 'Asia/Karachi');
-        $rows = [];
-        for ($i = 0; $i < $count; $i++) {
-            $rows[] = ['sequence' => $i + 1, 'due_date' => ($loan->frequency === 'weekly' ? $first->addWeeks($i) : $first->addMonthsNoOverflow($i))->toDateString(),
-                'amount' => Money::decimal($i === $count - 1 ? $total - $base * ($count - 1) : $base)];
-        }
-        return $rows;
+        return app(\App\Domain\Finance\Support\PrincipalSchedule::class)->make($loan->principal, (int) $loan->installment_count, $loan->frequency, $loan->first_due_date->toDateString());
     }
 
     public function sign(QardLoan $loan, array $data, User $actor): void

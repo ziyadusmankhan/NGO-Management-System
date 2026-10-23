@@ -339,7 +339,7 @@ class FundControlsTest extends TestCase
     {
         $service = app(FundPurposeService::class);
         $allowed = ['general_welfare' => ['welfare', 'medical', 'education'], 'education' => ['education'],
-            'emergency' => ['medical', 'welfare'], 'small_business' => ['project'],
+            'emergency' => ['medical', 'welfare'], 'small_business' => [],
             'community_development' => ['project'], 'qard' => [], 'unknown' => []];
         foreach (['restricted', 'designated', 'general'] as $type) {
             foreach ($allowed as $purpose => $categories) {

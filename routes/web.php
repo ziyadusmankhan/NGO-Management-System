@@ -332,41 +332,7 @@ Route::prefix('welfare/verification')
     });
 
 
-Route::get('/business/applications', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.index');
-
-Route::get('/business/applications/create', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.create');
-
-Route::get('/business/applications/{id}/viability', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.viability');
-
-Route::get('/business/applications/{id}/recommendation', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.recommendation');
-
-Route::get('/business/applications/{id}/approval', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.approval');
-
-Route::get('/business/applications/{id}/agreement', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.agreement');
-
-Route::get('/business/applications/{id}/disbursement', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.disbursement');
-
-Route::get('/business/applications/{id}/monitoring', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.monitoring');
-
-Route::get('/business/applications/{id}', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Small Businesses']);
-})->name('business.applications.show');
+require __DIR__.'/business.php';
 
 require __DIR__.'/qard.php';
 

@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             ImplementationCommitteeRoleSeeder::class,
             WelfareReviewRoleSeeder::class,
             QardRoleSeeder::class,
+            BusinessRoleSeeder::class,
         ]);
     }
 }

@@ -1179,4 +1179,11 @@
 
 </div>
 
+@if($businessCases !== null)
+<div class="card" style="margin-top:20px"><div class="card-head"><strong>Small Business assistance history</strong></div><div class="card-body">
+@forelse($businessCases as $business)
+<p><a href="{{ route('business.applications.show',$business) }}">{{ $business->number }} · {{ $business->name }}</a> — {{ ucfirst($business->support_type) }} · {{ str($business->status)->headline() }}{{ $business->trashed() ? ' (archived)' : '' }}<br>Original fund: {{ $business->fund?->name }} · Released: PKR {{ \App\Domain\Finance\Support\Money::format(\App\Domain\Finance\Support\Money::decimal($business->releasedMinor())) }} · Recovery: {{ $business->recoveryStatus() }}</p>
+@empty<p>No business assistance recorded.</p>@endforelse
+</div></div>
+@endif
 @endsection

@@ -130,7 +130,7 @@ class PhaseFiveMoneyAndAccessTest extends TestCase
     public function test_unimplemented_sections_do_not_show_sample_business_records(): void
     {
         $this->actingAs($this->staff());
-        foreach (['/business/applications', '/operations/tasks', '/records/reports'] as $url) {
+        foreach (['/operations/tasks', '/records/reports'] as $url) {
             $this->get($url)->assertOk()->assertSee('No records to display.')->assertDontSee('Ahmed Khan')->assertDontSee('2.84M');
         }
     }

@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Domain\Business\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class BusinessReminder extends Model
+{
+    protected $guarded = ['id'];
+
+    protected function casts(): array
+    {
+        return ['resolved_at' => 'datetime'];
+    }
+}

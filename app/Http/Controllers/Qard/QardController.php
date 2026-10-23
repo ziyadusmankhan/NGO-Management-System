@@ -30,7 +30,11 @@ class QardController
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')->toString()))
             ->when($request->boolean('reminders'), fn ($q) => $q->whereHas('reminder', fn ($r) => $r->whereNull('resolved_at')))
             ->latest('id')->paginate(15)->withQueryString();
-        return view('qard.index', compact('loans'));
+        $businessLoans = $request->user()->hasPermission('business.view')
+            ? \App\Domain\Business\Models\BusinessApplication::with(['beneficiary', 'fund'])->where('support_type', 'repayable')
+                ->whereHas('movements', fn ($q) => $q->where('kind', 'disbursement')->where('status', 'posted'))
+                ->latest('id')->paginate(10, ['*'], 'business_page')->withQueryString() : null;
+        return view('qard.index', compact('loans', 'businessLoans'));
     }
 
     private function form(?QardLoan $loan = null)

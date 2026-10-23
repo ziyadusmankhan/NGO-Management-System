@@ -129,7 +129,13 @@
                 @forelse($allocations as $assistance)
                     <tr>
                         <td>
-                            @if($assistance instanceof \App\Domain\Qard\Models\QardLoan)
+                            @if($assistance instanceof \App\Domain\Business\Models\BusinessApplication)
+                                @if(auth()->user()->hasPermission('business.view'))
+                                    <a href="{{ route('business.applications.show', $assistance) }}">{{ $assistance->number }}</a>
+                                @else
+                                    {{ $assistance->number }}
+                                @endif
+                            @elseif($assistance instanceof \App\Domain\Qard\Models\QardLoan)
                                 @if(auth()->user()->hasPermission('qard.view'))
                                     <a href="{{ route('qard.show', $assistance) }}">{{ $assistance->number }}</a>
                                 @else
@@ -141,7 +147,7 @@
                                 {{ $assistance->assistance_number }}
                             @endif
                         </td>
-                        <td>{{ $assistance->beneficiary?->full_name ?? 'Unavailable' }}</td>
+                        <td>{{ $assistance instanceof \App\Domain\Business\Models\BusinessApplication && !auth()->user()->hasPermission('business.view') ? 'Restricted beneficiary' : ($assistance->beneficiary?->full_name ?? 'Unavailable') }}</td>
                         <td>PKR {{ $money($assistance->amount) }}</td>
                         <td>PKR {{ $money($assistance->paid_amount) }}</td>
                         <td>PKR {{ $money($assistance->outstanding_amount) }}</td>

@@ -161,7 +161,9 @@ class BeneficiaryController extends Controller
             'verifications.verifiedBy',
         ]); 
 
-        return view('welfare.beneficiaries.show', compact('beneficiary'));
+        $businessCases = auth()->user()->hasPermission('business.view')
+            ? \App\Domain\Business\Models\BusinessApplication::withTrashed()->with('fund')->where('beneficiary_id', $beneficiary->id)->latest('id')->get() : null;
+        return view('welfare.beneficiaries.show', compact('beneficiary', 'businessCases'));
     }
 
     public function edit(

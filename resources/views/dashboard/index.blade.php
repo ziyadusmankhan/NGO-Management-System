@@ -1063,4 +1063,8 @@
         ])
     </div>
 
+@if($businessSummary !== null)
+<div class="card" style="margin-top:20px;padding:20px"><h3><a href="{{ route('business.applications.index') }}">Small Business assistance</a></h3><p>Real posted funding and principal recovery through today.</p>
+<div class="stats-grid">@foreach(['released'=>'Total released','recovered'=>'Principal recovered','outstanding'=>'Outstanding principal'] as $key=>$label)<div class="stat-card"><span>{{ $label }}</span><h3>PKR {{ \App\Domain\Finance\Support\Money::format(\App\Domain\Finance\Support\Money::decimal($businessSummary[$key])) }}</h3></div>@endforeach<div class="stat-card"><span>Businesses started</span><h3>{{ $businessSummary['started'] }}</h3></div></div></div>
+@endif
 @endsection

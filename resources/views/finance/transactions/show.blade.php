@@ -266,7 +266,9 @@
     $sourceUrl = null;
 
     if ($transaction->source) {
-        if ($transaction->source instanceof \App\Domain\Qard\Models\QardMovement) {
+        if ($transaction->source instanceof \App\Domain\Business\Models\BusinessMovement) {
+            $sourceUrl = auth()->user()->hasPermission('business.view') ? route('business.applications.show', $transaction->source->application) : null;
+        } elseif ($transaction->source instanceof \App\Domain\Qard\Models\QardMovement) {
             $sourceUrl = auth()->user()->hasPermission('qard.view') ? route('qard.show', $transaction->source->loan) : null;
         } elseif ($transaction->type === 'donation') {
             $sourceUrl = route(

@@ -456,6 +456,7 @@
             </option>
 
             <option value="qard_disbursement" @selected(request('type') === 'qard_disbursement')>Qard Disbursement</option>
+            <option value="business_disbursement" @selected(request('type') === 'business_disbursement')>Business Disbursement</option>
             <option value="recovery" @selected(request('type') === 'recovery')>Principal Recovery</option>
             <option value="welfare_assistance" @selected(request('type') === 'welfare_assistance')>Welfare Assistance</option>
 

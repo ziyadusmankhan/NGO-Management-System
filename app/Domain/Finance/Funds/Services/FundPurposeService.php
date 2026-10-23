@@ -11,6 +11,12 @@ use Illuminate\Validation\ValidationException;
 
 class FundPurposeService
 {
+    public function allowsBusiness(Fund $fund, string $supportType): bool
+    {
+        return ! $this->isRestricted($fund) || $fund->purpose === 'small_business'
+            || ($fund->purpose === 'qard' && $supportType === 'repayable');
+    }
+
     public function allowsQard(Fund $fund): bool
     {
         return ! $this->isRestricted($fund) || $fund->purpose === 'qard';
@@ -31,7 +37,7 @@ class FundPurposeService
             'general_welfare' => in_array($category, ['welfare', 'medical', 'education'], true),
             'education' => $category === 'education',
             'emergency' => in_array($category, ['medical', 'welfare'], true),
-            'small_business', 'community_development' => $category === 'project',
+            'community_development' => $category === 'project',
             // A generic expense must not disburse money reserved for loans.
             default => false,
         };
@@ -44,6 +50,8 @@ class FundPurposeService
         }
 
         $allowed = match (true) {
+            $source instanceof \App\Domain\Business\Models\BusinessMovement => $source->kind === 'disbursement'
+                && (int) $source->fund_id === (int) $fund->id && $this->allowsBusiness($fund, $source->application->support_type),
             $source instanceof \App\Domain\Qard\Models\QardMovement => $source->kind === 'disbursement'
                 && (int) $source->fund_id === (int) $fund->id && $this->allowsQard($fund),
             $source instanceof Expense => $this->allowsExpense($fund, $source->category),

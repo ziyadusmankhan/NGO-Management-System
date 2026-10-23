@@ -34,7 +34,15 @@ class FundReportingService
                 $loan->outstanding_amount = $loan->principal;
                 return $loan;
             });
-        return $welfare->concat($qard);
+        $business = \App\Domain\Business\Models\BusinessApplication::where('fund_id', $fund->id)
+            ->whereIn('status', ['approved', 'signed'])->where('funding_status', 'open')->with('beneficiary')->get()->map(function ($application) {
+                $application->assistance_number = $application->number;
+                $application->amount = $application->approved_amount;
+                $application->paid_amount = Money::decimal($application->releasedMinor());
+                $application->outstanding_amount = Money::decimal($application->remainingMinor());
+                return $application;
+            })->filter(fn ($application) => Money::minor($application->outstanding_amount) > 0);
+        return $welfare->concat($qard)->concat($business);
     }
 
     public function summary(Fund $fund, ?Collection $allocations = null): array

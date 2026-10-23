@@ -214,9 +214,13 @@ class DashboardController extends Controller
          * ==========================================
          */
 
+        $businessSummary = auth()->user()->hasPermission('business.view')
+            ? app(\App\Domain\Business\Services\BusinessReportService::class)->report([])['totals'] : null;
+
         return view(
             'dashboard.index',
             compact(
+                'businessSummary',
                 'totalMembers',
                 'activeMembers',
                 'totalCommittees',

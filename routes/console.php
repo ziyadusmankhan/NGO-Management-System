@@ -4,6 +4,9 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
+Schedule::command('business:refresh-reminders')->dailyAt('08:10')
+    ->timezone(config('business.timezone'))->withoutOverlapping(30);
+
 Schedule::command('qard:refresh-reminders')->dailyAt('08:05')
     ->timezone('Asia/Karachi')->withoutOverlapping(30);
 

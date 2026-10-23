@@ -186,6 +186,11 @@ class SyncFinancialTransactions extends Command
 
         $mismatches = 0;
 
+        \App\Domain\Business\Models\BusinessMovement::with('transaction')->each(function ($movement) use ($service, &$mismatches) {
+            try { $service->assertMatchesBusiness($movement->transaction, $movement); }
+            catch (ValidationException $exception) { $mismatches++; $this->warn('Business movement #'.$movement->id.': missing or inconsistent ledger entry.'); }
+        });
+
         QardMovement::with('transaction')->each(function (QardMovement $movement) use ($service, &$mismatches) {
             try {
                 $service->assertMatchesQard($movement->transaction, $movement);
@@ -224,6 +229,9 @@ class SyncFinancialTransactions extends Command
                 $qardCredits = Money::sumMinor(QardMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'repayment'));
                 $qardDebits = Money::sumMinor(QardMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'disbursement'));
                 $sourceBalance = Money::add($sourceBalance, Money::add($qardCredits, -$qardDebits));
+                $businessCredits = Money::sumMinor(\App\Domain\Business\Models\BusinessMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'repayment'));
+                $businessDebits = Money::sumMinor(\App\Domain\Business\Models\BusinessMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'disbursement'));
+                $sourceBalance = Money::add($sourceBalance, Money::add($businessCredits, -$businessDebits));
                 $ledgerBalance = app(FundBalanceService::class)->balanceMinor($fund);
                 $difference = Money::add($sourceBalance, -$ledgerBalance);
 

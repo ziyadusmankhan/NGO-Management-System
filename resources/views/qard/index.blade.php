@@ -14,4 +14,11 @@
 @forelse($loans as $loan)<tr><td><a href="{{ route('qard.show',$loan) }}">{{ $loan->number }}</a><small>{{ $loan->beneficiary?->full_name }}</small></td><td>{{ $loan->fund?->name }}</td><td>PKR {{ \App\Domain\Finance\Support\Money::format($loan->principal) }}</td><td><span class="qbadge">{{ str($loan->status)->headline() }}</span></td><td>{{ !$loan->reminder?->resolved_at ? $loan->reminder?->message : '—' }}</td></tr>
 @empty<tr><td colspan="5">No Qard applications found. Create an application to begin.</td></tr>@endforelse</tbody></table>{{ $loans->links('pagination::bootstrap-5') }}</div>
 <p class="qmuted">Reminders refresh daily at 08:05 Asia/Karachi when the scheduler is running. Payments also refresh the affected loan.</p></div>
+@if($businessLoans !== null)
+<div class="qard-page"><div class="qcard qtable"><h2>Business-originated principal</h2><p class="qmuted">This separate portfolio shows funded repayable businesses. Record their repayments from the business case. No duplicate Qard loan or ledger credit is created. The filters above apply to standalone Qard loans.</p>
+<table><thead><tr><th>Business / beneficiary</th><th>Original fund</th><th>Released</th><th>Recovered</th><th>Outstanding</th><th>Recovery status</th></tr></thead><tbody>
+@forelse($businessLoans as $business)<tr><td><a href="{{ route('business.applications.show',$business) }}">{{ $business->number }} · {{ $business->name }}</a><small>{{ $business->beneficiary?->full_name }}</small></td><td>{{ $business->fund?->name }}</td>@foreach([$business->releasedMinor(),$business->recoveredMinor(),$business->outstandingMinor()] as $minor)<td>PKR {{ \App\Domain\Finance\Support\Money::format(\App\Domain\Finance\Support\Money::decimal($minor)) }}</td>@endforeach<td>{{ $business->recoveryStatus() }}</td></tr>
+@empty<tr><td colspan="6">No funded repayable businesses.</td></tr>@endforelse
+</tbody></table>{{ $businessLoans->links('pagination::bootstrap-5') }}</div></div>
+@endif
 @endsection

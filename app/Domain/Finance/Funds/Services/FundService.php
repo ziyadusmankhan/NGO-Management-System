@@ -64,6 +64,9 @@ class FundService
         DB::transaction(function () use ($fund, $actor) {
             $locked = $this->lock($fund);
             $summary = app(FundReportingService::class)->summary($locked);
+            foreach (\App\Domain\Business\Models\BusinessApplication::withTrashed()->where('fund_id', $locked->id)->where('support_type', 'repayable')->get() as $business) {
+                if ($business->outstandingMinor() > 0) { throw ValidationException::withMessages(['fund' => 'This fund has outstanding business principal. Keep it available for recovery.']); }
+            }
             if (\App\Domain\Qard\Models\QardLoan::where('fund_id', $locked->id)->where('status', 'active')->exists()) {
                 throw ValidationException::withMessages(['fund' => 'This fund has outstanding Qard principal. Keep it available for repayments.']);
             }
@@ -78,6 +81,7 @@ class FundService
     public function hasActivity(Fund $fund): bool
     {
         return $fund->transactions()->withTrashed()->exists()
+            || \App\Domain\Business\Models\BusinessApplication::withTrashed()->where('fund_id', $fund->id)->exists()
             || \App\Domain\Qard\Models\QardLoan::where('fund_id', $fund->id)->exists()
             || $fund->donations()->withTrashed()->exists()
             || $fund->expenses()->withTrashed()->exists()

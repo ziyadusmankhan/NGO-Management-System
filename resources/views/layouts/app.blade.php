@@ -859,6 +859,7 @@
                 Programs
             </div>
 
+            @if(auth()->user()->hasPermission('business.view'))
             <a
                 href="{{ route('business.applications.index') }}"
                 class="nav-item {{ request()->routeIs('business.*') ? 'active' : '' }}"
@@ -866,6 +867,7 @@
                 <i class="bi bi-shop"></i>
                 <span>Small Businesses</span>
             </a>
+            @endif
 
             <a
                 href="{{ route('qard.index') }}"
