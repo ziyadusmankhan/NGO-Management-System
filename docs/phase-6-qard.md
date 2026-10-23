@@ -208,6 +208,6 @@ The existing finance:sync-transactions command now recognizes Qard movements. It
 - Posted Qard movements are immutable through the application; corrections require recorded void reasons.
 - One original fund per loan. Inactive funds must be reactivated before new movements. Outstanding loans prevent archival of their fund.
 - Commitments are reported separately from ledger cash. Approval does not reserve cash against all other workflows.
-- The global Audit Trail, Settings, Small Business, Projects, Operations, and Records remain for later phases.
+- At Phase 6 delivery, the global Audit Trail, Settings, Small Business, Projects, Operations, and Records remained for later phases. Small Business is now covered by `phase-7-small-business.md`; the remaining roadmap is maintained there.
 - MySQL/PostgreSQL are not certified by these SQLite tests.
 - The migration is reversible, but rollback removes Qard tables. Once real loans exist, preserve backups and use forward migrations instead of rolling back business data.

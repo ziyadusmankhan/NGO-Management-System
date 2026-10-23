@@ -46,7 +46,7 @@ General funds with spending restrictions disabled permit all existing expense/we
 | General welfare | Welfare, medical, education | Welfare, education, emergency |
 | Education | Education | Education |
 | Emergency | Medical, welfare | Emergency |
-| Small business | Project | Livelihood |
+| Small business | None (Phase 7: use the business workflow) | Livelihood |
 | Community development | Project | None |
 | Qard-e-Hasana | None through generic expenses | None through welfare payments |
 | Unknown/custom purpose | None until a rule is explicitly defined | None until a rule is explicitly defined |
