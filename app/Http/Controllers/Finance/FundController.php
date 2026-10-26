@@ -99,6 +99,7 @@ class FundController extends Controller
             \App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment::class,
             \App\Domain\Qard\Models\QardMovement::class,
             \App\Domain\Business\Models\BusinessMovement::class,
+            \App\Domain\Projects\Models\ProjectMovement::class,
         ];
         foreach ($classes as $class) {
             $model = new $class;
@@ -106,6 +107,8 @@ class FundController extends Controller
             $query = $class::query()->whereIn('id', $group->pluck('source_id'));
             if ($model instanceof \App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment) {
                 $query->with(['assistance' => fn ($q) => $q->withTrashed(), 'voidedBy']);
+            } elseif ($model instanceof \App\Domain\Projects\Models\ProjectMovement) {
+                $query->with('project');
             } elseif ($model instanceof \App\Domain\Business\Models\BusinessMovement) {
                 $query->with('application');
             } elseif ($model instanceof \App\Domain\Qard\Models\QardMovement) {
@@ -125,6 +128,10 @@ class FundController extends Controller
                 } elseif ($source instanceof \App\Domain\Finance\Expenses\Models\Expense) {
                     $transaction->source_label = $source->expense_number;
                     $transaction->source_url = $source->trashed() ? null : route('finance.expenses.show', $source);
+                } elseif ($source instanceof \App\Domain\Projects\Models\ProjectMovement) {
+                    $transaction->source_label=$source->project->number.' · '.$source->kind.' #'.$source->id;
+                    $transaction->source_url=request()->user()->hasPermission('projects.view') ? route('projects.show',$source->project) : null;
+                    $transaction->void_reason=$source->void_reason; $transaction->voided_at=$source->voided_at;
                 } elseif ($source instanceof \App\Domain\Business\Models\BusinessMovement) {
                     $transaction->source_label = $source->application?->number.' · '.$source->kind.' #'.$source->id;
                     $transaction->source_url = request()->user()->hasPermission('business.view') ? route('business.applications.show', $source->application) : null;

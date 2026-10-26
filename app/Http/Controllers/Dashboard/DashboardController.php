@@ -157,16 +157,11 @@ class DashboardController extends Controller
          * instead of displaying fake data.
          */
 
-        $activeProjects = 0;
-
-        $projectStatusCounts = [
-            'draft' => 0,
-            'review' => 0,
-            'approved' => 0,
-            'in_progress' => 0,
-            'completed' => 0,
-        ];
-
+        $projectStatusCounts = [];
+        if (auth()->user()->hasPermission('projects.view')) {
+            $projectStatusCounts = \App\Domain\Projects\Models\Project::withTrashed()->selectRaw('status, COUNT(*) as aggregate')->groupBy('status')->pluck('aggregate','status')->all();
+        }
+        $activeProjects = $projectStatusCounts['in_progress'] ?? 0;
 
         /*
          * ==========================================

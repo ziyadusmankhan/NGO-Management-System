@@ -110,6 +110,13 @@ class ExpenseController extends Controller
                 }
             ));
 
+        $projects = Money::decimal(Money::add(Money::minor($projects), Money::sumMinor((clone $postedDebits)->where('source_type', (new \App\Domain\Projects\Models\ProjectMovement)->getMorphClass()))));
+        $projectPayments=\App\Domain\Projects\Models\ProjectMovement::where('kind','payment')->with(['project','transaction'])
+            ->when(request('category') && request('category') !== 'project',fn($q)=>$q->whereRaw('1=0'))
+            ->when(request('fund_id'),fn($q,$v)=>$q->where('fund_id',$v))
+            ->when(request('status'),fn($q,$v)=>$q->where('status',$v === 'paid' ? 'posted' : $v))
+            ->when(request('search'),fn($q,$v)=>$q->where(fn($q)=>$q->where('payee','like','%'.$v.'%')->orWhereHas('project',fn($p)=>$p->where('number','like','%'.$v.'%')->orWhere('name','like','%'.$v.'%'))))
+            ->latest('id')->paginate(15,['*'],'project_page')->withQueryString();
         $pending = Expense::query()
             ->where('status', 'pending')
             ->count();
@@ -123,6 +130,7 @@ class ExpenseController extends Controller
             'finance.expenses.index',
             compact(
                 'expenses',
+                'projectPayments',
                 'funds',
                 'thisMonth',
                 'thisYear',
@@ -175,6 +183,7 @@ class ExpenseController extends Controller
     ): RedirectResponse {
 
         $data = $request->validated();
+        if (($data['category'] ?? '') === 'project' || (isset($expense) && $expense->category === 'project')) { throw \Illuminate\Validation\ValidationException::withMessages(['category'=>'Use Projects for new spending. Historical Project expenses cannot be edited; posted approvals may still be marked paid.']); }
 
         $fund = Fund::findOrFail($data['fund_id']);
         if (
@@ -367,6 +376,7 @@ class ExpenseController extends Controller
         }
 
         $data = $request->validated();
+        if (($data['category'] ?? '') === 'project' || (isset($expense) && $expense->category === 'project')) { throw \Illuminate\Validation\ValidationException::withMessages(['category'=>'Use Projects for new spending. Historical Project expenses cannot be edited; posted approvals may still be marked paid.']); }
 
         $fund = Fund::findOrFail($data['fund_id']);
         if (

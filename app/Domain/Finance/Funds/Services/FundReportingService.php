@@ -42,7 +42,11 @@ class FundReportingService
                 $application->outstanding_amount = Money::decimal($application->remainingMinor());
                 return $application;
             })->filter(fn ($application) => Money::minor($application->outstanding_amount) > 0);
-        return $welfare->concat($qard)->concat($business);
+        $projects = \App\Domain\Projects\Models\Project::where('fund_id',$fund->id)->whereIn('status',['approved','in_progress','completed'])->get()->map(function ($project) {
+            $project->assistance_number=$project->number; $project->amount=$project->approved()->budget;
+            $project->paid_amount=Money::decimal($project->netMinor()); $project->outstanding_amount=Money::decimal($project->commitmentMinor()); return $project;
+        })->filter(fn($p)=>Money::minor($p->outstanding_amount)>0);
+        return $welfare->concat($qard)->concat($business)->concat($projects);
     }
 
     public function summary(Fund $fund, ?Collection $allocations = null): array

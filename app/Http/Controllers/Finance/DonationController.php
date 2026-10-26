@@ -169,6 +169,7 @@ class DonationController
     {
         $validated = $request->validated();
         $donation = DB::transaction(function () use ($validated) {
+            app(\App\Domain\Projects\Services\ProjectDonationPolicy::class)->validate($validated);
             $donation = Donation::create(array_merge($validated, [
                 'donation_number' => 'DON-'.Str::ulid(),
                 'status' => 'received',
@@ -218,6 +219,9 @@ class DonationController
             $validated = $request->validated();
 
             DB::transaction(function () use ($validated, $donation) {
+                $donation = Donation::whereKey($donation->id)->lockForUpdate()->firstOrFail();
+                app(\App\Domain\Projects\Services\ProjectDonationPolicy::class)->validate($validated,$donation);
+                if (\App\Domain\Finance\Funds\Models\Fund::withTrashed()->find($donation->fund_id)?->project_id && ((int)($validated['fund_id']??0)!==(int)$donation->fund_id || $validated['designation']!=='restricted' || $validated['purpose']!=='project')) { throw \Illuminate\Validation\ValidationException::withMessages(['fund_id'=>'Keep this donation restricted to its original dedicated project fund.']); }
                 $donation->update([
                     'donor_type' => $validated['donor_type'],
                     'donor_name' => $validated['donor_name'],

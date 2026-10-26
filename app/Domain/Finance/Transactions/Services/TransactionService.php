@@ -10,6 +10,7 @@ use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment;
 use App\Domain\Qard\Models\QardMovement;
 use App\Domain\Business\Models\BusinessMovement;
+use App\Domain\Projects\Models\ProjectMovement;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -21,6 +22,7 @@ class TransactionService
     {
         return DB::transaction(function () use ($source, $data) {
             $this->lockSource($source);
+            if ($source instanceof ProjectMovement) { $this->assertProjectPayload($source,$data); }
             if ($source instanceof BusinessMovement) { $this->assertBusinessPayload($source, $data); }
             if ($source instanceof QardMovement) {
                 $this->assertQardPayload($source, $data);
@@ -30,8 +32,10 @@ class TransactionService
                 $this->assertSameMovement($existing, $data);
                 return $existing;
             }
+            if ($source instanceof \App\Domain\Finance\Expenses\Models\Expense && $source->fresh()->category === 'project') { throw ValidationException::withMessages(['category'=>'New project spending must use the approved Projects payment workflow.']); }
             $funds = $this->lockFunds([$data['fund_id']]);
-            $this->assertAffordable($funds, null, $data, $source instanceof WelfareAssistancePayment || $source instanceof QardMovement || $source instanceof BusinessMovement);
+            $this->assertProjectDonation($source, $data, null);
+            $this->assertAffordable($funds, null, $data, $source instanceof WelfareAssistancePayment || $source instanceof QardMovement || $source instanceof BusinessMovement || $source instanceof ProjectMovement);
             $this->assertPurpose($funds, $source, $data);
 
             // Allocate the display number from our own inserted ID, never MAX(id)+1.
@@ -59,7 +63,7 @@ class TransactionService
     public function syncForSource(Model $source, array $data): Transaction
     {
         // Welfare payments are immutable; corrections use their audited void action.
-        if ($source instanceof WelfareAssistancePayment || $source instanceof QardMovement || $source instanceof BusinessMovement) {
+        if ($source instanceof WelfareAssistancePayment || $source instanceof QardMovement || $source instanceof BusinessMovement || $source instanceof ProjectMovement) {
             return $this->createForSource($source, $data);
         }
 
@@ -69,6 +73,8 @@ class TransactionService
             if (! $transaction) {
                 return $this->createForSource($source, $data);
             }
+            if ($source instanceof \App\Domain\Finance\Expenses\Models\Expense && $source->fresh()->category === 'project') { $this->assertSameMovement($transaction,$data); return $transaction; }
+            $this->assertProjectDonation($source, $data, $transaction);
             $next = array_merge($transaction->only([
                 'fund_id', 'type', 'reference', 'description', 'amount', 'direction',
                 'transaction_date', 'status', 'recorded_by', 'notes',
@@ -91,6 +97,10 @@ class TransactionService
         DB::transaction(function () use ($source) {
             $this->lockSource($source);
             $transaction = $this->sourceTransaction($source);
+            if ($source instanceof ProjectMovement) {
+                if ($source->fresh()?->status !== 'void') { throw ValidationException::withMessages(['transaction'=>'Use the project void action.']); }
+                $expected=clone $source; $expected->status=$transaction?->status === 'void' ? 'void' : 'posted'; $this->assertMatchesProject($transaction,$expected);
+            }
             if ($source instanceof BusinessMovement) {
                 if ($source->fresh()?->status !== 'void') { throw ValidationException::withMessages(['transaction' => 'Use the business void action to reverse this entry.']); }
                 $expected = clone $source;
@@ -124,7 +134,7 @@ class TransactionService
                 return;
             }
             $funds = $this->lockFunds([$transaction->fund_id]);
-            $this->assertAffordable($funds, $transaction, null, $source instanceof QardMovement || $source instanceof BusinessMovement);
+            $this->assertAffordable($funds, $transaction, null, $source instanceof QardMovement || $source instanceof BusinessMovement || $source instanceof ProjectMovement);
             $transaction->update(['status' => 'void']);
         }, 5);
     }
@@ -168,6 +178,39 @@ class TransactionService
             || Money::minor($transaction->amount) !== Money::minor($movement->amount)
             || $transaction->status !== $movement->status
             || $transaction->transaction_date?->toDateString() !== $movement->payment_date?->toDateString()) { $this->invalidLedger(); }
+    }
+
+    public function assertMatchesProject(?Transaction $transaction, ProjectMovement $movement): void
+    {
+        if (!$transaction || $transaction->trashed() || $transaction->source_type !== $movement->getMorphClass() || (int)$transaction->source_id !== (int)$movement->id
+            || (int)$transaction->fund_id !== (int)$movement->fund_id || (int)$movement->fund_id !== (int)$movement->project->fund_id
+            || $transaction->direction !== ($movement->kind === 'payment' ? 'debit' : 'credit') || $transaction->type !== ($movement->kind === 'payment' ? 'expense' : 'refund')
+            || Money::minor($transaction->amount) !== Money::minor($movement->amount) || $transaction->status !== $movement->status
+            || $transaction->transaction_date?->toDateString() !== $movement->payment_date?->toDateString()) { $this->invalidLedger(); }
+    }
+
+    private function assertProjectPayload(ProjectMovement $source, array $data): void
+    {
+        $current=$source->fresh();
+        if (!$current || $current->status !== 'posted' || (int)$data['fund_id'] !== (int)$current->fund_id || (int)$current->fund_id !== (int)$current->project->fund_id
+            || Money::minor($data['amount']) !== Money::minor($current->amount) || $data['direction'] !== ($current->kind === 'payment' ? 'debit' : 'credit')
+            || $data['type'] !== ($current->kind === 'payment' ? 'expense' : 'refund') || ($data['status'] ?? 'posted') !== 'posted'
+            || $data['transaction_date'] !== $current->payment_date->toDateString()) { $this->invalidLedger(); }
+    }
+
+    private function assertProjectDonation(Model $source, array $data, ?Transaction $old): void
+    {
+        if (!$source instanceof \App\Domain\Finance\Donations\Models\Donation) { return; }
+        $fund=Fund::withTrashed()->lockForUpdate()->find($data['fund_id']);
+        if ($source->fresh()->purpose === 'project' && !$fund?->project_id && (!$old || (int)$old->fund_id !== (int)$data['fund_id'] || Money::minor($old->amount) !== Money::minor($data['amount']))) { throw ValidationException::withMessages(['fund_id'=>'New project donations require a dedicated fund bound to that project. Historical pooled donations remain unchanged.']); }
+        if ($old && (int)$old->fund_id !== (int)$data['fund_id'] && Fund::withTrashed()->find($old->fund_id)?->project_id) { throw ValidationException::withMessages(['fund_id'=>'A named-project donation cannot be moved to another fund.']); }
+        if ($fund?->project_id) {
+            $current=$source->fresh();
+            if ($current->designation !== 'restricted' || $current->purpose !== 'project' || (int)$current->fund_id !== (int)$fund->id) { throw ValidationException::withMessages(['designation'=>'Named-project donations require restricted designation, Project purpose and the dedicated project fund.']); }
+            $project=\App\Domain\Projects\Models\Project::withTrashed()->lockForUpdate()->findOrFail($fund->project_id);
+            if ((int)$project->fund_id !== (int)$fund->id) { throw ValidationException::withMessages(['fund_id'=>'This fund must be the original project fund.']); }
+            if (!$project->fund_locked_at) { $project->update(['fund_locked_at'=>now()]); }
+        }
     }
 
     private function assertBusinessPayload(BusinessMovement $source, array $data): void
@@ -274,7 +317,7 @@ class TransactionService
                 $next && (int) $next['fund_id'] === (int) $fund->id ? $nextEffect : 0,
                 $old && (int) $old->fund_id === (int) $fund->id ? -$oldEffect : 0
             );
-            if ($change < 0 && ($strict || $fund->prevent_negative_balance)) {
+            if ($change < 0 && ($strict || $fund->prevent_negative_balance || $fund->project_id)) {
                 $available = app(FundBalanceService::class)->balanceMinor($fund);
                 if (Money::add($available, $change) < 0) {
                     throw ValidationException::withMessages(['amount' => 'This movement exceeds the available fund balance of PKR '.Money::format(Money::decimal($available)).'.']);

@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             WelfareReviewRoleSeeder::class,
             QardRoleSeeder::class,
             BusinessRoleSeeder::class,
+            ProjectRoleSeeder::class,
         ]);
     }
 }

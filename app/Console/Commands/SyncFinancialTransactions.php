@@ -137,6 +137,7 @@ class SyncFinancialTransactions extends Command
                     return;
                 }
 
+                if ($expense->category === 'project' && (!$transaction || $transaction->status !== 'posted' || $transaction->trashed())) { $this->warn('Legacy Project expense #'.$expense->id.' needs review; no new debit created.'); return; }
                 $service->syncForSource(
                     $expense,
                     [
@@ -191,6 +192,11 @@ class SyncFinancialTransactions extends Command
             catch (ValidationException $exception) { $mismatches++; $this->warn('Business movement #'.$movement->id.': missing or inconsistent ledger entry.'); }
         });
 
+        \App\Domain\Projects\Models\ProjectMovement::with('transaction')->each(function ($movement) use ($service, &$mismatches) {
+            try { $service->assertMatchesProject($movement->transaction,$movement); }
+            catch (ValidationException $exception) { $mismatches++; $this->warn('Project movement #'.$movement->id.': missing or inconsistent ledger entry.'); }
+        });
+
         QardMovement::with('transaction')->each(function (QardMovement $movement) use ($service, &$mismatches) {
             try {
                 $service->assertMatchesQard($movement->transaction, $movement);
@@ -232,6 +238,9 @@ class SyncFinancialTransactions extends Command
                 $businessCredits = Money::sumMinor(\App\Domain\Business\Models\BusinessMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'repayment'));
                 $businessDebits = Money::sumMinor(\App\Domain\Business\Models\BusinessMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'disbursement'));
                 $sourceBalance = Money::add($sourceBalance, Money::add($businessCredits, -$businessDebits));
+                $projectCredits = Money::sumMinor(\App\Domain\Projects\Models\ProjectMovement::where('fund_id',$fund->id)->where('status','posted')->where('kind','refund'));
+                $projectDebits = Money::sumMinor(\App\Domain\Projects\Models\ProjectMovement::where('fund_id',$fund->id)->where('status','posted')->where('kind','payment'));
+                $sourceBalance = Money::add($sourceBalance, Money::add($projectCredits, -$projectDebits));
                 $ledgerBalance = app(FundBalanceService::class)->balanceMinor($fund);
                 $difference = Money::add($sourceBalance, -$ledgerBalance);
 
