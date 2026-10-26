@@ -265,6 +265,7 @@
 
 
 @section('content')
+<div class="alert alert-info">For a donation restricted to a named project, first create its dedicated fund on the Project page. Select that fund below, with <strong>Restricted</strong> designation and <strong>Project</strong> purpose. Its remaining balance stays restricted after project closure.</div>
 
 <div class="page-header">
 
@@ -786,7 +787,7 @@
                                             ) == $fund->id
                                         )
                                     >
-                                        {{ $fund->name }}
+                                        {{ $fund->name }}{{ $fund->project_id ? ' · Dedicated project fund' : '' }}
                                         ({{ $fund->fund_reference }})
                                     </option>
 

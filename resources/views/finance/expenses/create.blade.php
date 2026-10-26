@@ -666,7 +666,7 @@
                             name="category"
                             id="project"
                             value="project"
-                            @checked(old('category') === 'project')
+                            disabled
                         >
 
                         <label for="project">
@@ -678,7 +678,7 @@
                             </strong>
 
                             <span>
-                                Village development
+                                Use the Projects payment workflow
                             </span>
 
                         </label>

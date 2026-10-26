@@ -876,10 +876,11 @@
                 <i class="bi bi-arrow-repeat"></i>
                 <span>Qard-e-Hasana</span>
             </a>
-            <a href="#" class="nav-item">
-                <i class="bi bi-kanban"></i>
-                <span>Projects</span>
+            @can('projects.view')
+            <a href="{{ route('projects.index') }}" class="nav-item {{ request()->routeIs('projects.*') ? 'active' : '' }}">
+                <i class="bi bi-kanban"></i><span>Projects</span>
             </a>
+            @endcan
 
             <div class="nav-section">
                 Operations

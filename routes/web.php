@@ -333,6 +333,7 @@ Route::prefix('welfare/verification')
 
 
 require __DIR__.'/business.php';
+require __DIR__.'/projects.php';
 
 require __DIR__.'/qard.php';
 

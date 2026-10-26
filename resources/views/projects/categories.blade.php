@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title','Project categories')
+@push('styles')@include('projects.style')@endpush
+@section('content')<div class="qard-page project-page"><h1>Project categories</h1><a href="{{ route('projects.index') }}">Back to projects</a>@include('qard.partials.feedback')
+<p class="qmuted">Display names are configurable. The funding purpose controls eligible restricted funds. Used categories keep their funding purpose.</p>
+@foreach($categories->concat([null]) as $c)<form class="qcard" method="post" action="{{ $c?route('projects.categories.update',$c):route('projects.categories.store') }}">@csrf @if($c)@method('PUT')@endif<h2>{{ $c?'Edit '.$c->name:'Add category' }}</h2><div class="qgrid"><x-business-field name="name" label="Display name" :value="$c?->name"/><label>Funding purpose<select name="purpose">@foreach(config('projects.purposes') as $purpose)<option value="{{ $purpose }}" @selected($c?->purpose===$purpose)>{{ str($purpose)->headline() }}</option>@endforeach</select></label><label>Status<select name="active"><option value="1" @selected($c?->active??true)>Active</option><option value="0" @selected($c&&!$c->active)>Inactive</option></select></label></div><button class="qbtn">Save category</button></form>@endforeach</div>@endsection

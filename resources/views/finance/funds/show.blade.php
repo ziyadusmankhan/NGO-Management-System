@@ -111,7 +111,7 @@
         </div>
         <p class="text-muted mt-3 mb-0">
             Opening PKR {{ $money($summary['opening_balance']) }} + new receipts + recoveries + refunds returned − spending − refunds paid out = ledger balance.
-            Allocations include unpaid approved welfare assistance and undisbursed approved Qard principal; they are commitments, not additional ledger debits.
+            Allocations include unpaid approved Welfare, Qard, Small Business and Project budgets; they are commitments, not additional ledger debits.
             Available after allocations = ledger balance − allocations. Recoveries and refunds are included once.
         </p>
         @if(\App\Domain\Finance\Support\Money::minor($summary['available']) < 0)
@@ -129,7 +129,9 @@
                 @forelse($allocations as $assistance)
                     <tr>
                         <td>
-                            @if($assistance instanceof \App\Domain\Business\Models\BusinessApplication)
+                            @if($assistance instanceof \App\Domain\Projects\Models\Project)
+                                @can('projects.view')<a href="{{ route('projects.show',$assistance) }}">{{ $assistance->number }}</a>@else {{ $assistance->number }} @endcan
+                            @elseif($assistance instanceof \App\Domain\Business\Models\BusinessApplication)
                                 @if(auth()->user()->hasPermission('business.view'))
                                     <a href="{{ route('business.applications.show', $assistance) }}">{{ $assistance->number }}</a>
                                 @else
@@ -147,7 +149,7 @@
                                 {{ $assistance->assistance_number }}
                             @endif
                         </td>
-                        <td>{{ $assistance instanceof \App\Domain\Business\Models\BusinessApplication && !auth()->user()->hasPermission('business.view') ? 'Restricted beneficiary' : ($assistance->beneficiary?->full_name ?? 'Unavailable') }}</td>
+                        <td>{{ $assistance instanceof \App\Domain\Business\Models\BusinessApplication && !auth()->user()->hasPermission('business.view') ? 'Restricted beneficiary' : ($assistance instanceof \App\Domain\Projects\Models\Project ? $assistance->name : ($assistance->beneficiary?->full_name ?? 'Unavailable')) }}</td>
                         <td>PKR {{ $money($assistance->amount) }}</td>
                         <td>PKR {{ $money($assistance->paid_amount) }}</td>
                         <td>PKR {{ $money($assistance->outstanding_amount) }}</td>

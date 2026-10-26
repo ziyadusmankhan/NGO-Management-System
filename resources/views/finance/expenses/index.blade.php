@@ -987,6 +987,7 @@
 
 </div>
 
+@include('projects.finance-payments')
 @endsection
 
 

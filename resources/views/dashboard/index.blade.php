@@ -634,37 +634,9 @@
         </div>
 
 
-        <!-- Projects -->
-
-        <div class="stat-card">
-
-            <div class="stat-top">
-
-                <div class="stat-icon">
-                    <i class="bi bi-kanban"></i>
-                </div>
-
-                <div class="stat-trend">
-                    In development
-                </div>
-
-            </div>
-            
-
-            <div class="stat-label">
-                Active Projects
-            </div>
-
-            <div class="stat-value">
-                &mdash;
-            </div>
-
-            <div class="stat-description">
-                Project tracking is coming soon
-            </div>
-
-        </div>
-
+        @can('projects.view')
+        <div class="stat-card"><div class="stat-top"><div class="stat-icon"><i class="bi bi-kanban"></i></div></div><div class="stat-label">Active Projects</div><div class="stat-value">{{ $activeProjects }}</div><div class="stat-description"><a href="{{ route('projects.index',['status'=>'in_progress']) }}">Projects currently In Progress</a></div></div>
+        @endcan
 
         <!-- Donations -->
 
@@ -893,10 +865,11 @@
         </div>
 
 
-        @include('dashboard.partials.in-development', [
-            'title' => 'Project Status',
-            'message' => 'Project status tracking is in development. Updates will appear here when this feature is available.',
-        ])
+        @can('projects.view')
+        <div class="dashboard-card"><div class="card-header-custom"><h3>Project Status</h3><a href="{{ route('projects.index') }}">View projects</a></div><div class="card-body">
+        @foreach(['draft','approved','in_progress','completed','closed','cancelled'] as $status)<p>{{ str($status)->headline() }} <strong>{{ $projectStatusCounts[$status] ?? 0 }}</strong></p>@endforeach
+        </div></div>
+        @endcan
 
     </div>
 
