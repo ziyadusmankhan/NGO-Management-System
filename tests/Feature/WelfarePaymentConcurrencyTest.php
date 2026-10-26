@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
+use App\Domain\Finance\Funds\Services\FundReportingService;
 use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment;
 use App\Domain\Welfare\Assistance\Services\WelfareAssistancePaymentService;
@@ -67,6 +68,7 @@ class WelfarePaymentConcurrencyTest extends TestCase
                 $jobs[1] = ['pay', $other->id, (string) Str::uuid()];
             } elseif ($case === 'expense') {
                 $expense = Expense::create([
+                    'purchase_kind' => 'service',
                     'expense_number' => 'EXP-RACE', 'fund_id' => $fund->id, 'category' => 'education',
                     'description' => 'Competing expense', 'amount' => '40.00', 'expense_date' => '2026-10-18',
                     'payee_name' => 'School', 'status' => 'approved',
@@ -83,7 +85,9 @@ class WelfarePaymentConcurrencyTest extends TestCase
             $php = [PHP_BINARY, '-n'];
             foreach (['mbstring', 'pdo_sqlite', 'sqlite3', 'fileinfo', 'openssl'] as $extension) {
                 $path = ini_get('extension_dir').DIRECTORY_SEPARATOR.(PHP_OS_FAMILY === 'Windows' ? 'php_' : '').$extension.'.'.PHP_SHLIB_SUFFIX;
-                if (! is_file($path)) { $path = dirname(PHP_BINARY).DIRECTORY_SEPARATOR.$path; }
+                if (! is_file($path)) {
+                    $path = dirname(PHP_BINARY).DIRECTORY_SEPARATOR.$path;
+                }
                 if (is_file($path)) {
                     array_push($php, '-d', 'extension='.$path);
                 }
@@ -126,7 +130,7 @@ class WelfarePaymentConcurrencyTest extends TestCase
                 $this->assertSame('closed', $assistance->fresh()->status);
                 $this->assertSame(1, $assistance->statusChanges()->where('to_status', 'closed')->count());
                 $this->assertSame(0, $assistance->reminders()->whereNull('resolved_at')->count());
-                $this->assertSame('0.00', app(\App\Domain\Finance\Funds\Services\FundReportingService::class)->summary($fund)['allocated']);
+                $this->assertSame('0.00', app(FundReportingService::class)->summary($fund)['allocated']);
             } elseif ($case === 'same_key') {
                 $this->assertSame(['DUPLICATE', 'POSTED'], $results);
             } elseif ($case === 'void_twice') {

@@ -12,6 +12,7 @@ use App\Domain\Finance\Funds\Services\FundService;
 use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Finance\Transactions\Services\TransactionService;
 use App\Domain\Welfare\Assistance\Services\WelfareAssistancePaymentService;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -47,6 +48,7 @@ class FundControlsTest extends TestCase
     private function expense(Fund $fund, string $category = 'education'): Expense
     {
         return Expense::create([
+            'purchase_kind' => 'service',
             'expense_number' => 'EXP-'.Str::random(10), 'fund_id' => $fund->id,
             'category' => $category, 'description' => 'Purpose check', 'amount' => '50.00',
             'expense_date' => '2026-10-18', 'payee_name' => 'School', 'status' => 'approved',
@@ -322,7 +324,7 @@ class FundControlsTest extends TestCase
                         'archive' => $service->archive($fund, $actor),
                     };
                     $this->fail('Audit failure must roll back the operation.');
-                } catch (\Illuminate\Database\QueryException $exception) {
+                } catch (QueryException $exception) {
                     $this->assertStringContainsString('audit unavailable', $exception->getMessage());
                 }
                 $this->assertSame('Education reserve', $fund->fresh()->name);
@@ -417,7 +419,7 @@ class FundControlsTest extends TestCase
         $fund = $this->fund(['require_documents' => false]);
         $actor = $this->staff(['finance.view', 'finance.expenses.manage', 'finance.expenses.approve']);
         $this->actingAs($actor);
-        $data = ['fund_id' => $fund->id, 'category' => 'medical', 'description' => 'Incompatible purpose',
+        $data = ['purchase_kind' => 'service', 'fund_id' => $fund->id, 'category' => 'medical', 'description' => 'Incompatible purpose',
             'amount' => '50.00', 'expense_date' => '2026-10-18', 'payee_name' => 'Clinic',
             'payment_method' => 'cash', 'status' => 'pending', 'has_supporting_document' => false];
         $this->post(route('finance.expenses.store'), $data)->assertSessionHasErrors('category');

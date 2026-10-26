@@ -10,9 +10,10 @@ use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Finance\Transactions\Services\TransactionService;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment;
 use App\Domain\Welfare\Assistance\Services\WelfareAssistancePaymentService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\Support\CreatesWelfareFixtures;
@@ -31,7 +32,7 @@ class TransactionIntegrityTest extends TestCase
     {
         return Expense::create([
             'expense_number' => $number, 'fund_id' => $fund->id, 'category' => 'education',
-            'description' => 'School supplies', 'amount' => '60.00', 'expense_date' => '2026-10-18',
+            'description' => 'School tuition service', 'purchase_kind' => 'service', 'amount' => '60.00', 'expense_date' => '2026-10-18',
             'payee_name' => 'School', 'status' => 'approved',
         ]);
     }
@@ -162,7 +163,7 @@ class TransactionIntegrityTest extends TestCase
                     $copy->save();
                 });
                 $this->fail('The database constraint must prevent duplicate financial records.');
-            } catch (\Illuminate\Database\UniqueConstraintViolationException $exception) {
+            } catch (UniqueConstraintViolationException $exception) {
                 $this->assertNotEmpty($exception->getMessage());
             }
         }

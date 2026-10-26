@@ -79,7 +79,7 @@ class BusinessControlsTest extends TestCase
         $this->assertSame('approved', $a->fresh()->status);
     }
 
-    public function test_asset_purchases_require_handover_and_payer_independence(): void
+    public function test_legacy_asset_purchases_require_handover_and_payer_independence(): void
     {
         $officer = $this->businessActor();
         $w = app(BusinessWorkflowService::class);
@@ -97,6 +97,8 @@ class BusinessControlsTest extends TestCase
         $payment = $this->businessPayment($a, 'disbursement');
         $this->assertBlocked(fn () => $p->record($a, 'disbursement', $payment, $payer), 'payee');
         $payment['payee'] = 'Supplier A';
+        // This regression covers the retained pre-Phase-9 direct-payment path.
+        $a->currentBudget()->update(['legacy_direct_purchase' => true]);
         $movement = $p->record($a, 'disbursement', $payment, $payer);
         $this->assertBlocked(fn () => $p->finalize($a->fresh(), $this->finalization($a), $payer), 'handover');
         $this->assertBlocked(fn () => $m->record($a, 'start', $this->versioned($a, ['started_on' => '2026-10-23', 'evidence' => $this->evidence()]), $officer), 'handover');
@@ -293,8 +295,8 @@ class BusinessControlsTest extends TestCase
         $this->assertBlocked(fn () => $p->record($a, 'disbursement', $this->businessPayment($a, 'disbursement'), $payer), 'actor');
         $doc = $a->agreements()->where('kind', 'initial')->first()->documents()->first();
         Storage::disk('private')->delete($doc->path);
-        $this->assertBlocked(fn () => $p->record($a,'disbursement',$this->businessPayment($a,'disbursement'),$this->businessActor()),'agreement');
-        $this->assertDatabaseCount('transactions',0);
+        $this->assertBlocked(fn () => $p->record($a, 'disbursement', $this->businessPayment($a, 'disbursement'), $this->businessActor()), 'agreement');
+        $this->assertDatabaseCount('transactions', 0);
     }
 
     public function test_view_only_account_has_no_action_forms_and_stage_skips_fail(): void
@@ -302,9 +304,9 @@ class BusinessControlsTest extends TestCase
         $officer = $this->businessActor();
         $a = $this->draftBusiness($officer);
         $this->actingAs($this->staff(['business.view']));
-        $this->get(route('business.applications.show',$a))->assertOk()->assertDontSee('Submit application')->assertDontSee('Edit draft');
-        $this->postJson(route('business.applications.submit',$a),$this->versioned($a))->assertForbidden();
-        $this->actingAs($officer)->postJson(route('business.applications.decide',[$a, 'committee']),$this->versioned($a,['decision' => 'accept', 'notes' => 'Skip']))->assertUnprocessable()->assertJsonValidationErrors('status');
-        $this->get(route('business.applications.show',$a))->assertOk()->assertSee('Submit application');
+        $this->get(route('business.applications.show', $a))->assertOk()->assertDontSee('Submit application')->assertDontSee('Edit draft');
+        $this->postJson(route('business.applications.submit', $a), $this->versioned($a))->assertForbidden();
+        $this->actingAs($officer)->postJson(route('business.applications.decide', [$a, 'committee']), $this->versioned($a, ['decision' => 'accept', 'notes' => 'Skip']))->assertUnprocessable()->assertJsonValidationErrors('status');
+        $this->get(route('business.applications.show', $a))->assertOk()->assertSee('Submit application');
     }
 }
