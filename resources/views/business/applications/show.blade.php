@@ -2,6 +2,7 @@
 @section('title', $application->number.' — '.$application->name)
 @push('styles') @include('business.partials.style') @endpush
 @section('content')
+@if(auth()->user()->hasPermission('procurement.manage'))<p><a href="{{ route('operations.procurement.create',['parent_type'=>'business','parent_id'=>$application->id]) }}">Create purchase request from approved business budget</a></p>@endif
 @php($money = fn($minor) => \App\Domain\Finance\Support\Money::format(\App\Domain\Finance\Support\Money::decimal($minor)))
 <div class="qard-page"><div class="business-hero"><div><h1>{{ $application->number }} · {{ $application->name }}</h1><p class="qmuted">{{ $application->beneficiary?->full_name }} · {{ $application->category_snapshot ?? $application->category?->name }} · Revision {{ $application->revision }}</p></div><div class="qactions"><a class="qbtn secondary" href="{{ route('business.applications.index') }}">Back</a>
 @if(!$application->trashed() && in_array($application->status,['draft','rejected'])) @can('business.manage')<a class="qbtn" href="{{ route('business.applications.edit',$application) }}">Edit draft</a>@endcan @endif

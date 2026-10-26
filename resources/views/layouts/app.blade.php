@@ -894,13 +894,15 @@
                 <span>Tasks</span>
             </a>
 
-            <a
+            @if(auth()->user()->hasPermission('procurement.view'))
+<a
                 href="{{ route('operations.procurement.index') }}"
                 class="nav-item {{ request()->routeIs('operations.procurement.*') ? 'active' : '' }}"
             >
                 <i class="bi bi-cart-check"></i>
                 <span>Procurement</span>
             </a>
+@endif
 
             <a
                 href="{{ route('operations.meetings.index') }}"

@@ -15,6 +15,7 @@ use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
 use App\Domain\Finance\Funds\Services\FundPurposeService;
 use App\Domain\Finance\Support\Money;
+use App\Domain\Procurement\Services\ProcurementGuard;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use App\Http\Requests\Business\BusinessRequest;
 use Illuminate\Http\Request;
@@ -137,6 +138,7 @@ class BusinessController
     public function document(BusinessApplication $application, BusinessDocument $document)
     {
         abort_unless($document->business_application_id === $application->id && Storage::disk('private')->exists($document->path), 404);
+        app(ProcurementGuard::class)->authorizeEvidence('business', $document->movement_id, request()->user());
 
         return Storage::disk('private')->download($document->path, $application->number.'-'.$document->kind.'.'.pathinfo($document->path, PATHINFO_EXTENSION), ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
     }

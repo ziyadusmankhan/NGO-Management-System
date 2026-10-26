@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Projects;
 
 use App\Domain\Committees\Models\Committee;
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Procurement\Services\ProcurementGuard;
 use App\Domain\Projects\Models\Project;
 use App\Domain\Projects\Models\ProjectCategory;
 use App\Domain\Projects\Models\ProjectDocument;
@@ -117,6 +118,7 @@ class ProjectController
     public function document(Project $project, ProjectDocument $document)
     {
         abort_unless((int) $document->project_id === (int) $project->id, 404);
+        app(ProcurementGuard::class)->authorizeEvidence('project', $document->movement_id, request()->user());
         abort_unless(Storage::disk('private')->exists($document->path), 404);
 
         return Storage::disk('private')->download($document->path, $document->original_name, ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
@@ -183,9 +185,9 @@ class ProjectController
             return response()->streamDownload(function () use ($book) {
                 (new Xlsx($book))->save('php://output');
                 $book->disconnectWorksheets();
-            },'projects.xlsx',['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Cache-Control' => 'private, no-store']);
+            }, 'projects.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Cache-Control' => 'private, no-store']);
         }
 
-        return view('projects.reports',compact('rows','totals','filters') + $this->options());
+        return view('projects.reports', compact('rows', 'totals', 'filters') + $this->options());
     }
 }

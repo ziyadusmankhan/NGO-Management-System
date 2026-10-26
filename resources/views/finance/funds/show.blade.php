@@ -111,7 +111,7 @@
         </div>
         <p class="text-muted mt-3 mb-0">
             Opening PKR {{ $money($summary['opening_balance']) }} + new receipts + recoveries + refunds returned − spending − refunds paid out = ledger balance.
-            Allocations include unpaid approved Welfare, Qard, Small Business and Project budgets; they are commitments, not additional ledger debits.
+            Allocations include unpaid approved Welfare, Qard, Small Business Project budgets and standalone office purchase orders; they are commitments, not additional ledger debits.
             Available after allocations = ledger balance − allocations. Recoveries and refunds are included once.
         </p>
         @if(\App\Domain\Finance\Support\Money::minor($summary['available']) < 0)
@@ -129,7 +129,9 @@
                 @forelse($allocations as $assistance)
                     <tr>
                         <td>
-                            @if($assistance instanceof \App\Domain\Projects\Models\Project)
+                            @if($assistance instanceof \App\Domain\Procurement\Models\Procurement)
+                                @if(auth()->user()->hasPermission('procurement.view'))<a href="{{ route('operations.procurement.show',$assistance) }}">{{ $assistance->number }}</a>@else {{ $assistance->number }} @endif
+                            @elseif($assistance instanceof \App\Domain\Projects\Models\Project)
                                 @can('projects.view')<a href="{{ route('projects.show',$assistance) }}">{{ $assistance->number }}</a>@else {{ $assistance->number }} @endcan
                             @elseif($assistance instanceof \App\Domain\Business\Models\BusinessApplication)
                                 @if(auth()->user()->hasPermission('business.view'))

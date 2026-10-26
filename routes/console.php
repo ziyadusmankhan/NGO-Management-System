@@ -12,6 +12,9 @@ Schedule::command('business:refresh-reminders')->dailyAt('08:10')
 Schedule::command('qard:refresh-reminders')->dailyAt('08:05')
     ->timezone('Asia/Karachi')->withoutOverlapping(30);
 
+Schedule::command('procurement:refresh-reminders')->dailyAt('08:15')
+    ->timezone('Asia/Karachi')->withoutOverlapping(30);
+
 Schedule::command('welfare:refresh-reminders')->dailyAt('08:00')
     ->timezone(config('welfare.timezone'))->withoutOverlapping(30);
 

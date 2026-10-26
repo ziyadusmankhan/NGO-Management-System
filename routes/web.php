@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-
 Route::redirect('/', '/login');
 
 require __DIR__.'/auth.php';
@@ -20,9 +19,9 @@ Route::get('/settings', function () {
 })->name('settings.index');
 
 use App\Http\Controllers\Welfare\BeneficiaryController;
-use App\Http\Controllers\Welfare\WelfareApplicationController;
-use App\Http\Controllers\Welfare\WelfareApplicationAgreementController;
 use App\Http\Controllers\Welfare\BeneficiaryVerificationController;
+use App\Http\Controllers\Welfare\WelfareApplicationAgreementController;
+use App\Http\Controllers\Welfare\WelfareApplicationController;
 
 Route::middleware(['auth'])->group(function () {
 
@@ -63,7 +62,6 @@ Route::middleware(['auth'])->group(function () {
                     ])->name('destroy');
                 });
 
-
             /*
              * Verification
              */
@@ -81,7 +79,6 @@ Route::middleware(['auth'])->group(function () {
                     ])->name('reject-verification');
                 });
 
-
             /*
              * Approval
              */
@@ -98,7 +95,6 @@ Route::middleware(['auth'])->group(function () {
                         'rejectApproval',
                     ])->name('reject-approval');
                 });
-
 
             /*
              * Read-only routes
@@ -179,7 +175,6 @@ Route::prefix('welfare/applications')
             ->name('show');
     });
 
-
 /*
  * Welfare application agreements.
  */
@@ -215,22 +210,20 @@ Route::prefix('welfare/applications/{application}/agreement')
         ])
             ->middleware('permission:welfare.agreements.manage')
             ->name('signature');
-        
-        
+
         Route::get('/evidence/{party}', [
             WelfareApplicationAgreementController::class,
             'evidence',
         ])
             ->middleware('permission:welfare.agreements.view')
             ->name('evidence');
-        
+
         Route::get('/print', [
             WelfareApplicationAgreementController::class,
             'printable',
         ])
             ->middleware('permission:welfare.agreements.view')
             ->name('print');
-
 
         Route::get('/', [
             WelfareApplicationAgreementController::class,
@@ -239,7 +232,6 @@ Route::prefix('welfare/applications/{application}/agreement')
             ->middleware('permission:welfare.agreements.view')
             ->name('show');
     });
-
 
 // use App\Http\Controllers\Welfare\BeneficiaryVerificationController;
 
@@ -260,7 +252,6 @@ Route::prefix('welfare/verification')
         )
             ->middleware('permission:welfare.view')
             ->name('index');
-
 
         /*
          * Assignment page MUST come before /{verification}.
@@ -302,7 +293,6 @@ Route::prefix('welfare/verification')
             )->name('complete');
         });
 
-
         /*
          * Evidence files (private disk, served via this route).
          */
@@ -315,7 +305,6 @@ Route::prefix('welfare/verification')
         )
             ->middleware('permission:welfare.view')
             ->name('evidence');
-
 
         /*
          * Detail page MUST come after /create.
@@ -330,7 +319,6 @@ Route::prefix('welfare/verification')
             ->middleware('permission:welfare.view')
             ->name('show');
     });
-
 
 require __DIR__.'/business.php';
 require __DIR__.'/projects.php';
@@ -349,17 +337,7 @@ Route::get('/operations/tasks/{id}', function ($id) {
     return view('shared.module-pending', ['moduleTitle' => 'Tasks']);
 })->name('operations.tasks.show');
 
-Route::get('/operations/procurement', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Procurement']);
-})->name('operations.procurement.index');
-
-Route::get('/operations/procurement/create', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Procurement']);
-})->name('operations.procurement.create');
-
-Route::get('/operations/procurement/{id}', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Procurement']);
-})->name('operations.procurement.show');
+require __DIR__.'/procurement.php';
 
 Route::get('/operations/meetings', function () {
     return view('shared.module-pending', ['moduleTitle' => 'Meetings']);
@@ -458,7 +436,6 @@ Route::middleware([
     )->name('users.index');
 });
 
-
 Route::middleware([
     'auth',
     'permission:users.manage',
@@ -497,7 +474,6 @@ Route::middleware([
     )->name('users.destroy');
 });
 
-
 use App\Http\Controllers\Users\RoleController;
 
 Route::middleware('auth')->group(function () {
@@ -519,7 +495,6 @@ Route::middleware('auth')->group(function () {
     )->name('users.roles.update');
 
 });
-
 
 Route::middleware([
     'auth',
@@ -727,7 +702,6 @@ Route::prefix('finance/expenses')
             ->middleware('permission:finance.expenses.approve')
             ->name('paid');
     });
-
 
 use App\Http\Controllers\Finance\RestrictedFundController;
 

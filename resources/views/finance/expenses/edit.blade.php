@@ -181,6 +181,7 @@
         >
 
             @csrf
+@include('finance.expenses.purchase-kind')
             @method('PUT')
 
             <div class="grid">

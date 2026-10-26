@@ -11,6 +11,7 @@ class StoreExpenseRequest extends FormRequest
     {
         return true;
     }
+
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -23,6 +24,7 @@ class StoreExpenseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'purchase_kind' => ['required', 'in:service,labor,other_non_goods'],
             'fund_id' => [
                 'required',
                 'integer',

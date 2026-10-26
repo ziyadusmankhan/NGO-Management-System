@@ -483,6 +483,7 @@
     id="expenseForm"
 >
     @csrf
+@include('finance.expenses.purchase-kind')
 
 <div class="page-header">
 

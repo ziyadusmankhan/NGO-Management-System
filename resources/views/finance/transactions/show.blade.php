@@ -266,7 +266,9 @@
     $sourceUrl = null;
 
     if ($transaction->source) {
-        if ($transaction->source instanceof \App\Domain\Projects\Models\ProjectMovement) {
+        if ($transaction->source instanceof \App\Domain\Procurement\Models\ProcurementMovement) {
+            $sourceUrl=auth()->user()->hasPermission('procurement.view')?route('operations.procurement.show',$transaction->source->procurement):null;
+        } elseif ($transaction->source instanceof \App\Domain\Projects\Models\ProjectMovement) {
             $sourceUrl = auth()->user()->hasPermission('projects.view') ? route('projects.show',$transaction->source->project) : null;
         } elseif ($transaction->source instanceof \App\Domain\Business\Models\BusinessMovement) {
             $sourceUrl = auth()->user()->hasPermission('business.view') ? route('business.applications.show', $transaction->source->application) : null;

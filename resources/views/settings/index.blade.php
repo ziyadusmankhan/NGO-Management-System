@@ -977,6 +977,7 @@
 
                     <strong>
                         Procurement Rules
+@if(auth()->user()->hasPermission('procurement.view'))<a href="{{ route('operations.procurement.settings') }}">Manage saved procurement rules</a>@endif
                     </strong>
 
                     <span>

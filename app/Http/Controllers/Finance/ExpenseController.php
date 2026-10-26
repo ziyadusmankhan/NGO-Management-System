@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers\Finance;
 
-use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
+use App\Domain\Finance\Funds\Services\FundPurposeService;
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
+use App\Domain\Finance\Transactions\Services\TransactionService;
+use App\Domain\Procurement\Models\ProcurementMovement;
+use App\Domain\Projects\Models\ProjectMovement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\StoreExpenseRequest;
 use App\Http\Requests\Finance\UpdateExpenseRequest;
-use App\Domain\Finance\Transactions\Services\TransactionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+
 class ExpenseController extends Controller
 {
     public function index(): View
@@ -65,10 +70,6 @@ class ExpenseController extends Controller
             ->latest('id')
             ->paginate(15)
             ->withQueryString();
-        
-    
-        
-           
 
         /*
         * Financial summaries come from posted debit transactions.
@@ -110,13 +111,19 @@ class ExpenseController extends Controller
                 }
             ));
 
-        $projects = Money::decimal(Money::add(Money::minor($projects), Money::sumMinor((clone $postedDebits)->where('source_type', (new \App\Domain\Projects\Models\ProjectMovement)->getMorphClass()))));
-        $projectPayments=\App\Domain\Projects\Models\ProjectMovement::where('kind','payment')->with(['project','transaction'])
-            ->when(request('category') && request('category') !== 'project',fn($q)=>$q->whereRaw('1=0'))
-            ->when(request('fund_id'),fn($q,$v)=>$q->where('fund_id',$v))
-            ->when(request('status'),fn($q,$v)=>$q->where('status',$v === 'paid' ? 'posted' : $v))
-            ->when(request('search'),fn($q,$v)=>$q->where(fn($q)=>$q->where('payee','like','%'.$v.'%')->orWhereHas('project',fn($p)=>$p->where('number','like','%'.$v.'%')->orWhere('name','like','%'.$v.'%'))))
-            ->latest('id')->paginate(15,['*'],'project_page')->withQueryString();
+        $projects = Money::decimal(Money::add(Money::minor($projects), Money::sumMinor((clone $postedDebits)->where('source_type', (new ProjectMovement)->getMorphClass()))));
+        $projectPayments = ProjectMovement::where('kind', 'payment')->with(['project', 'transaction'])
+            ->when(request('category') && request('category') !== 'project', fn ($q) => $q->whereRaw('1=0'))
+            ->when(request('fund_id'), fn ($q, $v) => $q->where('fund_id', $v))
+            ->when(request('status'), fn ($q, $v) => $q->where('status', $v === 'paid' ? 'posted' : $v))
+            ->when(request('search'), fn ($q, $v) => $q->where(fn ($q) => $q->where('payee', 'like', '%'.$v.'%')->orWhereHas('project', fn ($p) => $p->where('number', 'like', '%'.$v.'%')->orWhere('name', 'like', '%'.$v.'%'))))
+            ->latest('id')->paginate(15, ['*'], 'project_page')->withQueryString();
+        $procurementPayments = ProcurementMovement::whereNull('source_type')->where('kind', 'payment')->with(['procurement', 'transaction'])
+            ->when(request('category') && request('category') !== 'admin', fn ($q) => $q->whereRaw('1=0'))
+            ->when(request('fund_id'), fn ($q, $v) => $q->where('fund_id', $v))
+            ->when(request('status'), fn ($q, $v) => $q->where('status', $v === 'paid' ? 'posted' : $v))
+            ->when(request('search'), fn ($q, $v) => $q->whereHas('procurement', fn ($p) => $p->where('number', 'like', '%'.$v.'%')))
+            ->latest('id')->paginate(15, ['*'], 'procurement_page')->withQueryString();
         $pending = Expense::query()
             ->where('status', 'pending')
             ->count();
@@ -131,6 +138,7 @@ class ExpenseController extends Controller
             compact(
                 'expenses',
                 'projectPayments',
+                'procurementPayments',
                 'funds',
                 'thisMonth',
                 'thisYear',
@@ -145,7 +153,7 @@ class ExpenseController extends Controller
         Fund $fund,
         string $category
     ): bool {
-        return app(\App\Domain\Finance\Funds\Services\FundPurposeService::class)
+        return app(FundPurposeService::class)
             ->allowsExpense($fund, $category);
     }
 
@@ -183,11 +191,13 @@ class ExpenseController extends Controller
     ): RedirectResponse {
 
         $data = $request->validated();
-        if (($data['category'] ?? '') === 'project' || (isset($expense) && $expense->category === 'project')) { throw \Illuminate\Validation\ValidationException::withMessages(['category'=>'Use Projects for new spending. Historical Project expenses cannot be edited; posted approvals may still be marked paid.']); }
+        if (($data['category'] ?? '') === 'project' || (isset($expense) && $expense->category === 'project')) {
+            throw ValidationException::withMessages(['category' => 'Use Projects for new spending. Historical Project expenses cannot be edited; posted approvals may still be marked paid.']);
+        }
 
         $fund = Fund::findOrFail($data['fund_id']);
         if (
-            !$this->fundPurposeAllowsExpense(
+            ! $this->fundPurposeAllowsExpense(
                 $fund,
                 $data['category']
             )
@@ -236,7 +246,7 @@ class ExpenseController extends Controller
             $nextNumber = ($lastExpense?->id ?? 0) + 1;
 
             $data['expense_number'] =
-                'EXP-' . str_pad(
+                'EXP-'.str_pad(
                     $nextNumber,
                     5,
                     '0',
@@ -321,7 +331,7 @@ class ExpenseController extends Controller
             * In that case, show the fund's current balance as the available
             * financial context rather than pretending money was deducted.
             */
-            if (!$expense->transaction || $expense->transaction->status !== 'posted') {
+            if (! $expense->transaction || $expense->transaction->status !== 'posted') {
                 $balanceBefore = $balanceService->balance($fund);
                 $balanceAfter = $balanceBefore;
             }
@@ -376,11 +386,13 @@ class ExpenseController extends Controller
         }
 
         $data = $request->validated();
-        if (($data['category'] ?? '') === 'project' || (isset($expense) && $expense->category === 'project')) { throw \Illuminate\Validation\ValidationException::withMessages(['category'=>'Use Projects for new spending. Historical Project expenses cannot be edited; posted approvals may still be marked paid.']); }
+        if (($data['category'] ?? '') === 'project' || (isset($expense) && $expense->category === 'project')) {
+            throw ValidationException::withMessages(['category' => 'Use Projects for new spending. Historical Project expenses cannot be edited; posted approvals may still be marked paid.']);
+        }
 
         $fund = Fund::findOrFail($data['fund_id']);
         if (
-            !$this->fundPurposeAllowsExpense(
+            ! $this->fundPurposeAllowsExpense(
                 $fund,
                 $data['category']
             )
@@ -453,20 +465,18 @@ class ExpenseController extends Controller
             return back()
                 ->withInput()
                 ->withErrors([
-                    'status' =>
-                        'An expense must be approved before it can be marked as paid.',
+                    'status' => 'An expense must be approved before it can be marked as paid.',
                 ]);
         }
         if (
             in_array($data['status'], ['approved', 'paid'], true)
             && $fund->require_documents
-            && !$data['has_supporting_document']
+            && ! $data['has_supporting_document']
         ) {
             return back()
                 ->withInput()
                 ->withErrors([
-                    'has_supporting_document' =>
-                        'This fund requires supporting documentation before the expense can be approved or paid.',
+                    'has_supporting_document' => 'This fund requires supporting documentation before the expense can be approved or paid.',
                 ]);
         }
 
@@ -507,29 +517,21 @@ class ExpenseController extends Controller
                     ->syncForSource(
                         $expense,
                         [
-                            'fund_id' =>
-                                $expense->fund_id,
+                            'fund_id' => $expense->fund_id,
 
-                            'type' =>
-                                'expense',
+                            'type' => 'expense',
 
-                            'reference' =>
-                                $expense->expense_number,
+                            'reference' => $expense->expense_number,
 
-                            'description' =>
-                                $expense->description,
+                            'description' => $expense->description,
 
-                            'amount' =>
-                                $expense->amount,
+                            'amount' => $expense->amount,
 
-                            'direction' =>
-                                'debit',
+                            'direction' => 'debit',
 
-                            'transaction_date' =>
-                                $expense->expense_date,
+                            'transaction_date' => $expense->expense_date,
 
-                            'status' =>
-                                'posted',
+                            'status' => 'posted',
                         ]
                     );
             }
@@ -564,19 +566,18 @@ class ExpenseController extends Controller
         FundBalanceService $balanceService
     ): RedirectResponse {
 
-        if (!in_array($expense->status, [
+        if (! in_array($expense->status, [
             'pending',
         ], true)) {
             return back()
                 ->withErrors([
-                    'status' =>
-                        'Only pending expenses can be approved.',
+                    'status' => 'Only pending expenses can be approved.',
                 ]);
         }
 
         $fund = $expense->fund;
 
-        if (!$fund) {
+        if (! $fund) {
             return back()
                 ->withErrors([
                     'fund_id' => 'This expense is not linked to a fund.',
@@ -586,23 +587,21 @@ class ExpenseController extends Controller
         if ($fund->status !== 'active') {
             return back()
                 ->withErrors([
-                    'fund_id' =>
-                        'The expense fund is unavailable or inactive.',
+                    'fund_id' => 'The expense fund is unavailable or inactive.',
                 ]);
         }
 
         if (
             $fund->require_documents
-            && !$expense->has_supporting_document
+            && ! $expense->has_supporting_document
         ) {
             return back()
                 ->withErrors([
-                    'documents' =>
-                        'Supporting documentation is required before this expense can be approved.',
+                    'documents' => 'Supporting documentation is required before this expense can be approved.',
                 ]);
         }
         if (
-            !$this->fundPurposeAllowsExpense(
+            ! $this->fundPurposeAllowsExpense(
                 $fund,
                 $expense->category
             )
@@ -634,43 +633,32 @@ class ExpenseController extends Controller
         DB::transaction(function () use ($expense) {
 
             $expense->update([
-                'status' =>
-                    'approved',
+                'status' => 'approved',
 
-                'approved_by' =>
-                    auth()->id(),
+                'approved_by' => auth()->id(),
 
-                'approved_at' =>
-                    now(),
+                'approved_at' => now(),
             ]);
 
             app(TransactionService::class)
                 ->syncForSource(
                     $expense,
                     [
-                        'fund_id' =>
-                            $expense->fund_id,
+                        'fund_id' => $expense->fund_id,
 
-                        'type' =>
-                            'expense',
+                        'type' => 'expense',
 
-                        'reference' =>
-                            $expense->expense_number,
+                        'reference' => $expense->expense_number,
 
-                        'description' =>
-                            $expense->description,
+                        'description' => $expense->description,
 
-                        'amount' =>
-                            $expense->amount,
+                        'amount' => $expense->amount,
 
-                        'direction' =>
-                            'debit',
+                        'direction' => 'debit',
 
-                        'transaction_date' =>
-                            $expense->expense_date,
+                        'transaction_date' => $expense->expense_date,
 
-                        'status' =>
-                            'posted',
+                        'status' => 'posted',
                     ]
                 );
         });
@@ -685,14 +673,13 @@ class ExpenseController extends Controller
         Expense $expense
     ): RedirectResponse {
 
-        if (!in_array($expense->status, [
+        if (! in_array($expense->status, [
             'pending',
             'approved',
         ], true)) {
             return back()
                 ->withErrors([
-                    'status' =>
-                        'This expense cannot be rejected at its current stage.',
+                    'status' => 'This expense cannot be rejected at its current stage.',
                 ]);
         }
 
@@ -719,8 +706,7 @@ class ExpenseController extends Controller
         if ($expense->status !== 'approved') {
             return back()
                 ->withErrors([
-                    'status' =>
-                        'Only approved expenses can be marked as paid.',
+                    'status' => 'Only approved expenses can be marked as paid.',
                 ]);
         }
 
@@ -734,29 +720,21 @@ class ExpenseController extends Controller
                 ->syncForSource(
                     $expense,
                     [
-                        'fund_id' =>
-                            $expense->fund_id,
+                        'fund_id' => $expense->fund_id,
 
-                        'type' =>
-                            'expense',
+                        'type' => 'expense',
 
-                        'reference' =>
-                            $expense->expense_number,
+                        'reference' => $expense->expense_number,
 
-                        'description' =>
-                            $expense->description,
+                        'description' => $expense->description,
 
-                        'amount' =>
-                            $expense->amount,
+                        'amount' => $expense->amount,
 
-                        'direction' =>
-                            'debit',
+                        'direction' => 'debit',
 
-                        'transaction_date' =>
-                            $expense->expense_date,
+                        'transaction_date' => $expense->expense_date,
 
-                        'status' =>
-                            'posted',
+                        'status' => 'posted',
                     ]
                 );
         });

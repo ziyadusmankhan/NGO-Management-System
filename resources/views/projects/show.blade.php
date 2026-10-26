@@ -2,6 +2,7 @@
 @section('title',$project->number.' · '.$project->name)
 @push('styles')@include('projects.style')@endpush
 @section('content')
+@if(auth()->user()->hasPermission('procurement.manage'))<p><a href="{{ route('operations.procurement.create',['parent_type'=>'project','parent_id'=>$project->id]) }}">Create purchase request from approved project budget</a></p>@endif
 @php($money=\App\Domain\Finance\Support\Money::class)
 <div class="qard-page project-page"><div class="business-hero"><div><h1>{{ $project->number }} · {{ $project->name }}</h1><p class="qmuted">{{ str($project->status)->headline() }} · Revision {{ $project->revision }}: {{ str($revision->stage)->headline() }}{{ $project->trashed()?' · Archived':'' }}</p></div><a class="qbtn secondary" href="{{ route('projects.index') }}">Back</a></div>
 @include('qard.partials.feedback')

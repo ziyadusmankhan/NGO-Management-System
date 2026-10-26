@@ -15,6 +15,7 @@ class UpdateExpenseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'purchase_kind' => ['required', 'in:service,labor,other_non_goods'],
             'fund_id' => [
                 'required',
                 'integer',
