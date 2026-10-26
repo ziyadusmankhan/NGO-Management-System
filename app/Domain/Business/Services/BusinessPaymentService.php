@@ -10,6 +10,7 @@ use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Support\PrincipalSchedule;
 use App\Domain\Finance\Transactions\Services\TransactionService;
 use App\Domain\Members\Models\Member;
+use App\Domain\Procurement\Services\ProcurementGuard;
 use App\Domain\Users\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -99,6 +100,7 @@ class BusinessPaymentService
                     if ($item->release_method !== 'cash' && $data['payee'] !== $item->supplier) {
                         $this->workflow->fail('payee', 'Pay the supplier recorded in the approved budget.');
                     }
+                    app(ProcurementGuard::class)->payment('business', $application, $item, $amount);
                     $remaining = min($application->remainingMinor(), Money::minor($item->organization_amount) - $item->paidMinor());
                     if ($amount > $remaining) {
                         $this->workflow->fail('amount', 'The remaining approved release for this item is PKR '.Money::decimal($remaining).'.');
@@ -182,6 +184,7 @@ class BusinessPaymentService
             DB::transaction(function () use ($application, $data, $actor, $files) {
                 $application = $this->workflow->lock($application);
                 $this->workflow->current($application, $data);
+                app(ProcurementGuard::class)->assertNoOpen('business', $application->id);
                 $this->assertPayer($application, $actor);
                 if ($application->status !== 'signed' || $application->funding_status !== 'open' || $application->releasedMinor() < 1) {
                     $this->workflow->fail('status', 'Finalize an open signed case after at least one payment.');
@@ -226,6 +229,7 @@ class BusinessPaymentService
         DB::transaction(function () use ($application, $movement, $data, $actor) {
             $application = $this->workflow->lock($application);
             $movement = $application->movements()->whereKey($movement->id)->lockForUpdate()->firstOrFail();
+            app(ProcurementGuard::class)->linked($movement);
             $this->ledger->assertMatchesBusiness($movement->transaction, $movement);
             if ($movement->status === 'void') {
                 return;

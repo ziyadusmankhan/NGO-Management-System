@@ -6,6 +6,7 @@ use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Services\TransactionService;
 use App\Domain\Members\Models\Member;
+use App\Domain\Procurement\Services\ProcurementGuard;
 use App\Domain\Projects\Models\Project;
 use App\Domain\Projects\Models\ProjectMovement;
 use App\Domain\Users\Models\User;
@@ -85,6 +86,7 @@ class ProjectPaymentService
                     if (! $budget || $budget->payee !== $d['payee']) {
                         $this->workflow->fail('budget_item_id', 'Use an approved budget item and its approved payee. Supplier changes require an amendment.');
                     }
+                    app(ProcurementGuard::class)->payment('project', $p, $budget, $amount);
                     if ($amount > Money::minor($budget->amount) - $p->netMinor($budget->budget_item_id) || $amount > $p->remainingMinor()) {
                         $this->workflow->fail('amount', 'This payment exceeds the remaining item or total budget.');
                     }
@@ -97,6 +99,7 @@ class ProjectPaymentService
                     if (! $original) {
                         $this->workflow->fail('original_payment_id', 'Choose a posted payment belonging to this project.');
                     }
+                    app(ProcurementGuard::class)->linked($original);
                     $refunded = Money::sumMinor($p->movements()->where('original_payment_id', $original->id)->where('status', 'posted')->getQuery());
                     if ($amount > Money::minor($original->amount) - $refunded) {
                         $this->workflow->fail('amount', 'The refund exceeds the unrefunded amount of the original payment.');
@@ -127,6 +130,7 @@ class ProjectPaymentService
             }
             $p = Project::withTrashed()->lockForUpdate()->findOrFail($p->id);
             $m = $p->movements()->findOrFail($m->id);
+            app(ProcurementGuard::class)->linked($m);
             $this->reconcile($p);
             if ($m->status === 'void') {
                 return;
@@ -143,8 +147,9 @@ class ProjectPaymentService
                 }
             }
             $m->update(['status' => 'void', 'voided_by' => $actor->id, 'voided_at' => now(), 'void_reason' => $d['reason']]);
+            app(ProcurementGuard::class)->afterProjectCorrection($p);
             $this->ledger->voidForSource($m);
-            $this->workflow->event($p,$actor,$m->kind.'_voided',[],['movement_id' => $m->id, 'reason' => $d['reason']]);
+            $this->workflow->event($p, $actor, $m->kind.'_voided', [], ['movement_id' => $m->id, 'reason' => $d['reason']]);
         }, 5);
     }
 }

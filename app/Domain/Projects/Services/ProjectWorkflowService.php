@@ -7,6 +7,7 @@ use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundPurposeService;
 use App\Domain\Finance\Funds\Services\FundService;
 use App\Domain\Finance\Support\Money;
+use App\Domain\Procurement\Services\ProcurementGuard;
 use App\Domain\Projects\Models\Project;
 use App\Domain\Projects\Models\ProjectCategory;
 use App\Domain\Users\Models\User;
@@ -63,7 +64,7 @@ class ProjectWorkflowService
                 }
             }
 
-return $callback($stored);
+            return $callback($stored);
         } catch (\Throwable $e) {
             foreach ($stored as $f) {
                 Storage::disk('private')->delete($f['path']);
@@ -194,6 +195,7 @@ return $callback($stored);
 
     public function limits(Project $p, int $revision): void
     {
+        app(ProcurementGuard::class)->projectBudget($p, $revision);
         $r = $p->revisions()->where('revision', $revision)->firstOrFail();
         if (Money::minor($r->budget) < $p->netMinor()) {
             $this->fail('budget', 'The budget cannot be below existing net expenditure.');
@@ -301,6 +303,9 @@ return $callback($stored);
                 $this->current($p, $d);
                 $r = $p->proposal();
                 $before = $p->toArray();
+                if (in_array($action, ['close', 'cancel'])) {
+                    app(ProcurementGuard::class)->assertNoOpen('project', $p->id);
+                }
                 if (in_array($action, ['amend', 'reopen'])) {
                     if ($action === 'reopen' && ! in_array($p->status, ['closed', 'cancelled']) || $action === 'amend' && in_array($p->status, ['closed', 'cancelled'])) {
                         $this->fail('status', 'Use reopening for a closed or cancelled project.');
@@ -315,6 +320,7 @@ return $callback($stored);
                     foreach ($p->budgets()->get() as $item) {
                         $copy = $item->replicate();
                         $copy->revision = $next;
+                        $copy->legacy_direct_purchase = false;
                         $copy->save();
                     }
                     // Evidence remains explicitly associated with the prior revision; attach fresh estimates for the new revision.
@@ -370,16 +376,16 @@ return $callback($stored);
     {
         $d = ProjectRules::validate('dedicated-fund', $input);
         abort_unless($actor->hasPermission('finance.funds.manage') && $actor->hasPermission('projects.view'), 403);
-        DB::transaction(function () use ($p,$d,$actor) {
+        DB::transaction(function () use ($p, $d, $actor) {
             $p = $this->lock($p);
-            $this->current($p,$d);
+            $this->current($p, $d);
             if ($p->fund_id || $p->fund_locked_at || $p->proposal()->stage !== 'draft') {
-                $this->fail('fund_id','Create a dedicated fund only for a draft with no assigned fund.');
+                $this->fail('fund_id', 'Create a dedicated fund only for a draft with no assigned fund.');
             }
-            $fund = app(FundService::class)->create(['name' => $d['name'], 'type' => 'restricted', 'purpose' => $p->proposal()->purpose, 'opening_balance' => '0.00', 'status' => 'active', 'restrict_spending' => true, 'protect_restricted_designation' => true, 'prevent_negative_balance' => true],$actor);
+            $fund = app(FundService::class)->create(['name' => $d['name'], 'type' => 'restricted', 'purpose' => $p->proposal()->purpose, 'opening_balance' => '0.00', 'status' => 'active', 'restrict_spending' => true, 'protect_restricted_designation' => true, 'prevent_negative_balance' => true], $actor);
             $fund->forceFill(['project_id' => $p->id])->save();
             $p->update(['fund_id' => $fund->id]);
-            $this->event($p,$actor,'dedicated_fund_created',[],['fund_id' => $fund->id]);
-        },5);
+            $this->event($p, $actor, 'dedicated_fund_created', [], ['fund_id' => $fund->id]);
+        }, 5);
     }
 }

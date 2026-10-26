@@ -2,15 +2,20 @@
 
 namespace App\Console\Commands;
 
+use App\Domain\Business\Models\BusinessMovement;
 use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
-use App\Domain\Finance\Transactions\Services\TransactionService;
-use Illuminate\Console\Command;
-use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
-use App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment;
+use App\Domain\Finance\Support\Money;
+use App\Domain\Finance\Transactions\Services\TransactionService;
+use App\Domain\Procurement\Models\Procurement;
+use App\Domain\Procurement\Models\ProcurementMovement;
+use App\Domain\Procurement\Services\ProcurementPaymentService;
+use App\Domain\Projects\Models\ProjectMovement;
 use App\Domain\Qard\Models\QardMovement;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment;
+use Illuminate\Console\Command;
 use Illuminate\Validation\ValidationException;
 
 class SyncFinancialTransactions extends Command
@@ -42,7 +47,7 @@ class SyncFinancialTransactions extends Command
                 $transaction = $donation->transaction()->withTrashed()->first();
 
                 $eligible =
-                    !$donation->trashed()
+                    ! $donation->trashed()
                     && $donation->fund_id
                     && in_array(
                         $donation->status,
@@ -50,7 +55,7 @@ class SyncFinancialTransactions extends Command
                         true
                     );
 
-                if (!$eligible) {
+                if (! $eligible) {
 
                     if ($transaction && $transaction->status !== 'void') {
                         $service->voidForSource($donation);
@@ -64,33 +69,24 @@ class SyncFinancialTransactions extends Command
                 $service->syncForSource(
                     $donation,
                     [
-                        'fund_id' =>
-                            $donation->fund_id,
+                        'fund_id' => $donation->fund_id,
 
-                        'type' =>
-                            'donation',
+                        'type' => 'donation',
 
-                        'reference' =>
-                            $donation->donation_number,
+                        'reference' => $donation->donation_number,
 
-                        'description' =>
-                            'Donation from ' .
+                        'description' => 'Donation from '.
                             $donation->donor_name,
 
-                        'amount' =>
-                            $donation->amount,
+                        'amount' => $donation->amount,
 
-                        'direction' =>
-                            'credit',
+                        'direction' => 'credit',
 
-                        'transaction_date' =>
-                            $donation->donation_date,
+                        'transaction_date' => $donation->donation_date,
 
-                        'status' =>
-                            'posted',
+                        'status' => 'posted',
 
-                        'recorded_by' =>
-                            $donation->recorded_by,
+                        'recorded_by' => $donation->recorded_by,
                     ]
                 );
 
@@ -105,7 +101,6 @@ class SyncFinancialTransactions extends Command
             "Donation transactions voided: {$donationsVoided}"
         );
 
-
         $this->info('Synchronizing expenses...');
 
         Expense::withTrashed()
@@ -118,7 +113,7 @@ class SyncFinancialTransactions extends Command
                 $transaction = $expense->transaction()->withTrashed()->first();
 
                 $eligible =
-                    !$expense->trashed()
+                    ! $expense->trashed()
                     && $expense->fund_id
                     && in_array(
                         $expense->status,
@@ -126,7 +121,7 @@ class SyncFinancialTransactions extends Command
                         true
                     );
 
-                if (!$eligible) {
+                if (! $eligible) {
 
                     if ($transaction && $transaction->status !== 'void') {
                         $service->voidForSource($expense);
@@ -137,36 +132,31 @@ class SyncFinancialTransactions extends Command
                     return;
                 }
 
-                if ($expense->category === 'project' && (!$transaction || $transaction->status !== 'posted' || $transaction->trashed())) { $this->warn('Legacy Project expense #'.$expense->id.' needs review; no new debit created.'); return; }
+                if ($expense->category === 'project' && (! $transaction || $transaction->status !== 'posted' || $transaction->trashed())) {
+                    $this->warn('Legacy Project expense #'.$expense->id.' needs review; no new debit created.');
+
+                    return;
+                }
                 $service->syncForSource(
                     $expense,
                     [
-                        'fund_id' =>
-                            $expense->fund_id,
+                        'fund_id' => $expense->fund_id,
 
-                        'type' =>
-                            'expense',
+                        'type' => 'expense',
 
-                        'reference' =>
-                            $expense->expense_number,
+                        'reference' => $expense->expense_number,
 
-                        'description' =>
-                            $expense->description,
+                        'description' => $expense->description,
 
-                        'amount' =>
-                            $expense->amount,
+                        'amount' => $expense->amount,
 
-                        'direction' =>
-                            'debit',
+                        'direction' => 'debit',
 
-                        'transaction_date' =>
-                            $expense->expense_date,
+                        'transaction_date' => $expense->expense_date,
 
-                        'status' =>
-                            'posted',
+                        'status' => 'posted',
 
-                        'recorded_by' =>
-                            $expense->recorded_by,
+                        'recorded_by' => $expense->recorded_by,
                     ]
                 );
 
@@ -181,20 +171,36 @@ class SyncFinancialTransactions extends Command
             "Expense transactions voided: {$expensesVoided}"
         );
 
-
         $this->newLine();
         $this->info('Reconciling funds...');
 
         $mismatches = 0;
 
-        \App\Domain\Business\Models\BusinessMovement::with('transaction')->each(function ($movement) use ($service, &$mismatches) {
-            try { $service->assertMatchesBusiness($movement->transaction, $movement); }
-            catch (ValidationException $exception) { $mismatches++; $this->warn('Business movement #'.$movement->id.': missing or inconsistent ledger entry.'); }
+        Procurement::withTrashed()->each(function ($purchase) use (&$mismatches) {
+            try {
+                app(ProcurementPaymentService::class)->reconcile($purchase);
+            } catch (ValidationException $exception) {
+                $mismatches++;
+                $this->warn($purchase->number.': missing or inconsistent procurement ledger entry.');
+            }
         });
 
-        \App\Domain\Projects\Models\ProjectMovement::with('transaction')->each(function ($movement) use ($service, &$mismatches) {
-            try { $service->assertMatchesProject($movement->transaction,$movement); }
-            catch (ValidationException $exception) { $mismatches++; $this->warn('Project movement #'.$movement->id.': missing or inconsistent ledger entry.'); }
+        BusinessMovement::with('transaction')->each(function ($movement) use ($service, &$mismatches) {
+            try {
+                $service->assertMatchesBusiness($movement->transaction, $movement);
+            } catch (ValidationException $exception) {
+                $mismatches++;
+                $this->warn('Business movement #'.$movement->id.': missing or inconsistent ledger entry.');
+            }
+        });
+
+        ProjectMovement::with('transaction')->each(function ($movement) use ($service, &$mismatches) {
+            try {
+                $service->assertMatchesProject($movement->transaction, $movement);
+            } catch (ValidationException $exception) {
+                $mismatches++;
+                $this->warn('Project movement #'.$movement->id.': missing or inconsistent ledger entry.');
+            }
         });
 
         QardMovement::with('transaction')->each(function (QardMovement $movement) use ($service, &$mismatches) {
@@ -217,7 +223,6 @@ class SyncFinancialTransactions extends Command
                 }
             });
 
-
         Fund::query()
             ->withTrashed()
             ->orderBy('id')
@@ -235,13 +240,16 @@ class SyncFinancialTransactions extends Command
                 $qardCredits = Money::sumMinor(QardMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'repayment'));
                 $qardDebits = Money::sumMinor(QardMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'disbursement'));
                 $sourceBalance = Money::add($sourceBalance, Money::add($qardCredits, -$qardDebits));
-                $businessCredits = Money::sumMinor(\App\Domain\Business\Models\BusinessMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'repayment'));
-                $businessDebits = Money::sumMinor(\App\Domain\Business\Models\BusinessMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'disbursement'));
+                $businessCredits = Money::sumMinor(BusinessMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'repayment'));
+                $businessDebits = Money::sumMinor(BusinessMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'disbursement'));
                 $sourceBalance = Money::add($sourceBalance, Money::add($businessCredits, -$businessDebits));
-                $projectCredits = Money::sumMinor(\App\Domain\Projects\Models\ProjectMovement::where('fund_id',$fund->id)->where('status','posted')->where('kind','refund'));
-                $projectDebits = Money::sumMinor(\App\Domain\Projects\Models\ProjectMovement::where('fund_id',$fund->id)->where('status','posted')->where('kind','payment'));
+                $projectCredits = Money::sumMinor(ProjectMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'refund'));
+                $projectDebits = Money::sumMinor(ProjectMovement::where('fund_id', $fund->id)->where('status', 'posted')->where('kind', 'payment'));
                 $sourceBalance = Money::add($sourceBalance, Money::add($projectCredits, -$projectDebits));
                 $ledgerBalance = app(FundBalanceService::class)->balanceMinor($fund);
+                $officePayments = Money::sumMinor(ProcurementMovement::where('fund_id', $fund->id)->whereNull('source_type')->where('status', 'posted')->where('kind', 'payment'));
+                $officeRefunds = Money::sumMinor(ProcurementMovement::where('fund_id', $fund->id)->whereNull('source_type')->where('status', 'posted')->where('kind', 'refund'));
+                $sourceBalance = Money::add($sourceBalance, Money::add($officeRefunds, -$officePayments));
                 $difference = Money::add($sourceBalance, -$ledgerBalance);
 
                 if ($difference !== 0) {

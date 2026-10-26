@@ -8,6 +8,7 @@ use App\Domain\Committees\Models\Committee;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundPurposeService;
 use App\Domain\Finance\Support\Money;
+use App\Domain\Procurement\Services\ProcurementGuard;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use Illuminate\Support\Arr;
@@ -316,6 +317,9 @@ class BusinessWorkflowService
         DB::transaction(function () use ($application, $action, $data, $actor) {
             $application = $this->lock($application);
             $this->current($application, $data);
+            if (in_array($action, ['revise', 'cancel', 'close', 'archive'])) {
+                app(ProcurementGuard::class)->assertNoOpen('business', $application->id);
+            }
             $before = $application->only(['status', 'revision']);
             if ($action === 'revise') {
                 if (! in_array($application->status, ['approved', 'signed']) || $application->movements()->exists()) {
@@ -324,7 +328,7 @@ class BusinessWorkflowService
                 $oldItems = $application->currentBudget()->get();
                 $application->update(['status' => 'draft', 'revision' => $application->revision + 1]);
                 foreach ($oldItems as $item) {
-                    $application->budgetItems()->create(Arr::except($item->getAttributes(), ['id', 'business_application_id', 'created_at', 'updated_at', 'revision']) + ['revision' => $application->revision]);
+                    $application->budgetItems()->create(Arr::except($item->getAttributes(), ['id', 'business_application_id', 'created_at', 'updated_at', 'revision', 'legacy_direct_purchase']) + ['revision' => $application->revision]);
                 }
             } elseif ($action === 'cancel') {
                 if ($application->releasedMinor() !== 0 || in_array($application->status, ['closed', 'cancelled'])) {

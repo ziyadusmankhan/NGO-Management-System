@@ -2,9 +2,13 @@
 
 namespace App\Domain\Finance\Funds\Services;
 
+use App\Domain\Business\Models\BusinessApplication;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
+use App\Domain\Procurement\Models\Procurement;
+use App\Domain\Projects\Models\Project;
+use App\Domain\Qard\Models\QardLoan;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use Brick\Math\BigInteger;
 use Illuminate\Support\Collection;
@@ -26,27 +30,42 @@ class FundReportingService
 
                 return $assistance;
             })->filter(fn ($assistance) => Money::minor($assistance->outstanding_amount) > 0)->values();
-        $qard = \App\Domain\Qard\Models\QardLoan::where('fund_id', $fund->id)->whereIn('status', ['approved', 'signed'])
+        $qard = QardLoan::where('fund_id', $fund->id)->whereIn('status', ['approved', 'signed'])
             ->with('beneficiary')->get()->map(function ($loan) {
                 $loan->assistance_number = $loan->number;
                 $loan->amount = $loan->principal;
                 $loan->paid_amount = '0.00';
                 $loan->outstanding_amount = $loan->principal;
+
                 return $loan;
             });
-        $business = \App\Domain\Business\Models\BusinessApplication::where('fund_id', $fund->id)
+        $business = BusinessApplication::where('fund_id', $fund->id)
             ->whereIn('status', ['approved', 'signed'])->where('funding_status', 'open')->with('beneficiary')->get()->map(function ($application) {
                 $application->assistance_number = $application->number;
                 $application->amount = $application->approved_amount;
                 $application->paid_amount = Money::decimal($application->releasedMinor());
                 $application->outstanding_amount = Money::decimal($application->remainingMinor());
+
                 return $application;
             })->filter(fn ($application) => Money::minor($application->outstanding_amount) > 0);
-        $projects = \App\Domain\Projects\Models\Project::where('fund_id',$fund->id)->whereIn('status',['approved','in_progress','completed'])->get()->map(function ($project) {
-            $project->assistance_number=$project->number; $project->amount=$project->approved()->budget;
-            $project->paid_amount=Money::decimal($project->netMinor()); $project->outstanding_amount=Money::decimal($project->commitmentMinor()); return $project;
-        })->filter(fn($p)=>Money::minor($p->outstanding_amount)>0);
-        return $welfare->concat($qard)->concat($business)->concat($projects);
+        $projects = Project::where('fund_id', $fund->id)->whereIn('status', ['approved', 'in_progress', 'completed'])->get()->map(function ($project) {
+            $project->assistance_number = $project->number;
+            $project->amount = $project->approved()->budget;
+            $project->paid_amount = Money::decimal($project->netMinor());
+            $project->outstanding_amount = Money::decimal($project->commitmentMinor());
+
+            return $project;
+        })->filter(fn ($p) => Money::minor($p->outstanding_amount) > 0);
+        $office = Procurement::where('parent_type', 'office')->where('fund_id', $fund->id)->whereNotNull('approved_revision')->get()->map(function ($p) {
+            $p->assistance_number = $p->number;
+            $p->amount = Money::decimal($p->approved()->total_minor);
+            $p->paid_amount = Money::decimal($p->paidMinor() - $p->refundedMinor());
+            $p->outstanding_amount = Money::decimal($p->reservation());
+
+            return $p;
+        })->filter(fn ($p) => Money::minor($p->outstanding_amount) > 0);
+
+        return $welfare->concat($qard)->concat($business)->concat($projects)->concat($office);
     }
 
     public function summary(Fund $fund, ?Collection $allocations = null): array

@@ -2,8 +2,12 @@
 
 namespace App\Domain\Finance\Funds\Services;
 
+use App\Domain\Business\Models\BusinessApplication;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Support\Money;
+use App\Domain\Procurement\Models\Procurement;
+use App\Domain\Projects\Models\Project;
+use App\Domain\Qard\Models\QardLoan;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
@@ -35,7 +39,9 @@ class FundService
 
         DB::transaction(function () use ($fund, $data, $actor) {
             $locked = $this->lock($fund);
-            if (array_key_exists('project_id',$data) && (int)$data['project_id'] !== (int)$locked->project_id) { throw ValidationException::withMessages(['project_id'=>'Dedicated project bindings cannot be changed.']); }
+            if (array_key_exists('project_id', $data) && (int) $data['project_id'] !== (int) $locked->project_id) {
+                throw ValidationException::withMessages(['project_id' => 'Dedicated project bindings cannot be changed.']);
+            }
             unset($data['project_id']);
             $before = $locked->only($locked->getFillable());
             if (array_key_exists('opening_balance', $data)) {
@@ -67,10 +73,12 @@ class FundService
         DB::transaction(function () use ($fund, $actor) {
             $locked = $this->lock($fund);
             $summary = app(FundReportingService::class)->summary($locked);
-            foreach (\App\Domain\Business\Models\BusinessApplication::withTrashed()->where('fund_id', $locked->id)->where('support_type', 'repayable')->get() as $business) {
-                if ($business->outstandingMinor() > 0) { throw ValidationException::withMessages(['fund' => 'This fund has outstanding business principal. Keep it available for recovery.']); }
+            foreach (BusinessApplication::withTrashed()->where('fund_id', $locked->id)->where('support_type', 'repayable')->get() as $business) {
+                if ($business->outstandingMinor() > 0) {
+                    throw ValidationException::withMessages(['fund' => 'This fund has outstanding business principal. Keep it available for recovery.']);
+                }
             }
-            if (\App\Domain\Qard\Models\QardLoan::where('fund_id', $locked->id)->where('status', 'active')->exists()) {
+            if (QardLoan::where('fund_id', $locked->id)->where('status', 'active')->exists()) {
                 throw ValidationException::withMessages(['fund' => 'This fund has outstanding Qard principal. Keep it available for repayments.']);
             }
             if (Money::minor($summary['balance']) !== 0 || Money::minor($summary['allocated']) !== 0) {
@@ -83,11 +91,12 @@ class FundService
 
     public function hasActivity(Fund $fund): bool
     {
-        return (bool)$fund->project_id
-            || \App\Domain\Projects\Models\Project::withTrashed()->where('fund_id',$fund->id)->whereNotNull('fund_locked_at')->exists()
+        return (bool) $fund->project_id
+            || Procurement::withTrashed()->where('fund_id', $fund->id)->exists()
+            || Project::withTrashed()->where('fund_id', $fund->id)->whereNotNull('fund_locked_at')->exists()
             || $fund->transactions()->withTrashed()->exists()
-            || \App\Domain\Business\Models\BusinessApplication::withTrashed()->where('fund_id', $fund->id)->exists()
-            || \App\Domain\Qard\Models\QardLoan::where('fund_id', $fund->id)->exists()
+            || BusinessApplication::withTrashed()->where('fund_id', $fund->id)->exists()
+            || QardLoan::where('fund_id', $fund->id)->exists()
             || $fund->donations()->withTrashed()->exists()
             || $fund->expenses()->withTrashed()->exists()
             || WelfareAssistance::withTrashed()->where('fund_id', $fund->id)->exists()

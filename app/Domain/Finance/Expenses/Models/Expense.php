@@ -3,22 +3,24 @@
 namespace App\Domain\Finance\Expenses\Models;
 
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Finance\Support\ReadsDecimalMoney;
+use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Domain\Finance\Transactions\Models\Transaction;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Expense extends Model
 {
-    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+    use ReadsDecimalMoney;
 
     protected array $moneyColumns = ['amount'];
 
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'purchase_kind',
         'expense_number',
         'fund_id',
         'category',
@@ -47,6 +49,7 @@ class Expense extends Model
             'has_supporting_document' => 'boolean',
         ];
     }
+
     public function transaction()
     {
         return $this->morphOne(
