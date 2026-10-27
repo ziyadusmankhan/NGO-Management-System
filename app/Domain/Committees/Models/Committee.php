@@ -2,15 +2,18 @@
 
 namespace App\Domain\Committees\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Audit\Services\AuditedCommitteeRelations;
 use App\Domain\Members\Models\Member;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Committee extends Model
 {
     use HasFactory, SoftDeletes;
+    use RecordsAudit;
 
     protected $table = 'committees';
 
@@ -29,17 +32,14 @@ class Committee extends Model
 
     public function members(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Member::class,
-            'committee_members'
-        )
-        ->withPivot([
-            'position',
-            'joined_at',
-            'ended_at',
-            'status',
-            'notes',
-        ])
-        ->withTimestamps();
+        return AuditedCommitteeRelations::make($this, Member::class, 'committee_id', 'member_id')
+            ->withPivot([
+                'position',
+                'joined_at',
+                'ended_at',
+                'status',
+                'notes',
+            ])
+            ->withTimestamps();
     }
 }

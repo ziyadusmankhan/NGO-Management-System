@@ -2,9 +2,10 @@
 
 namespace App\Domain\Welfare\Verification\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Users\Models\User;
-use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
+use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,18 +14,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BeneficiaryVerification extends Model
 {
     use HasFactory;
+    use RecordsAudit;
 
     /**
      * Single source of truth for the field checklist
      * (used by the controller validation and the views).
      */
     public const CHECKLIST_ITEMS = [
-        'identity_verified'            => 'Identity Verified',
-        'residence_verified'           => 'Residence Verified',
-        'family_condition_verified'    => 'Family Condition Verified',
+        'identity_verified' => 'Identity Verified',
+        'residence_verified' => 'Residence Verified',
+        'family_condition_verified' => 'Family Condition Verified',
         'financial_condition_verified' => 'Financial Condition Verified',
-        'documents_reviewed'           => 'Supporting Documents Reviewed',
-        'photos_attached'              => 'Photos / Evidence Attached',
+        'documents_reviewed' => 'Supporting Documents Reviewed',
+        'photos_attached' => 'Photos / Evidence Attached',
     ];
 
     protected $fillable = [

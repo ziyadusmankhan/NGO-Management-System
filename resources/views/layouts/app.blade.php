@@ -933,13 +933,13 @@
                 <span>Reports</span>
             </a>
 
-            <a
+            @can('audit.view')<a
                 href="{{ route('records.audit.index') }}"
                 class="nav-item {{ request()->routeIs('records.audit.*') ? 'active' : '' }}"
             >
                 <i class="bi bi-shield-check"></i>
                 <span>Audit Trail</span>
-            </a>
+            </a>@endcan
 
 
             <div class="nav-section">

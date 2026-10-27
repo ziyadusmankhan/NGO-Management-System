@@ -2,12 +2,15 @@
 
 namespace App\Domain\Welfare\Applications\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WelfareApplicationAgreement extends Model
 {
+    use RecordsAudit;
+
     public function newModelQuery()
     {
         $query = parent::newModelQuery();

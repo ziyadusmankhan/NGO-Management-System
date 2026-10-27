@@ -2,18 +2,21 @@
 
 namespace App\Domain\Welfare\Beneficiaries\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Finance\Support\ReadsDecimalMoney;
+use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use App\Domain\Welfare\Verification\Models\BeneficiaryVerification;
-use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Beneficiary extends Model
 {
-    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+    use ReadsDecimalMoney;
+    use RecordsAudit;
 
     protected array $moneyColumns = ['monthly_income'];
 

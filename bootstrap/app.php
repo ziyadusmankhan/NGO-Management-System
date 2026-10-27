@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Middleware\CaptureAuditRequest;
+use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\EnsureActiveUser;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-
 
 // return Application::configure(basePath: dirname(__DIR__))
 //     ->withRouting(
@@ -21,7 +23,6 @@ use Illuminate\Foundation\Configuration\Middleware;
 //         //
 //     })->create();
 
-
 // use Illuminate\Foundation\Application;
 // use Illuminate\Foundation\Configuration\Exceptions;
 // use Illuminate\Foundation\Configuration\Middleware;
@@ -36,13 +37,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust VS Code tunnel proxy headers for HTTPS & redirects
         $middleware->trustProxies(at: '*');
 
+        $middleware->appendToGroup('web', CaptureAuditRequest::class);
+
         $middleware->appendToGroup(
             'web',
-            \App\Http\Middleware\EnsureActiveUser::class
+            EnsureActiveUser::class
         );
 
         $middleware->alias([
-            'permission' => \App\Http\Middleware\CheckPermission::class,
+            'permission' => CheckPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

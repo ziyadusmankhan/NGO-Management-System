@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProcurementGuard
 {
+    public static function activeOrderId(): ?int
+    {
+        return self::$activeOrder;
+    }
+
     public function authorizeEvidence(string $type, ?int $movementId, User $actor): void
     {
         if (! $movementId) {
@@ -147,7 +152,7 @@ class ProcurementGuard
     {
         // Linked corrections validate after both authoritative and procurement movements change.
         if (! self::$activeOrder) {
-            $this->projectBudget($project,$project->approved_revision);
+            $this->projectBudget($project, $project->approved_revision);
         }
     }
 }

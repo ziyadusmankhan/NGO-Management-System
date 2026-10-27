@@ -2,11 +2,14 @@
 
 namespace App\Domain\Procurement\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class ProcurementEvent extends Model
 {
+    use RecordsAudit;
+
     protected $table = 'procurement_events';
 
     protected $guarded = ['id'];

@@ -2,17 +2,20 @@
 
 namespace App\Domain\Finance\Donations\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Finance\Support\ReadsDecimalMoney;
+use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Domain\Finance\Transactions\Models\Transaction;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Domain\Finance\Funds\Models\Fund;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Donation extends Model
 {
-    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+    use ReadsDecimalMoney;
+    use RecordsAudit;
 
     protected array $moneyColumns = ['amount'];
 
@@ -20,7 +23,7 @@ class Donation extends Model
 
     protected $table = 'donations';
 
-    protected $fillable = [ 
+    protected $fillable = [
         'donation_number',
         'donor_type',
         'donor_name',
@@ -45,6 +48,7 @@ class Donation extends Model
         'amount' => 'decimal:2',
         'donation_date' => 'date',
     ];
+
     public function fund(): BelongsTo
     {
         return $this->belongsTo(
@@ -52,6 +56,7 @@ class Donation extends Model
             'fund_id'
         );
     }
+
     public function transaction()
     {
         return $this->morphOne(

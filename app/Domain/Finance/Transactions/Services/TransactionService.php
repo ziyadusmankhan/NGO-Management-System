@@ -2,6 +2,7 @@
 
 namespace App\Domain\Finance\Transactions\Services;
 
+use App\Domain\Audit\Services\AuditCapture;
 use App\Domain\Business\Models\BusinessMovement;
 use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
@@ -71,6 +72,7 @@ class TransactionService
                 'notes' => $data['notes'] ?? null,
             ]);
             $transaction->update(['transaction_number' => sprintf('TXN-%05d', $transaction->id)]);
+            app(AuditCapture::class)->ledger($source, $transaction, 'payment_posted');
 
             return $transaction;
         }, 5);
@@ -107,6 +109,9 @@ class TransactionService
             }
             $next['amount'] = Money::decimal(Money::minor($next['amount']));
             $transaction->update($next);
+            if (array_diff_key($transaction->getChanges(), array_flip(['updated_at']))) {
+                app(AuditCapture::class)->ledger($source, $transaction, 'ledger_corrected');
+            }
 
             return $transaction->fresh();
         }, 5);
@@ -169,6 +174,7 @@ class TransactionService
             $funds = $this->lockFunds([$transaction->fund_id]);
             $this->assertAffordable($funds, $transaction, null, $source instanceof QardMovement || $source instanceof BusinessMovement || $source instanceof ProjectMovement || $source instanceof ProcurementMovement);
             $transaction->update(['status' => 'void']);
+            app(AuditCapture::class)->ledger($source, $transaction, 'payment_voided');
         }, 5);
     }
 

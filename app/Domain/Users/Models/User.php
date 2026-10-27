@@ -2,18 +2,20 @@
 
 namespace App\Domain\Users\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Audit\Services\AuditedRelations;
 use App\Domain\Members\Models\Member;
-use App\Domain\Users\Models\Role;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
+    use RecordsAudit;
 
     protected $fillable = [
         'name',
@@ -38,10 +40,7 @@ class User extends Authenticatable
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Role::class,
-            'user_roles'
-        )->withTimestamps();
+        return AuditedRelations::make($this, Role::class, 'user_roles', 'user_id', 'role_id');
     }
 
     public function member(): HasOne
@@ -55,6 +54,7 @@ class User extends Authenticatable
             ->where('slug', $role)
             ->exists();
     }
+
     public function isActive(): bool
     {
         return $this->status === 'active';

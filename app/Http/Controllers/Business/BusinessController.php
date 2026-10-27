@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Domain\Business\Models\BusinessApplication;
 use App\Domain\Business\Models\BusinessCategory;
+use App\Domain\Business\Models\BusinessCategoryEvent;
 use App\Domain\Business\Models\BusinessDocument;
 use App\Domain\Business\Models\BusinessMovement;
 use App\Domain\Business\Services\BusinessMonitoringService;
@@ -170,7 +171,7 @@ class BusinessController
             $category->fill($data);
             $category->save();
             if ($before !== $category->only(['name', 'active'])) {
-                DB::table('business_category_events')->insert(['category_id' => $category->id, 'actor_id' => $request->user()->id, 'before_values' => json_encode($before), 'after_values' => json_encode($category->only(['name', 'active'])), 'created_at' => now(), 'updated_at' => now()]);
+                BusinessCategoryEvent::create(['category_id' => $category->id, 'actor_id' => $request->user()->id, 'before_values' => $before, 'after_values' => $category->only(['name', 'active'])]);
             }
         }, 5);
 

@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Members;
 
+use App\Domain\Audit\Services\AuditedMemberships;
+use App\Domain\Committees\Models\Committee;
 use App\Domain\Members\Models\Member;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Members\StoreMemberRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use App\Domain\Committees\Models\Committee;
 
 class MemberController extends Controller
 {
-        public function index(): View
+    public function index(): View
     {
         $query = Member::query()
             ->with([
@@ -74,7 +75,6 @@ class MemberController extends Controller
         );
     }
 
-
     public function create(): View
     {
         $committees = Committee::query()
@@ -87,7 +87,6 @@ class MemberController extends Controller
             compact('committees')
         );
     }
-
 
     public function store(
         StoreMemberRequest $request
@@ -105,7 +104,6 @@ class MemberController extends Controller
 
         $lastName = $nameParts[1] ?? null;
 
-
         $member = DB::transaction(function () use (
             $validated,
             $firstName,
@@ -116,14 +114,13 @@ class MemberController extends Controller
                 (Member::withTrashed()->max('id') ?? 0) + 1;
 
             $memberNumber =
-                'MEM-' .
+                'MEM-'.
                 str_pad(
                     $nextId,
                     5,
                     '0',
                     STR_PAD_LEFT
                 );
-
 
             $member = Member::create([
                 'member_number' => $memberNumber,
@@ -132,86 +129,66 @@ class MemberController extends Controller
 
                 'last_name' => $lastName,
 
-                'father_name' =>
-                    $validated['father_name'] ?? null,
+                'father_name' => $validated['father_name'] ?? null,
 
-                'cnic' =>
-                    $validated['cnic'] ?? null,
+                'cnic' => $validated['cnic'] ?? null,
 
-                'phone' =>
-                    $validated['phone'],
+                'phone' => $validated['phone'],
 
-                'email' =>
-                    $validated['email'] ?? null,
+                'email' => $validated['email'] ?? null,
 
-                'address' =>
-                    $validated['address'] ?? null,
+                'address' => $validated['address'] ?? null,
 
-                'joining_date' =>
-                    $validated['joining_date'] ?? null,
+                'joining_date' => $validated['joining_date'] ?? null,
 
-                'status' =>
-                    $validated['status'],
+                'status' => $validated['status'],
 
-                'notes' =>
-                    $validated['notes'] ?? null,
+                'notes' => $validated['notes'] ?? null,
             ]);
-
 
             /*
             * Optional committee assignment, made from the
             * same "add member" form instead of requiring a
             * separate trip to the committee's members screen.
             */
-            if (!empty($validated['committee_id'])) {
+            if (! empty($validated['committee_id'])) {
 
                 $committeeExists = Committee::query()
                     ->where('id', $validated['committee_id'])
                     ->where('status', 'active')
                     ->exists();
 
-                if (!$committeeExists) {
+                if (! $committeeExists) {
                     throw new \RuntimeException(
                         'The selected committee is not active.'
                     );
                 }
 
-                DB::table('committee_members')->insert([
-                    'committee_id' =>
-                        $validated['committee_id'],
+                AuditedMemberships::query()->insert([
+                    'committee_id' => $validated['committee_id'],
 
-                    'member_id' =>
-                        $member->id,
+                    'member_id' => $member->id,
 
-                    'position' =>
-                        $validated['committee_position']
+                    'position' => $validated['committee_position']
                         ?? 'Member',
 
-                    'joined_at' =>
-                        $validated['committee_joined_at']
+                    'joined_at' => $validated['committee_joined_at']
                         ?? now()->toDateString(),
 
-                    'ended_at' =>
-                        null,
+                    'ended_at' => null,
 
-                    'status' =>
-                        'active',
+                    'status' => 'active',
 
-                    'notes' =>
-                        null,
+                    'notes' => null,
 
-                    'created_at' =>
-                        now(),
+                    'created_at' => now(),
 
-                    'updated_at' =>
-                        now(),
+                    'updated_at' => now(),
                 ]);
             }
 
-
             return $member;
         });
-
 
         return redirect()
             ->route(
@@ -224,21 +201,19 @@ class MemberController extends Controller
             );
     }
 
-
     public function show(Member $member): View
-        {
-            $member->load([
-                'committees' => function ($query) {
-                    $query->wherePivot('status', 'active');
-                },
-            ]);
+    {
+        $member->load([
+            'committees' => function ($query) {
+                $query->wherePivot('status', 'active');
+            },
+        ]);
 
-            return view(
-                'members.show',
-                compact('member')
-            );
-        }
-
+        return view(
+            'members.show',
+            compact('member')
+        );
+    }
 
     public function edit(Member $member): View
     {
@@ -247,7 +222,6 @@ class MemberController extends Controller
             compact('member')
         );
     }
-
 
     public function update(
         StoreMemberRequest $request,
@@ -266,37 +240,27 @@ class MemberController extends Controller
 
         $lastName = $nameParts[1] ?? null;
 
-
         $member->update([
             'first_name' => $firstName,
 
             'last_name' => $lastName,
 
-            'father_name' =>
-                $validated['father_name'] ?? null,
+            'father_name' => $validated['father_name'] ?? null,
 
-            'cnic' =>
-                $validated['cnic'] ?? null,
+            'cnic' => $validated['cnic'] ?? null,
 
-            'phone' =>
-                $validated['phone'],
+            'phone' => $validated['phone'],
 
-            'email' =>
-                $validated['email'] ?? null,
+            'email' => $validated['email'] ?? null,
 
-            'address' =>
-                $validated['address'] ?? null,
+            'address' => $validated['address'] ?? null,
 
-            'joining_date' =>
-                $validated['joining_date'] ?? null,
+            'joining_date' => $validated['joining_date'] ?? null,
 
-            'status' =>
-                $validated['status'],
+            'status' => $validated['status'],
 
-            'notes' =>
-                $validated['notes'] ?? null,
+            'notes' => $validated['notes'] ?? null,
         ]);
-
 
         return redirect()
             ->route(
@@ -308,7 +272,6 @@ class MemberController extends Controller
                 "Member {$member->member_number} was updated successfully."
             );
     }
-
 
     public function destroy(
         Member $member

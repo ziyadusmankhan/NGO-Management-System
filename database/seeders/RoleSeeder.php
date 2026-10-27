@@ -14,53 +14,45 @@ class RoleSeeder extends Seeder
             [
                 'name' => 'Administrator',
                 'slug' => 'administrator',
-                'description' =>
-                    'Full administrative access to the system.',
+                'description' => 'Full administrative access to the system.',
             ],
 
             [
                 'name' => 'General Secretary',
                 'slug' => 'general-secretary',
-                'description' =>
-                    'Organization-wide administrative and coordination access.',
+                'description' => 'Organization-wide administrative and coordination access.',
             ],
 
             [
                 'name' => 'Treasurer',
                 'slug' => 'treasurer',
-                'description' =>
-                    'Financial management and financial reporting access.',
+                'description' => 'Financial management and financial reporting access.',
             ],
 
             [
                 'name' => 'Committee Coordinator',
                 'slug' => 'committee-coordinator',
-                'description' =>
-                    'Committee and operational coordination access.',
+                'description' => 'Committee and operational coordination access.',
             ],
 
             [
                 'name' => 'Welfare Officer',
                 'slug' => 'welfare-officer',
-                'description' =>
-                    'Welfare and beneficiary management access.',
+                'description' => 'Welfare and beneficiary management access.',
             ],
 
             [
                 'name' => 'Project Officer',
                 'slug' => 'project-officer',
-                'description' =>
-                    'Project and field-operation management access.',
+                'description' => 'Project and field-operation management access.',
             ],
 
             [
                 'name' => 'Viewer',
                 'slug' => 'viewer',
-                'description' =>
-                    'Read-only access to permitted records and reports.',
+                'description' => 'Read-only access to permitted records and reports.',
             ],
         ];
-
 
         foreach ($roles as $roleData) {
 
@@ -74,7 +66,6 @@ class RoleSeeder extends Seeder
                     'status' => 'active',
                 ]
             );
-
 
             $permissionMap = [
 
@@ -109,7 +100,6 @@ class RoleSeeder extends Seeder
                         'reports.view',
                         'reports.generate',
 
-                        'audit.view',
                     ]
                 )->pluck('id')->all(),
 
@@ -206,12 +196,10 @@ class RoleSeeder extends Seeder
                         'meetings.view',
                         'documents.view',
                         'reports.view',
-                        'audit.view',
                     ]
                 )->pluck('id')->all(),
 
             ];
-
 
             $role->permissions()->sync(
                 $permissionMap[$role->slug] ?? []

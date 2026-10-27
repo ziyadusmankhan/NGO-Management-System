@@ -2,11 +2,14 @@
 
 namespace App\Domain\Business\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class BusinessEvent extends Model
 {
+    use RecordsAudit;
+
     protected $guarded = ['id'];
 
     protected function casts(): array

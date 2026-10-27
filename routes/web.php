@@ -371,9 +371,7 @@ Route::get('/records/reports/{id}', function ($id) {
     return view('shared.module-pending', ['moduleTitle' => 'Reports']);
 })->name('records.reports.show');
 
-Route::get('/records/audit', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Audit Trail']);
-})->name('records.audit.index');
+require __DIR__.'/audit.php';
 
 use App\Http\Controllers\Members\MemberController;
 

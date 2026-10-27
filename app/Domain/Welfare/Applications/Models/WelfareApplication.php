@@ -2,7 +2,9 @@
 
 namespace App\Domain\Welfare\Applications\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Finance\Support\ReadsDecimalMoney;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
@@ -15,9 +17,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WelfareApplication extends Model
 {
-    use \App\Domain\Finance\Support\ReadsDecimalMoney;
+    use ReadsDecimalMoney;
+    use RecordsAudit;
 
-    protected array $moneyColumns = ['requested_amount','applicant_contribution','organization_contribution','recommended_amount'];
+    protected array $moneyColumns = ['requested_amount', 'applicant_contribution', 'organization_contribution', 'recommended_amount'];
 
     use SoftDeletes;
 

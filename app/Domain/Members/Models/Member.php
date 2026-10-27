@@ -2,17 +2,20 @@
 
 namespace App\Domain\Members\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Audit\Services\AuditedCommitteeRelations;
 use App\Domain\Committees\Models\Committee;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Member extends Model
 {
     use HasFactory, SoftDeletes;
+    use RecordsAudit;
 
     protected $table = 'members';
 
@@ -46,24 +49,21 @@ class Member extends Model
 
     public function committees(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Committee::class,
-            'committee_members'
-        )
-        ->withPivot([
-            'position',
-            'joined_at',
-            'ended_at',
-            'status',
-            'notes',
-        ])
-        ->withTimestamps();
+        return AuditedCommitteeRelations::make($this, Committee::class, 'member_id', 'committee_id')
+            ->withPivot([
+                'position',
+                'joined_at',
+                'ended_at',
+                'status',
+                'notes',
+            ])
+            ->withTimestamps();
     }
 
     public function getFullNameAttribute(): string
     {
         return trim(
-            $this->first_name . ' ' . ($this->last_name ?? '')
+            $this->first_name.' '.($this->last_name ?? '')
         );
     }
 }

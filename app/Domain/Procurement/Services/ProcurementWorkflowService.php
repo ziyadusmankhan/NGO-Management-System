@@ -95,7 +95,7 @@ class ProcurementWorkflowService
             $this->current($p, $d);
             $before = $p->toArray();
             $result = $callback($p, $f);
-            $this->event($p, $a, $action, $before, ['revision' => $p->revision, 'status' => $p->status, 'reason' => $d['reason'] ?? $d['notes'] ?? null]);
+            $this->event($p, $a, $action, $before, ['revision' => $p->revision, 'status' => $p->status, 'reason' => $d['reason'] ?? $d['notes'] ?? null] + Arr::only($d, ['record_type', 'record_id', 'return_id', 'invoice_line_id', 'receipt_id']));
 
             return $result;
         }, 5));
@@ -402,17 +402,17 @@ class ProcurementWorkflowService
                     $this->fail('status', 'Resume only after rejection or withdrawal of an amendment.');
                 } $p->update(['frozen' => false]);
             } elseif (in_array($action, ['close', 'cancel'])) {
-                if (in_array($p->status,['closed', 'cancelled']) || $p->frozen) {
-                    $this->fail('status','Resolve amendments before ending this order.');
+                if (in_array($p->status, ['closed', 'cancelled']) || $p->frozen) {
+                    $this->fail('status', 'Resolve amendments before ending this order.');
                 }
-                if ($a->id === $p->created_by || $p->revisions()->where('prepared_by',$a->id)->exists() || $p->receipts()->where('actor_id',$a->id)->exists() || $p->movements()->where('recorded_by',$a->id)->exists()) {
-                    $this->fail('actor','An independent approver must close or cancel the order.');
+                if ($a->id === $p->created_by || $p->revisions()->where('prepared_by', $a->id)->exists() || $p->receipts()->where('actor_id', $a->id)->exists() || $p->movements()->where('recorded_by', $a->id)->exists()) {
+                    $this->fail('actor', 'An independent approver must close or cancel the order.');
                 }
-                app(ProcurementOperationsService::class)->assertSettled($p,$action === 'close');
+                app(ProcurementOperationsService::class)->assertSettled($p, $action === 'close');
                 $p->update(['status' => $action === 'close' ? 'closed' : 'cancelled', 'closed_at' => now()]);
             } elseif ($action === 'archive') {
-                if (! in_array($p->status,['closed', 'cancelled'])) {
-                    $this->fail('status','Close or cancel before archiving.');
+                if (! in_array($p->status, ['closed', 'cancelled'])) {
+                    $this->fail('status', 'Close or cancel before archiving.');
                 } $p->delete();
             }
         });

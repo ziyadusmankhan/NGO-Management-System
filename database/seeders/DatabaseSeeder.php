@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             BusinessRoleSeeder::class,
             ProjectRoleSeeder::class,
             ProcurementRoleSeeder::class,
+            AuditRoleSeeder::class,
         ]);
     }
 }

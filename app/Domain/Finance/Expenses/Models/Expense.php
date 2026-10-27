@@ -2,6 +2,7 @@
 
 namespace App\Domain\Finance\Expenses\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Support\ReadsDecimalMoney;
 use App\Domain\Finance\Transactions\Models\Transaction;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Expense extends Model
 {
     use ReadsDecimalMoney;
+    use RecordsAudit;
 
     protected array $moneyColumns = ['amount'];
 

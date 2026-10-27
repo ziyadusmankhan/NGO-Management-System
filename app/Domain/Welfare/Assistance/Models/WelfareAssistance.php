@@ -2,6 +2,7 @@
 
 namespace App\Domain\Welfare\Assistance\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class WelfareAssistance extends Model
 {
     use HasFactory, SoftDeletes;
+    use RecordsAudit;
 
     public function newModelQuery()
     {

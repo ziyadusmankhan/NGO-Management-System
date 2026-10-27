@@ -2,12 +2,15 @@
 
 namespace App\Domain\Welfare\Assistance\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WelfareAssistanceStatusChange extends Model
 {
+    use RecordsAudit;
+
     public $timestamps = false;
 
     protected $fillable = ['from_status', 'to_status', 'changed_by', 'changed_at', 'reason'];

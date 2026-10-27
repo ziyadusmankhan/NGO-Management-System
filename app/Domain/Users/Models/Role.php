@@ -2,6 +2,8 @@
 
 namespace App\Domain\Users\Models;
 
+use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Audit\Services\AuditedRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -9,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Role extends Model
 {
     use HasFactory;
+    use RecordsAudit;
 
     protected $table = 'roles';
 
@@ -34,9 +37,6 @@ class Role extends Model
 
     public function permissions(): BelongsToMany
     {
-        return $this->belongsToMany(
-            Permission::class,
-            'role_permissions'
-        )->withTimestamps();
+        return AuditedRelations::make($this, Permission::class, 'role_permissions', 'role_id', 'permission_id');
     }
 }
