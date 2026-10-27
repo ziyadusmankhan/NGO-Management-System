@@ -23,7 +23,7 @@ class ProcurementWorkflowTest extends TestCase
     {
         parent::setUp();
         Storage::fake('private');
-        $this->travelTo(now()->setTime(12, 0));
+        $this->travelTo(now('Asia/Karachi')->setTime(12, 0));
     }
 
     private function denied(callable $f): void
@@ -79,7 +79,7 @@ class ProcurementWorkflowTest extends TestCase
         $s = app(ProcurementPaymentService::class);
         $payer = $this->procurementActor();
         $m = $s->record($p, 'pay', $this->purchasePayment($p, $l), $payer);
-        app(ProcurementOperationsService::class)->returnGoods($p, $this->purchaseVersion($p, ['receipt_id' => $l->receipt_id, 'invoice_line_id' => $l->id, 'quantity' => '0.4', 'credit_reference' => 'CN-1', 'returned_on' => now()->toDateString(), 'refund_due_on' => now()->addDay()->toDateString(), 'reason' => 'Damaged goods returned', 'evidence' => $this->evidence()]), $payer);
+        app(ProcurementOperationsService::class)->returnGoods($p, $this->purchaseVersion($p, ['receipt_id' => $l->receipt_id, 'invoice_line_id' => $l->id, 'quantity' => '0.4', 'credit_reference' => 'CN-1', 'returned_on' => now('Asia/Karachi')->toDateString(), 'refund_due_on' => now('Asia/Karachi')->addDay()->toDateString(), 'reason' => 'Damaged goods returned', 'evidence' => $this->evidence()]), $payer);
         $this->assertSame(1, Transaction::count());
         $return = $p->returns()->first();
         $this->assertSame(10000, (int) $return->refund_due_minor);
@@ -102,7 +102,7 @@ class ProcurementWorkflowTest extends TestCase
         $this->denied(fn () => $w->transition($p, 'submit', $this->purchaseVersion($p), $a));
         $this->purchaseQuotes($p, $a);
         $w->transition($p, 'submit', $this->purchaseVersion($p), $a);
-        $this->denied(fn () => $w->decide($p,'committee',$this->purchaseVersion($p,['decision' => 'accept', 'notes' => 'Skip']),$this->procurementActor()));
-        $this->denied(fn () => $w->decide($p,'coordinator',$this->purchaseVersion($p,['decision' => 'accept', 'notes' => 'Self']),$a));
+        $this->denied(fn () => $w->decide($p, 'committee', $this->purchaseVersion($p, ['decision' => 'accept', 'notes' => 'Skip']), $this->procurementActor()));
+        $this->denied(fn () => $w->decide($p, 'coordinator', $this->purchaseVersion($p, ['decision' => 'accept', 'notes' => 'Self']), $a));
     }
 }

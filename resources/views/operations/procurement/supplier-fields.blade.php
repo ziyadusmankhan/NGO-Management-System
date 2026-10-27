@@ -1,1 +1,8 @@
-<div class="qgrid"><x-business-field name="name" label="Supplier name" :value="$supplier?->name"/><x-business-field name="contact" label="Contact details" :value="$supplier?->contact" :required="false"/><x-business-field name="address" label="Address" :value="$supplier?->address" :required="false"/><x-business-field name="registration" label="Registration / tax reference (optional)" :value="$supplier?->registration" :required="false"/><label>Status<select name="active"><option value="1" @selected(!$supplier || $supplier->active)>Active</option><option value="0" @selected($supplier && !$supplier->active)>Archived</option></select></label></div>
+<div class="qgrid"><x-business-field name="name" label="Supplier name" :value="$supplier?->name" /><x-business-field
+        name="contact" label="Contact details" :value="$supplier?->contact" :required="false" /><x-business-field
+        name="address" label="Address" :value="$supplier?->address" :required="false" /><x-business-field
+        name="registration" label="Registration / tax reference (optional)" :value="$supplier?->registration"
+        :required="false" /><label>Status<select name="active">
+            <option value="1" @selected(!$supplier || $supplier->active)>Active</option>
+            <option value="0" @selected($supplier && !$supplier->active)>Archived</option>
+        </select></label></div>

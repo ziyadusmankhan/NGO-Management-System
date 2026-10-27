@@ -23,7 +23,7 @@ class ProcurementIntegrityTest extends TestCase
     {
         parent::setUp();
         Storage::fake('private');
-        $this->travelTo(now()->setTime(12, 0));
+        $this->travelTo(now('Asia/Karachi')->setTime(12, 0));
     }
 
     private function denied(callable $f): void
@@ -43,7 +43,7 @@ class ProcurementIntegrityTest extends TestCase
         $this->actingAs($actor)->post(route('operations.procurement.store'), [
             'title' => 'Browser purchase', 'description' => 'Office supplies', 'parent_type' => 'office', 'parent_id' => '',
             'fund_id' => $existing->fund_id, 'supplier_id' => $existing->proposal()->supplier_id, 'delivery_location' => 'Office',
-            'required_on' => now()->addDay()->toDateString(), 'exception_reason' => '',
+            'required_on' => now('Asia/Karachi')->addDay()->toDateString(), 'exception_reason' => '',
             'items' => [['key' => '', 'description' => 'Chair', 'unit' => 'each', 'quantity' => '2', 'unit_price' => '250.00']],
         ])->assertSessionHasNoErrors()->assertRedirect();
         $this->assertDatabaseHas('procurement_revisions', ['title' => 'Browser purchase']);
@@ -83,7 +83,7 @@ class ProcurementIntegrityTest extends TestCase
         $p = $this->purchaseApprove($this->purchaseDraft($a), $a);
         $l = $this->purchaseInvoice($p, $a, '1');
         $ops = app(ProcurementOperationsService::class);
-        $data = ['reference' => ' inv-1 ', 'invoiced_on' => now()->toDateString(), 'due_on' => now()->addDay()->toDateString(), 'lines' => [['receipt_id' => $l->receipt_id, 'quantity' => '1']], 'evidence' => $this->evidence()];
+        $data = ['reference' => ' inv-1 ', 'invoiced_on' => now('Asia/Karachi')->toDateString(), 'due_on' => now('Asia/Karachi')->addDay()->toDateString(), 'lines' => [['receipt_id' => $l->receipt_id, 'quantity' => '1']], 'evidence' => $this->evidence()];
         $files = count(Storage::disk('private')->allFiles());
         $this->denied(fn () => $ops->invoice($p, $this->purchaseVersion($p, $data), $a));
         $this->assertSame($files, count(Storage::disk('private')->allFiles()));
@@ -139,7 +139,7 @@ class ProcurementIntegrityTest extends TestCase
         $m = $s->record($p, 'pay', $this->purchasePayment($p, $l), $payer);
         app(ProcurementWorkflowService::class)->transition($p, 'close', $this->purchaseVersion($p, ['reason' => 'Settled']), $this->procurementActor());
         app(ProcurementWorkflowService::class)->transition($p, 'archive', $this->purchaseVersion($p, ['reason' => 'Keep history']), $a);
-        $ops->returnGoods($p, $this->purchaseVersion($p, ['receipt_id' => $l->receipt_id, 'invoice_line_id' => $l->id, 'quantity' => '0.4', 'credit_reference' => 'CN-1', 'returned_on' => now()->toDateString(), 'refund_due_on' => now()->addDay()->toDateString(), 'reason' => 'Defect discovered', 'evidence' => $this->evidence()]), $payer);
+        $ops->returnGoods($p, $this->purchaseVersion($p, ['receipt_id' => $l->receipt_id, 'invoice_line_id' => $l->id, 'quantity' => '0.4', 'credit_reference' => 'CN-1', 'returned_on' => now('Asia/Karachi')->toDateString(), 'refund_due_on' => now('Asia/Karachi')->addDay()->toDateString(), 'reason' => 'Defect discovered', 'evidence' => $this->evidence()]), $payer);
         $return = $p->returns()->first();
         $d = $this->purchasePayment($p, $l, '100.00');
         unset($d['invoice_line_id']);
@@ -172,7 +172,7 @@ class ProcurementIntegrityTest extends TestCase
         $a = $this->procurementActor();
         $p = $this->purchaseApprove($this->purchaseDraft($a), $a);
         $l = $this->purchaseInvoice($p, $a);
-        app(ProcurementOperationsService::class)->returnGoods($p, $this->purchaseVersion($p, ['receipt_id' => $l->receipt_id, 'invoice_line_id' => $l->id, 'quantity' => '0.4', 'credit_reference' => 'CN-U', 'returned_on' => now()->toDateString(), 'reason' => 'Unpaid goods returned', 'evidence' => $this->evidence()]), $this->procurementActor());
+        app(ProcurementOperationsService::class)->returnGoods($p, $this->purchaseVersion($p, ['receipt_id' => $l->receipt_id, 'invoice_line_id' => $l->id, 'quantity' => '0.4', 'credit_reference' => 'CN-U', 'returned_on' => now('Asia/Karachi')->toDateString(), 'reason' => 'Unpaid goods returned', 'evidence' => $this->evidence()]), $this->procurementActor());
         $this->assertSame(40000, $p->invoiceBalance($l));
         $this->assertSame(0, (int) $p->returns()->first()->refund_due_minor);
         $this->assertSame(0, Transaction::count());
@@ -188,14 +188,14 @@ class ProcurementIntegrityTest extends TestCase
         $migration = require base_path('database/migrations/2026_10_26_000001_create_procurement_domain.php');
         $migration->down();
         $fund = $project->fund;
-        $id = DB::table('expenses')->insertGetId(['expense_number' => 'EXP-PRE-P9', 'fund_id' => $fund->id, 'category' => 'admin', 'description' => 'Historical goods', 'amount' => '10.00', 'expense_date' => now()->toDateString(), 'payee_name' => 'Supplier', 'status' => 'approved', 'created_at' => now(), 'updated_at' => now()]);
+        $id = DB::table('expenses')->insertGetId(['expense_number' => 'EXP-PRE-P9', 'fund_id' => $fund->id, 'category' => 'admin', 'description' => 'Historical goods', 'amount' => '10.00', 'expense_date' => now('Asia/Karachi')->toDateString(), 'payee_name' => 'Supplier', 'status' => 'approved', 'created_at' => now('Asia/Karachi'), 'updated_at' => now('Asia/Karachi')]);
         $migration->up();
         $this->assertSame($password, $a->fresh()->getRawOriginal('password'));
         $this->assertTrue((bool) $project->budgets($project->approved_revision)->first()->legacy_direct_purchase);
         $this->assertFalse((bool) $draft->budgets()->first()->legacy_direct_purchase);
         $this->assertTrue((bool) $business->currentBudget()->first()->legacy_direct_purchase);
-        $this->assertTrue((bool) DB::table('expenses')->where('id',$id)->value('legacy_posted'));
-        $this->assertSame(0,Procurement::count());
-        $this->assertSame(2,ProcurementPolicy::first()->quote_count);
+        $this->assertTrue((bool) DB::table('expenses')->where('id', $id)->value('legacy_posted'));
+        $this->assertSame(0, Procurement::count());
+        $this->assertSame(2, ProcurementPolicy::first()->quote_count);
     }
 }

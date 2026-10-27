@@ -30,7 +30,7 @@ class ProcurementIntegrationTest extends TestCase
     {
         parent::setUp();
         Storage::fake('private');
-        $this->travelTo(now()->setTime(12, 0));
+        $this->travelTo(now('Asia/Karachi')->setTime(12, 0));
     }
 
     private function denied(callable $f): void
@@ -110,7 +110,7 @@ class ProcurementIntegrationTest extends TestCase
         $payments = app(ProcurementPaymentService::class);
         $payment = $payments->record($p, 'pay', $this->purchasePayment($p, $line), $payer);
         app(ProcurementWorkflowService::class)->transition($p, 'close', $this->purchaseVersion($p, ['reason' => 'Original order settled']), $this->procurementActor());
-        app(ProcurementOperationsService::class)->returnGoods($p, $this->purchaseVersion($p, ['receipt_id' => $line->receipt_id, 'invoice_line_id' => $line->id, 'quantity' => '0.4', 'credit_reference' => 'PROJECT-CN', 'returned_on' => now()->toDateString(), 'refund_due_on' => now()->addDay()->toDateString(), 'reason' => 'Returned damaged goods', 'evidence' => $this->evidence()]), $payer);
+        app(ProcurementOperationsService::class)->returnGoods($p, $this->purchaseVersion($p, ['receipt_id' => $line->receipt_id, 'invoice_line_id' => $line->id, 'quantity' => '0.4', 'credit_reference' => 'PROJECT-CN', 'returned_on' => now('Asia/Karachi')->toDateString(), 'refund_due_on' => now('Asia/Karachi')->addDay()->toDateString(), 'reason' => 'Returned damaged goods', 'evidence' => $this->evidence()]), $payer);
         $return = $p->returns()->firstOrFail();
         $input = $this->purchasePayment($p, $line, '100.00');
         unset($input['invoice_line_id']);
@@ -128,7 +128,7 @@ class ProcurementIntegrationTest extends TestCase
         $this->assertSame(0, $p->fresh()->reservation());
         $this->assertSame('closed', $p->fresh()->status);
         $this->denied(fn () => $payments->record($p, 'pay', $this->purchasePayment($p, $line, '100.00'), $payer));
-        $this->denied(fn () => app(ProjectPaymentService::class)->record($parent, 'refund', $this->projectVersion($parent, ['original_payment_id' => $payment->source_id, 'amount' => '1.00', 'payment_date' => now()->toDateString(), 'payment_method' => 'cash', 'receipt' => 'BYPASS', 'idempotency_key' => (string) Str::uuid(), 'evidence' => $this->evidence()]), $payer));
+        $this->denied(fn () => app(ProjectPaymentService::class)->record($parent, 'refund', $this->projectVersion($parent, ['original_payment_id' => $payment->source_id, 'amount' => '1.00', 'payment_date' => now('Asia/Karachi')->toDateString(), 'payment_method' => 'cash', 'receipt' => 'BYPASS', 'idempotency_key' => (string) Str::uuid(), 'evidence' => $this->evidence()]), $payer));
         $payments->reconcile($p);
     }
 
@@ -148,7 +148,7 @@ class ProcurementIntegrationTest extends TestCase
         $this->get(route('operations.procurement.documents', [$p, $doc]))->assertOk();
         $other = $this->purchaseDraft($a);
         $this->get(route('operations.procurement.documents', [$other, $doc]))->assertNotFound();
-        $this->get(route('operations.procurement.reports', ['to' => now()->toDateString()]))->assertOk()->assertSee('10.25');
+        $this->get(route('operations.procurement.reports', ['to' => now('Asia/Karachi')->toDateString()]))->assertOk()->assertSee('10.25');
         $res = $this->get(route('operations.procurement.reports', ['format' => 'xlsx']))->assertOk();
         $path = tempnam(sys_get_temp_dir(), 'procurement-xlsx-');
         try {
@@ -186,14 +186,14 @@ class ProcurementIntegrationTest extends TestCase
 
     public function test_reminders_and_fractional_quantity_rounding(): void
     {
-        $this->assertSame(1,ProcurementMath::cost(5,100));
+        $this->assertSame(1, ProcurementMath::cost(5, 100));
         $a = $this->procurementActor();
-        $p = $this->purchaseApprove($this->purchaseDraft($a),$a);
-        $l = $this->purchaseInvoice($p,$a,'1');
+        $p = $this->purchaseApprove($this->purchaseDraft($a), $a);
+        $l = $this->purchaseInvoice($p, $a, '1');
         $this->travel(10)->days();
         app(ProcurementReportService::class)->refresh($p);
         $this->assertTrue($p->fresh()->reminder->delivery_due);
         $this->assertTrue($p->fresh()->reminder->invoice_due);
-        $this->assertSame(0,Transaction::count());
+        $this->assertSame(0, Transaction::count());
     }
 }
