@@ -1,6 +1,6 @@
 # Client requirements versus implementation
 
-Source: **Tanzeem Falah Naujawanan Kasso Foundation Software Requirements & Development Specification v1.0, 12 August 2026**. Updated 26 October 2026 for the Phase 9 Procurement implementation.
+Source: **Tanzeem Falah Naujawanan Kasso Foundation Software Requirements & Development Specification v1.0, 12 August 2026**. Updated 27 October 2026 for the Phase 10 Audit Trail implementation.
 
 This is a coverage map, not a claim that the entire client specification is complete. The client's five broad development phases differ from the agreed fifteen-phase delivery roadmap.
 
@@ -24,7 +24,7 @@ This is a coverage map, not a claim that the entire client specification is comp
 | 18 Tasks | Phase 14. |
 | 19 Meetings | Phase 14, including formal votes and minutes. Phase 7 records offline resolution evidence and consent; it is not an online voting system. |
 | 20 Documents | Module-specific private project/business/Qard evidence and controlled downloads exist. Central library and a review of older upload paths remain Phase 11. |
-| 21 Audit Trail | Sensitive procurement/project/Welfare/fund/Qard/business events are retained in their modules. A unified viewer and remaining administrative event coverage are Phase 10. |
+| 21 Audit Trail | Phase 10 provides the unified sanitized viewer, filters, event details, private print/XLSX exports, transactional business capture, account/organization changes, security events and an idempotent retained-history import. Original histories remain intact. Application immutability does not claim database-administrator tamper protection. |
 | 22 Reports | Existing Finance Reports; Phase 7 business report includes invested/recovered/outstanding, actual starts, overdue principal, current shared capital and funding queue. Print-to-PDF and actual XLSX. Phase 8 adds project budget/payment/refund/variance/progress reports, print-to-PDF and XLSX. Phase 9 adds purchasing delivery, invoice, payment, return/refund and commitment reports with PDF print and XLSX. Remaining Records/monthly reports are Phase 12. |
 | 23 Visibility | Phase 7 routes, financial actions, reports and documents require explicit business permissions. Ordinary membership grants no business access. Full public/member portals and organization-wide visibility audit remain future work. |
 | 24 Notifications | Procurement delivery/invoice/refund and Project/Welfare/Qard/business in-app reminder records and scheduled refresh commands. General event notifications are Phase 12; WhatsApp/SMS/email integrations need separate scope. |
@@ -45,7 +45,7 @@ This is a coverage map, not a claim that the entire client specification is comp
 
 ## Remaining roadmap
 
-9 Procurement · 10 Audit Trail · 11 Documents/security/standalone-Qard witnesses · 12 Records Reports/dashboard/search/notifications · 13 cleanup/integration/deployment · 14 Tasks/Meetings · 15 persistent Settings.
+11 Documents/security/standalone-Qard witnesses · 12 Records Reports/dashboard/search/notifications · 13 cleanup/integration/deployment · 14 Tasks/Meetings · 15 persistent Settings.
 
 See `phase-7-small-business.md` for the current workflow, deployment procedure and beginner testing checklist. Earlier delivery documents retain their historical test counts; these are not the current aggregate verification result.
 
@@ -58,4 +58,10 @@ Projects reuse the existing Money, TransactionService, fund balance/commitment c
 
 Procurement preserves the authoritative Project and Business financial movements, adds office expense/refund movements, and does not double-count parent commitments. Legacy approved goods retain compatibility; new goods approvals require purchasing acceptance/invoicing before payment. Parent closure/funding finalization, amendments, refunds and voids respect procurement obligations. The upgrade adds Procurement Officer/Receiving Officer and explicit action permissions without changing user accounts or passwords.
 
-See `phase-9-procurement.md` for implementation and rollout notes, and `phase-9-procurement-testing.md` for the beginner walkthrough. Phase 10 remains the unified Audit Trail; inventory and automated supplier communication are not delivered.
+See `phase-9-procurement.md` for implementation and rollout notes, and `phase-9-procurement-testing.md` for the beginner walkthrough. Phase 10 adds the unified Audit Trail; inventory and automated supplier communication are not delivered.
+
+## Phase 10 integration review
+
+The shared audit recorder uses existing financial/domain histories and transaction boundaries. Account, permission and committee changes gain transactional capture. Security failures do not prevent logout; the private health marker identifies capture failures. Audit access is separate from export and source-document access. Historical import is resumable and does not fabricate missing past edits or login activity.
+
+See `phase-10-audit.md` for implementation and activation notes and `phase-10-audit-testing.md` for the beginner walkthrough. Existing users, password hashes and business records are preserved. Dashboard Recent Activity remains Phase 12.
