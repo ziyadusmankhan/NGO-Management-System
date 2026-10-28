@@ -21,6 +21,7 @@
 /database/database.sqlite
 /database/*.sqlite-wal
 /database/*.sqlite-shm
+/database/*.sqlite.backup
 /tmp/
 /output/
 
