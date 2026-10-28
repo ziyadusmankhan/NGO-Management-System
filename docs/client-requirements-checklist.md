@@ -45,7 +45,7 @@ This is a coverage map, not a claim that the entire client specification is comp
 
 ## Remaining roadmap
 
-11 Documents/security/standalone-Qard witnesses · 12 Records Reports/dashboard/search/notifications · 13 cleanup/integration/deployment · 14 Tasks/Meetings · 15 persistent Settings.
+12 Records Reports/dashboard/search/notifications · 13 cleanup/integration/deployment · 14 Tasks/Meetings · 15 persistent Settings.
 
 See `phase-7-small-business.md` for the current workflow, deployment procedure and beginner testing checklist. Earlier delivery documents retain their historical test counts; these are not the current aggregate verification result.
 
@@ -65,3 +65,11 @@ See `phase-9-procurement.md` for implementation and rollout notes, and `phase-9-
 The shared audit recorder uses existing financial/domain histories and transaction boundaries. Account, permission and committee changes gain transactional capture. Security failures do not prevent logout; the private health marker identifies capture failures. Audit access is separate from export and source-document access. Historical import is resumable and does not fabricate missing past edits or login activity.
 
 See `phase-10-audit.md` for implementation and activation notes and `phase-10-audit-testing.md` for the beginner walkthrough. Existing users, password hashes and business records are preserved. Dashboard Recent Activity remains Phase 12.
+
+## Phase 11 integration review
+
+Delivered the private Documents Library, role-scoped standalone access, immutable versions, source-evidence catalogue and protected downloads. Welfare application attachments now have registry records. Source permissions remain authoritative, including Procurement's parent restrictions. Supplementary attachments cannot satisfy workflow evidence requirements.
+
+Account Security adds password confirmation, optional Fortify authenticator enrollment, single-use recovery codes, administrator-assisted temporary-password recovery, session limits/revocation and rate limits. Structured personal fields and retained sensitive snapshots/history are encrypted, with separately keyed complete CNIC/phone lookup and archived-member CNIC uniqueness. Existing passwords, records, signed evidence and original files are preserved; new Qard signing requires two witnesses.
+
+See phase-11-documents-security.md, phase-11-documents-security-testing.md and phase-11-recovery-deployment.md. Validation is not malware scanning. Phase 13 retains scanner integration and host/backup encryption. The remaining roadmap is Phase 12 Reports/dashboard/search/notifications, Phase 13 integration/deployment, Phase 14 Tasks/Meetings, and Phase 15 persistent Settings.
