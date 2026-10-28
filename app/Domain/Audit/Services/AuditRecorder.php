@@ -53,7 +53,19 @@ class AuditRecorder
             'reason' => $s->text($data['reason'] ?? null), 'before_values' => $s->values($data['before'] ?? []), 'after_values' => $s->values($data['after'] ?? []), 'context' => $context,
         ];
 
-        return $key ? AuditEvent::firstOrCreate(['source_key' => $key], $attributes) : AuditEvent::create($attributes);
+        if (! $key) {
+            return AuditEvent::create($attributes);
+        }
+
+        // firstOrCreate() opens an additional savepoint when the business action is
+        // already inside a transaction. SQLite may then require a temporary
+        // sub-journal and fail the otherwise valid business write. The unique
+        // source_key remains the authority for idempotency, while insert-or-ignore
+        // avoids that redundant nested transaction and remains concurrency-safe.
+        $event = new AuditEvent($attributes);
+        AuditEvent::query()->insertOrIgnore($event->getAttributes());
+
+        return AuditEvent::where('source_key', $key)->firstOrFail();
     }
 
     public function security(string $action, array $data = []): void
