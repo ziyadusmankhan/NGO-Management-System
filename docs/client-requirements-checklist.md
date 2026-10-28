@@ -1,6 +1,6 @@
 # Client requirements versus implementation
 
-Source: **Tanzeem Falah Naujawanan Kasso Foundation Software Requirements & Development Specification v1.0, 12 August 2026**. Updated 27 October 2026 for the Phase 10 Audit Trail implementation.
+Source: **Tanzeem Falah Naujawanan Kasso Foundation Software Requirements & Development Specification v1.0, 12 August 2026**. Updated 28 October 2026 for Tasks, Meetings and Records Reports.
 
 This is a coverage map, not a claim that the entire client specification is complete. The client's five broad development phases differ from the agreed fifteen-phase delivery roadmap.
 
@@ -21,11 +21,11 @@ This is a coverage map, not a claim that the entire client specification is comp
 | 14–15 Projects | Phase 8 delivers proposals, stable item budgets, field review, independent decisions and offline committee consent, direct payments/refunds, amendments, monitoring, final reports, closure, cancellation, reopening and retained history. |
 | 16 Expenses | Existing expense and finance controls. Phase 7 blocks new generic expenses from Small Business restricted funds while retaining historical records. Phase 8 adds controlled project payments to Expenses and reports without duplicate expense records. New generic Project spending is blocked; historical posted entries are preserved. Phase 9 adds office procurement payments without duplicate generic expenses; new generic goods requests must use Procurement. |
 | 17 Procurement | Phase 9 delivers office/Project/Business purchasing, versioned quotations, configurable quote count, independent approvals, orders, acceptance, invoices, payments, Project/office returns and actual refunds, reservations and retained evidence. No supplier advances, inventory or Business post-payment supplier returns. General approval-value thresholds remain separate scope. |
-| 18 Tasks | Phase 14. |
-| 19 Meetings | Phase 14, including formal votes and minutes. Phase 7 records offline resolution evidence and consent; it is not an online voting system. |
+| 18 Tasks | Live assignments, priorities, deadlines, progress, comments, meeting action items, dashboard reminders, archival and audit history. |
+| 19 Meetings | Live scheduling, invitations, quorum, attendance, minutes, decisions, linked action tasks, cancellation, archival and audit history. Phase 7 decision-committee consents remain the formal approval vote record for financial workflows. |
 | 20 Documents | Module-specific private project/business/Qard evidence and controlled downloads exist. Central library and a review of older upload paths remain Phase 11. |
 | 21 Audit Trail | Phase 10 provides the unified sanitized viewer, filters, event details, private print/XLSX exports, transactional business capture, account/organization changes, security events and an idempotent retained-history import. Original histories remain intact. Application immutability does not claim database-administrator tamper protection. |
-| 22 Reports | Existing Finance Reports; Phase 7 business report includes invested/recovered/outstanding, actual starts, overdue principal, current shared capital and funding queue. Print-to-PDF and actual XLSX. Phase 8 adds project budget/payment/refund/variance/progress reports, print-to-PDF and XLSX. Phase 9 adds purchasing delivery, invoice, payment, return/refund and commitment reports with PDF print and XLSX. Remaining Records/monthly reports are Phase 12. |
+| 22 Reports | Records Reports now generates permission-safe retained Finance, Welfare, Qard, Business, Project, Procurement, Operations and Organization snapshots with date filters, print-to-PDF and genuine XLSX. Existing detailed domain reports remain available. |
 | 23 Visibility | Phase 7 routes, financial actions, reports and documents require explicit business permissions. Ordinary membership grants no business access. Full public/member portals and organization-wide visibility audit remain future work. |
 | 24 Notifications | Procurement delivery/invoice/refund and Project/Welfare/Qard/business in-app reminder records and scheduled refresh commands. General event notifications are Phase 12; WhatsApp/SMS/email integrations need separate scope. |
 | 25 Global search | Existing search fields are module-specific. Global search remains Phase 12. |
@@ -45,7 +45,7 @@ This is a coverage map, not a claim that the entire client specification is comp
 
 ## Remaining roadmap
 
-12 Records Reports/dashboard/search/notifications · 13 cleanup/integration/deployment · 14 Tasks/Meetings · 15 persistent Settings.
+12 remaining dashboard widgets/global search/notifications · 13 cleanup/integration/deployment · 15 persistent Settings. Tasks, Meetings and Records Reports were completed early at the client's request.
 
 See `phase-7-small-business.md` for the current workflow, deployment procedure and beginner testing checklist. Earlier delivery documents retain their historical test counts; these are not the current aggregate verification result.
 
@@ -72,4 +72,10 @@ Delivered the private Documents Library, role-scoped standalone access, immutabl
 
 Account Security adds password confirmation, optional Fortify authenticator enrollment, single-use recovery codes, administrator-assisted temporary-password recovery, session limits/revocation and rate limits. Structured personal fields and retained sensitive snapshots/history are encrypted, with separately keyed complete CNIC/phone lookup and archived-member CNIC uniqueness. Existing passwords, records, signed evidence and original files are preserved; new Qard signing requires two witnesses.
 
-See phase-11-documents-security.md, phase-11-documents-security-testing.md and phase-11-recovery-deployment.md. Validation is not malware scanning. Phase 13 retains scanner integration and host/backup encryption. The remaining roadmap is Phase 12 Reports/dashboard/search/notifications, Phase 13 integration/deployment, Phase 14 Tasks/Meetings, and Phase 15 persistent Settings.
+See phase-11-documents-security.md, phase-11-documents-security-testing.md and phase-11-recovery-deployment.md. Validation is not malware scanning. Phase 13 retains scanner integration and host/backup encryption.
+
+## Operations and Records Reports integration review
+
+Tasks and Meetings now use live records, encrypted operational notes, explicit permissions and the unified audit trail. Meeting action items create linked Tasks atomically after quorum and attendance validation. The dashboard Upcoming Tasks widget is live.
+
+Records Reports creates fixed, permission-safe snapshots from existing source modules. The report permission does not grant access to Finance, Welfare or another source by itself. Printable and XLSX exports use the retained snapshot, so later changes do not rewrite old reports. See `operations-tasks-meetings-reports.md` and `operations-tasks-meetings-reports-testing.md`.
