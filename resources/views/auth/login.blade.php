@@ -922,24 +922,6 @@
 
                 <div class="remember-row">
 
-                    <div class="form-check">
-
-                        <input
-                            class="form-check-input"
-                            type="checkbox"
-                            name="remember"
-                            id="remember"
-                        >
-
-                        <label
-                            class="form-check-label"
-                            for="remember"
-                        >
-                            Keep me signed in
-                        </label>
-
-                    </div>
-
                     @if (Route::has('password.request'))
 
                         <a

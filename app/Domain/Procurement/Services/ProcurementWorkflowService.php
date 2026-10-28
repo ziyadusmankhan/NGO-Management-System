@@ -3,6 +3,7 @@
 namespace App\Domain\Procurement\Services;
 
 use App\Domain\Committees\Models\Committee;
+use App\Domain\Documents\Services\UploadValidator;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundPurposeService;
 use App\Domain\Finance\Support\Money;
@@ -67,6 +68,7 @@ class ProcurementWorkflowService
         $stored = [];
         try {
             if ($f = $input['evidence'] ?? null) {
+                app(UploadValidator::class)->inspect($f);
                 $path = $f->store('procurement', 'private');
                 if (! $path) {
                     throw new \RuntimeException('Evidence could not be saved.');

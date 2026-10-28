@@ -307,6 +307,8 @@
 
 
 @section('content')
+<div class="alert alert-light">Before changing account access, <a href="{{ route('security.confirm') }}">confirm your password</a>. Confirmation lasts 15 minutes.</div>
+
 
 @php
     $userRoleIds = old('roles', $user->roles->pluck('id')->all());
@@ -484,14 +486,14 @@
                             </label>
 
                             <input
-                                name="password"
+                                name="unused_password" disabled
                                 type="password"
                                 class="control"
-                                placeholder="Leave blank to keep current password"
+                                placeholder="Use Password recovery on account details"
                             >
 
                             <div class="help">
-                                Only fill this in if you want to change the password.
+                                Use the Password recovery action on the account details page.
                             </div>
 
                             @error('password')
@@ -512,7 +514,7 @@
                             </label>
 
                             <input
-                                name="password_confirmation"
+                                name="unused_password_confirmation" disabled
                                 type="password"
                                 class="control"
                                 placeholder="Confirm new password"

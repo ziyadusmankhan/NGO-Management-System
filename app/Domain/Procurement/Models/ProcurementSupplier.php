@@ -2,11 +2,14 @@
 
 namespace App\Domain\Procurement\Models;
 
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class ProcurementSupplier extends Model
 {
+    use EncryptsSensitive;
+
     protected $table = 'procurement_suppliers';
 
     protected $guarded = ['id'];

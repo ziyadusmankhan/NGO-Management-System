@@ -2,11 +2,14 @@
 
 namespace App\Domain\Business\Models;
 
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class BusinessReview extends Model
 {
+    use EncryptsSensitive;
+
     protected $guarded = ['id'];
 
     protected function casts(): array

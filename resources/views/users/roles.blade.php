@@ -266,6 +266,8 @@
 @endpush
 
 @section('content')
+<div class="alert alert-light">Before changing account access, <a href="{{ route('security.confirm') }}">confirm your password</a>. Confirmation lasts 15 minutes.</div>
+
 
 <div class="header">
 

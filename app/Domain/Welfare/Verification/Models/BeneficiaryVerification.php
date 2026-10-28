@@ -3,6 +3,7 @@
 namespace App\Domain\Welfare\Verification\Models;
 
 use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BeneficiaryVerification extends Model
 {
+    use EncryptsSensitive;
     use HasFactory;
     use RecordsAudit;
 

@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers\Welfare;
 
+use App\Domain\Documents\Services\DocumentService;
+use App\Domain\Documents\Services\UploadValidator;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Applications\Models\WelfareApplicationAgreement;
+use App\Domain\Welfare\Assistance\Services\WelfareAssistanceService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Welfare\RecordWelfareAgreementSignatureRequest;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Brick\Math\BigDecimal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WelfareApplicationAgreementController extends Controller
 {
@@ -79,13 +83,12 @@ class WelfareApplicationAgreementController extends Controller
         ]);
 
         if (
-            !empty($data['agreement_date'])
-            && !empty($data['effective_date'])
+            ! empty($data['agreement_date'])
+            && ! empty($data['effective_date'])
             && $data['effective_date'] < $data['agreement_date']
         ) {
             throw ValidationException::withMessages([
-                'effective_date' =>
-                    'The effective date cannot precede the agreement date.',
+                'effective_date' => 'The effective date cannot precede the agreement date.',
             ]);
         }
 
@@ -107,21 +110,19 @@ class WelfareApplicationAgreementController extends Controller
                 // Enforce one agreement per application.
                 if ($locked->agreement()->exists()) {
                     throw ValidationException::withMessages([
-                        'agreement' =>
-                            'An agreement already exists for this application.',
+                        'agreement' => 'An agreement already exists for this application.',
                     ]);
                 }
 
                 $amount = $locked->recommended_amount;
 
                 return WelfareApplicationAgreement::create([
-                    'agreement_number' =>
-                        'AGR-' . str_pad(
-                            (string) $locked->id,
-                            8,
-                            '0',
-                            STR_PAD_LEFT
-                        ),
+                    'agreement_number' => 'AGR-'.str_pad(
+                        (string) $locked->id,
+                        8,
+                        '0',
+                        STR_PAD_LEFT
+                    ),
 
                     'application_id' => $locked->id,
                     'approved_amount' => $amount,
@@ -160,7 +161,7 @@ class WelfareApplicationAgreementController extends Controller
             ->firstOrFail();
 
         $assistance = $application->assistanceIncludingArchived()->first();
-        $assistanceError = app(\App\Domain\Welfare\Assistance\Services\WelfareAssistanceService::class)->eligibilityError($application);
+        $assistanceError = app(WelfareAssistanceService::class)->eligibilityError($application);
         $agreementActionError = in_array($agreement->status, ['draft', 'prepared'], true)
             ? $this->agreementEligibilityError($application) : null;
 
@@ -216,7 +217,6 @@ class WelfareApplicationAgreementController extends Controller
             );
     }
 
-
     /**
      * Record a signatory after receiving and verifying the signed document.
      *
@@ -228,7 +228,7 @@ class WelfareApplicationAgreementController extends Controller
         WelfareApplication $application,
         string $party
     ): RedirectResponse {
-        if (!in_array($party, ['beneficiary', 'organization'], true)) {
+        if (! in_array($party, ['beneficiary', 'organization'], true)) {
             abort(404);
         }
 
@@ -263,8 +263,7 @@ class WelfareApplicationAgreementController extends Controller
 
                 if ($agreement->status !== 'prepared') {
                     throw ValidationException::withMessages([
-                        'agreement' =>
-                            'Only a prepared agreement can receive signatures.',
+                        'agreement' => 'Only a prepared agreement can receive signatures.',
                     ]);
                 }
 
@@ -292,8 +291,7 @@ class WelfareApplicationAgreementController extends Controller
                     || $agreement->{$pathField} !== null
                 ) {
                     throw ValidationException::withMessages([
-                        'agreement' =>
-                            'Signature evidence has already been recorded for this party.',
+                        'agreement' => 'Signature evidence has already been recorded for this party.',
                     ]);
                 }
 
@@ -305,18 +303,18 @@ class WelfareApplicationAgreementController extends Controller
                         === mb_strtolower(trim($agreement->{$otherNameField}))
                 ) {
                     throw ValidationException::withMessages([
-                        'signatory_name' =>
-                            'The beneficiary and organization signatories must be different people.',
+                        'signatory_name' => 'The beneficiary and organization signatories must be different people.',
                     ]);
                 }
 
                 // Store the uploaded evidence on the private disk.
+                app(UploadValidator::class)->inspect($data['document']);
                 $storedPath = $data['document']->store(
                     "welfare/agreements/{$agreement->id}/{$party}",
                     'private'
                 );
 
-                if (!$storedPath) {
+                if (! $storedPath) {
                     throw new \RuntimeException(
                         'The signature evidence could not be stored.'
                     );
@@ -361,13 +359,12 @@ class WelfareApplicationAgreementController extends Controller
         $message = $result['fully_signed']
             ? 'Both signature records and their evidence have been saved. The agreement is marked as signed. No payment was created.'
             : ucfirst($result['party'])
-                . ' signature evidence recorded. The agreement is waiting for the other signatory.';
+                .' signature evidence recorded. The agreement is waiting for the other signatory.';
 
         return redirect()
             ->route('welfare.applications.agreement.show', $application)
             ->with('success', $message);
     }
-
 
     /**
      * Display a print-ready copy of an existing agreement.
@@ -385,9 +382,6 @@ class WelfareApplicationAgreementController extends Controller
         );
     }
 
-
-
-
     /**
      * Stream signature evidence from private storage to authorized staff.
      */
@@ -395,7 +389,7 @@ class WelfareApplicationAgreementController extends Controller
         WelfareApplication $application,
         string $party
     ): StreamedResponse {
-        if (!in_array($party, ['beneficiary', 'organization'], true)) {
+        if (! in_array($party, ['beneficiary', 'organization'], true)) {
             abort(404);
         }
 
@@ -409,7 +403,7 @@ class WelfareApplicationAgreementController extends Controller
             $signedAt = $agreement->organization_signed_at;
         }
 
-        if (!$path || !$signedAt) {
+        if (! $path || ! $signedAt) {
             abort(404);
         }
 
@@ -417,29 +411,18 @@ class WelfareApplicationAgreementController extends Controller
         $expectedPrefix =
             "welfare/agreements/{$agreement->id}/{$party}/";
 
-        if (!str_starts_with($path, $expectedPrefix)) {
+        if (! str_starts_with($path, $expectedPrefix)) {
             abort(404);
         }
 
         $disk = Storage::disk('private');
 
-        if (!$disk->exists($path)) {
+        if (! $disk->exists($path)) {
             abort(404);
         }
 
-        return $disk->response(
-            $path,
-            basename($path),
-            [
-                'Cache-Control' => 'private, no-store, max-age=0',
-                'Pragma' => 'no-cache',
-                'X-Content-Type-Options' => 'nosniff',
-            ],
-            'inline'
-        );
+        return app(DocumentService::class)->sourceDownload(auth()->user(), 'welfare_agreement:'.$agreement->id.':'.$party);
     }
-
-
 
     /**
      * Check whether the current user may prepare this agreement.
@@ -452,15 +435,15 @@ class WelfareApplicationAgreementController extends Controller
         }
         if (
             $application->status !== 'approved'
-            || !$application->approved_at
-            || !$application->approved_by
+            || ! $application->approved_at
+            || ! $application->approved_by
         ) {
             return 'Only applications with recorded final approval can proceed to an agreement.';
         }
 
         if (
-            !is_numeric($application->recommended_amount)
-            || ! \Brick\Math\BigDecimal::of($application->recommended_amount)->isPositive()
+            ! is_numeric($application->recommended_amount)
+            || ! BigDecimal::of($application->recommended_amount)->isPositive()
         ) {
             return 'The application must have a valid final approved amount.';
         }
@@ -468,7 +451,7 @@ class WelfareApplicationAgreementController extends Controller
         $beneficiary = $application->beneficiary;
 
         if (
-            !$beneficiary
+            ! $beneficiary
             || $beneficiary->verification_status !== 'verified'
             || $beneficiary->approval_status !== 'approved'
         ) {

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Welfare;
 
+use App\Domain\Business\Models\BusinessApplication;
+use App\Domain\Security\Services\FieldEncryption;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use App\Domain\Welfare\Verification\Models\BeneficiaryVerification;
 use App\Http\Controllers\Controller;
@@ -29,31 +31,23 @@ class BeneficiaryController extends Controller
                     'like',
                     "%{$search}%"
                 )
-                ->orWhere(
-                    'full_name',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'father_husband_name',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'cnic',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'phone',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'location',
-                    'like',
-                    "%{$search}%"
-                );
+                    ->orWhere(
+                        'full_name',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhere(
+                        'father_husband_name',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhere('cnic_lookup', app(FieldEncryption::class)->lookup('cnic', $search) ?? 'no-match')
+                    ->orWhere('phone_lookup', app(FieldEncryption::class)->lookup('phone', $search) ?? 'no-match')
+                    ->orWhere(
+                        'location',
+                        'like',
+                        "%{$search}%"
+                    );
             });
         }
 
@@ -128,7 +122,7 @@ class BeneficiaryController extends Controller
         $nextNumber = ($lastBeneficiary?->id ?? 0) + 1;
 
         $data['beneficiary_number'] =
-            'BEN-' . str_pad(
+            'BEN-'.str_pad(
                 $nextNumber,
                 5,
                 '0',
@@ -159,10 +153,11 @@ class BeneficiaryController extends Controller
             'approvedBy',
             'assistance.fund',
             'verifications.verifiedBy',
-        ]); 
+        ]);
 
         $businessCases = auth()->user()->hasPermission('business.view')
-            ? \App\Domain\Business\Models\BusinessApplication::withTrashed()->with('fund')->where('beneficiary_id', $beneficiary->id)->latest('id')->get() : null;
+            ? BusinessApplication::withTrashed()->with('fund')->where('beneficiary_id', $beneficiary->id)->latest('id')->get() : null;
+
         return view('welfare.beneficiaries.show', compact('beneficiary', 'businessCases'));
     }
 
@@ -262,8 +257,7 @@ class BeneficiaryController extends Controller
     ): RedirectResponse {
         if ($beneficiary->verification_status !== 'verified') {
             return back()->withErrors([
-                'verification' =>
-                    'A beneficiary must be verified before approval.',
+                'verification' => 'A beneficiary must be verified before approval.',
             ]);
         }
 

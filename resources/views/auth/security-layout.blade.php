@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Account Security</title>
+<style>body{font:16px/1.6 system-ui;background:#f3f7f5;color:#183b32;margin:0}main{max-width:780px;margin:40px auto;padding:28px;background:white;border:1px solid #dce6e1;border-radius:16px}section{border-top:1px solid #dce6e1;margin-top:24px;padding-top:20px}label{display:block;margin:12px 0}input{display:block;padding:12px;border:1px solid #bccfc4;border-radius:8px;max-width:95%;width:360px}button,.button{background:#173f35;color:white;padding:10px 18px;border:0;border-radius:8px;cursor:pointer}a{color:#235c4e}code{font-size:16px}.error{background:#fff1ed;padding:16px}.success{background:#e6f4ed;padding:16px}svg{max-width:240px;height:auto}</style></head><body><main>
+@if($errors->any())<div class="error" role="alert">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+@if(session('success'))<p class="success">{{ session('success') }}</p>@endif
+@yield('content')</main></body></html>

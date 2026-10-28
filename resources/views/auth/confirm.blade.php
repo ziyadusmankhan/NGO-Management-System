@@ -1,0 +1,2 @@
+@extends('auth.security-layout')
+@section('content')<h1>Confirm your password</h1><p>Confirmation lasts 15 minutes. You can then return to the document or account page and submit your change.</p><form method="post" action="{{ route('security.confirm.store') }}">@csrf<label>Current password<input type="password" name="password" autocomplete="current-password" required></label><button>Confirm password</button></form>@endsection

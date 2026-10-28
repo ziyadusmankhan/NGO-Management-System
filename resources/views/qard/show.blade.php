@@ -37,6 +37,7 @@ $can = fn($slug) => auth()->user()->hasPermission('qard.'.$slug);
 <form class="qcard" method="post" enctype="multipart/form-data" action="{{ route('qard.sign',$loan) }}">@csrf<h2>Record signed agreement</h2><p>Print the agreement, obtain both signatures, then upload the copies. PDF, JPG or PNG, maximum 10 MB each.</p><div class="qgrid">
 <div><label for="borrower_name">Borrower signatory</label><input id="borrower_name" name="borrower_name" value="{{ old('borrower_name',$loan->beneficiary->full_name) }}" required maxlength="255"></div>
 <div><label for="foundation_name">Foundation signatory</label><input id="foundation_name" name="foundation_name" value="{{ old('foundation_name') }}" required maxlength="255"></div>
+<div><label>First witness name<input name="witnesses[]" value="{{ old('witnesses.0') }}" required maxlength="255"></label></div><div><label>Second witness name<input name="witnesses[]" value="{{ old('witnesses.1') }}" required maxlength="255"></label></div>
 <div><label for="borrower_file">Borrower signed copy</label><input id="borrower_file" type="file" name="borrower_file" accept=".pdf,.jpg,.jpeg,.png" required></div>
 <div><label for="foundation_file">Foundation signed copy</label><input id="foundation_file" type="file" name="foundation_file" accept=".pdf,.jpg,.jpeg,.png" required></div></div><div class="qactions"><button class="qbtn">Record both signatures</button></div></form>@endif
 @if($loan->status==='signed' && $can('disburse'))

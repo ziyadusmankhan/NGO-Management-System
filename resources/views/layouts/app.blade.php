@@ -981,7 +981,8 @@
             </div>
 
             @auth
-                <form method="POST" action="{{ route('logout') }}">
+                <a href="{{ route('security.index') }}" class="sidebar-logout">Account Security</a>
+                    <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="sidebar-logout">
                         <i class="bi bi-box-arrow-right" aria-hidden="true"></i>

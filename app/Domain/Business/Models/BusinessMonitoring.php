@@ -3,11 +3,13 @@
 namespace App\Domain\Business\Models;
 
 use App\Domain\Finance\Support\ReadsDecimalMoney;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class BusinessMonitoring extends Model
 {
+    use EncryptsSensitive;
     use ReadsDecimalMoney;
 
     protected $table = 'business_monitorings';

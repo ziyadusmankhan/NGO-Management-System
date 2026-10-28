@@ -3,7 +3,9 @@
 namespace App\Domain\Welfare\Assistance\Models;
 
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Finance\Support\ReadsDecimalMoney;
 use App\Domain\Finance\Transactions\Models\Transaction;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +14,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class WelfareAssistancePayment extends Model
 {
-    use HasFactory, \App\Domain\Finance\Support\ReadsDecimalMoney;
+    use EncryptsSensitive;
+    use HasFactory, ReadsDecimalMoney;
 
     protected $fillable = [
         'payment_number',
@@ -56,6 +59,7 @@ class WelfareAssistancePayment extends Model
     {
         return $this->belongsTo(User::class, 'recorded_by');
     }
+
     public function voidedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'voided_by');

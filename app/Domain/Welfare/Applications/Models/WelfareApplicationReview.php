@@ -4,6 +4,7 @@ namespace App\Domain\Welfare\Applications\Models;
 
 use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Finance\Support\ReadsDecimalMoney;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WelfareApplicationReview extends Model
 {
+    use EncryptsSensitive;
     use ReadsDecimalMoney;
     use RecordsAudit;
 

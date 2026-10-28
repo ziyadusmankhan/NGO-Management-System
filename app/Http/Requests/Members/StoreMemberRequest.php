@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Members;
 
+use App\Rules\UniqueMemberCnic;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreMemberRequest extends FormRequest
 {
@@ -34,8 +34,7 @@ class StoreMemberRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:30',
-                Rule::unique('members', 'cnic')
-                    ->ignore($memberId),
+                new UniqueMemberCnic($memberId),
             ],
 
             'phone' => [
@@ -91,17 +90,13 @@ class StoreMemberRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'full_name.required' =>
-                'The member name is required.',
+            'full_name.required' => 'The member name is required.',
 
-            'phone.required' =>
-                'The phone number is required.',
+            'phone.required' => 'The phone number is required.',
 
-            'cnic.unique' =>
-                'This CNIC is already registered.',
+            'cnic.unique' => 'This CNIC is already registered.',
 
-            'email.email' =>
-                'Please enter a valid email address.',
+            'email.email' => 'Please enter a valid email address.',
         ];
     }
 }

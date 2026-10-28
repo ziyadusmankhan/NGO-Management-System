@@ -11,11 +11,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
     use RecordsAudit;
+    use TwoFactorAuthenticatable;
 
     protected $fillable = [
         'name',
@@ -27,6 +29,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret', 'two_factor_recovery_codes',
     ];
 
     protected function casts(): array
@@ -35,6 +38,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'last_active_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_confirmed_at' => 'datetime', 'temporary_password_expires_at' => 'datetime', 'session_version' => 'integer', 'must_change_password' => 'boolean',
         ];
     }
 

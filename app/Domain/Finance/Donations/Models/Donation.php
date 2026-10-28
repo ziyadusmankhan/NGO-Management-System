@@ -6,6 +6,7 @@ use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Support\ReadsDecimalMoney;
 use App\Domain\Finance\Transactions\Models\Transaction;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Donation extends Model
 {
+    use EncryptsSensitive;
     use ReadsDecimalMoney;
     use RecordsAudit;
 

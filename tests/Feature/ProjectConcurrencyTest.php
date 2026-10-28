@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Process\Process;
 use Tests\Support\CreatesProjectFixtures;
+use Tests\Support\ValidUpload;
 use Tests\TestCase;
 
 class ProjectConcurrencyTest extends TestCase
@@ -34,7 +35,8 @@ class ProjectConcurrencyTest extends TestCase
             DB::purge('sqlite');
             Storage::forgetDisk('private');
             $this->assertSame(0, Artisan::call('migrate', ['--force' => true]));
-            file_put_contents($directory.'/receipt.pdf', "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF");
+            $receiptFile = ValidUpload::pdf();
+            file_put_contents($directory.'/receipt.pdf', file_get_contents($receiptFile->getRealPath()));
             $officer = $this->projectActor();
             $payer = $this->projectActor();
             $p = app(ProjectPaymentService::class);

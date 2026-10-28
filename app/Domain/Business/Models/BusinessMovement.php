@@ -4,10 +4,12 @@ namespace App\Domain\Business\Models;
 
 use App\Domain\Finance\Support\ReadsDecimalMoney;
 use App\Domain\Finance\Transactions\Models\Transaction;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use Illuminate\Database\Eloquent\Model;
 
 class BusinessMovement extends Model
 {
+    use EncryptsSensitive;
     use ReadsDecimalMoney;
 
     protected $guarded = ['id'];

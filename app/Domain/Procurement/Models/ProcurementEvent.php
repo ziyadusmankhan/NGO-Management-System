@@ -3,11 +3,13 @@
 namespace App\Domain\Procurement\Models;
 
 use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class ProcurementEvent extends Model
 {
+    use EncryptsSensitive;
     use RecordsAudit;
 
     protected $table = 'procurement_events';

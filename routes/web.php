@@ -351,17 +351,7 @@ Route::get('/operations/meetings/{id}', function ($id) {
     return view('shared.module-pending', ['moduleTitle' => 'Meetings']);
 })->name('operations.meetings.show');
 
-Route::get('/records/documents', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Documents']);
-})->name('records.documents.index');
-
-Route::get('/records/documents/create', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Documents']);
-})->name('records.documents.create');
-
-Route::get('/records/documents/{id}', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Documents']);
-})->name('records.documents.show');
+require __DIR__.'/documents.php';
 
 Route::get('/records/reports', function () {
     return view('shared.module-pending', ['moduleTitle' => 'Reports']);

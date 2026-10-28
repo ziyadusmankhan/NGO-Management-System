@@ -36,7 +36,7 @@ class CaptureAuditRequest
 
     private function sensitive(Request $r): bool
     {
-        return ! $r->isMethodSafe() && (bool) preg_match('/(pay|refund|void|approve|decid|submit|sign|disburs|repay|finaliz|clos|cancel|receive|invoice|return|amend|role|permission)/i', $r->route()?->getName() ?? '');
+        return ! $r->isMethodSafe() && (bool) preg_match('/(pay|refund|void|approve|decid|submit|sign|disburs|repay|finaliz|clos|cancel|receive|invoice|return|amend|role|permission|security|documents.change)/i', $r->route()?->getName() ?? '');
     }
 
     private function denied(Request $r, string $action): void

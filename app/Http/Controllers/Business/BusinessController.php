@@ -12,6 +12,7 @@ use App\Domain\Business\Services\BusinessPaymentService;
 use App\Domain\Business\Services\BusinessReportService;
 use App\Domain\Business\Services\BusinessWorkflowService;
 use App\Domain\Committees\Models\Committee;
+use App\Domain\Documents\Services\DocumentService;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
 use App\Domain\Finance\Funds\Services\FundPurposeService;
@@ -141,7 +142,7 @@ class BusinessController
         abort_unless($document->business_application_id === $application->id && Storage::disk('private')->exists($document->path), 404);
         app(ProcurementGuard::class)->authorizeEvidence('business', $document->movement_id, request()->user());
 
-        return Storage::disk('private')->download($document->path, $application->number.'-'.$document->kind.'.'.pathinfo($document->path, PATHINFO_EXTENSION), ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
+        return app(DocumentService::class)->sourceDownload(auth()->user(), 'business:'.$document->id);
     }
 
     public function agreement(Request $request, BusinessApplication $application)

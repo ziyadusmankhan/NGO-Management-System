@@ -600,4 +600,8 @@
 
 </div>
 
+
+@if(auth()->user()->hasPermission('users.password-reset') && auth()->id() !== $user->id)
+<div class="alert alert-light mt-3"><h3>Password recovery</h3><p><a href="{{ route('security.confirm') }}">Confirm your password</a> before generating a temporary password for this account.</p><form method="post" action="{{ route('security.reset',$user) }}">@csrf<button class="btn btn-outline-danger" onclick="return confirm('Reset this account password and sign out its sessions?')">Generate temporary password</button></form></div>
+@endif
 @endsection

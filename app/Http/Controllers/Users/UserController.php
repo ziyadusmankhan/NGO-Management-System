@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Domain\Security\Services\AccountSecurity;
 use App\Domain\Users\Models\Role;
 use App\Domain\Users\Models\User;
 use App\Http\Requests\Users\StoreUserRequest;
 use App\Http\Requests\Users\UpdateUserRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class UserController
@@ -46,7 +47,6 @@ class UserController
         );
     }
 
-
     public function create(): View
     {
         $roles = Role::query()
@@ -60,38 +60,31 @@ class UserController
         );
     }
 
-
     public function store(
         StoreUserRequest $request
     ): RedirectResponse {
 
+        AccountSecurity::requireRecent($request);
         $validated = $request->validated();
 
         $user = DB::transaction(function () use ($validated) {
 
             $user = User::create([
-                'name' =>
-                    $validated['name'],
+                'name' => $validated['name'],
 
-                'email' =>
-                    $validated['email'],
+                'email' => $validated['email'],
 
-                'password' =>
-                    $validated['password'],
+                'password' => $validated['password'],
 
-                'status' =>
-                    $validated['status'],
+                'status' => $validated['status'],
             ]);
-
 
             $user->roles()->sync(
                 $validated['roles'] ?? []
             );
 
-
             return $user;
         });
-
 
         return redirect()
             ->route(
@@ -103,7 +96,6 @@ class UserController
                 'User created successfully.'
             );
     }
-
 
     public function show(User $user): View
     {
@@ -129,7 +121,6 @@ class UserController
         );
     }
 
-
     public function edit(User $user): View
     {
         $roles = Role::query()
@@ -148,12 +139,12 @@ class UserController
         );
     }
 
-
     public function update(
         UpdateUserRequest $request,
         User $user
     ): RedirectResponse {
 
+        AccountSecurity::requireRecent($request);
         $validated = $request->validated();
 
         DB::transaction(function () use (
@@ -162,33 +153,23 @@ class UserController
         ) {
 
             $data = [
-                'name' =>
-                    $validated['name'],
+                'name' => $validated['name'],
 
-                'email' =>
-                    $validated['email'],
+                'email' => $validated['email'],
 
-                'status' =>
-                    $validated['status'],
+                'status' => $validated['status'],
             ];
 
-
-            if (!empty($validated['password'])) {
-
-                $data['password'] =
-                    $validated['password'];
-
+            if (! empty($validated['password'])) {
+                throw ValidationException::withMessages(['password' => 'Use Account Security or the administrator password recovery action.']);
             }
 
-
             $user->update($data);
-
 
             $user->roles()->sync(
                 $validated['roles'] ?? []
             );
         });
-
 
         return redirect()
             ->route(
@@ -200,7 +181,6 @@ class UserController
                 'User updated successfully.'
             );
     }
-
 
     public function destroy(
         User $user
@@ -215,11 +195,9 @@ class UserController
             auth()->id() === $user->id
         ) {
             return back()->withErrors([
-                'user' =>
-                    'You cannot archive your own account.',
+                'user' => 'You cannot archive your own account.',
             ]);
         }
-
 
         $user->delete();
 

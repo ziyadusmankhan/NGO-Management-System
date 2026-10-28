@@ -2,11 +2,14 @@
 
 namespace App\Domain\Projects\Models;
 
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class ProjectProgress extends Model
 {
+    use EncryptsSensitive;
+
     protected $guarded = ['id'];
 
     protected $table = 'project_progress';

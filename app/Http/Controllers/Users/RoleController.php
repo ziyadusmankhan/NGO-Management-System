@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Domain\Security\Services\AccountSecurity;
 use App\Domain\Users\Models\Permission;
 use App\Domain\Users\Models\Role;
 use Illuminate\Http\RedirectResponse;
@@ -25,11 +26,11 @@ class RoleController
                 ->first()
             : $roles->first();
 
-        if (!$selectedRole && $roles->isNotEmpty()) {
+        if (! $selectedRole && $roles->isNotEmpty()) {
             $selectedRole = $roles->first()->load('permissions');
         }
 
-        $permissions = Permission::query()
+        $permissions = Permission::query()->where('slug', '!=', 'documents.delete')
             ->orderBy('module')
             ->orderBy('name')
             ->get()
@@ -45,11 +46,11 @@ class RoleController
         );
     }
 
-
     public function update(
         Request $request,
         Role $role
     ): RedirectResponse {
+        AccountSecurity::requireRecent($request);
         $validated = $request->validate([
             'permissions' => [
                 'nullable',

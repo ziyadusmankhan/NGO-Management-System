@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Welfare;
 
+use App\Domain\Documents\Services\DocumentService;
+use App\Domain\Documents\Services\UploadValidator;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
@@ -11,6 +13,7 @@ use App\Http\Controllers\Controller;
 use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -23,8 +26,10 @@ class BeneficiaryVerificationController extends Controller
 {
     /** Evidence upload rules (kept in one place). */
     private const EVIDENCE_MAX_FILES = 10;
-    private const EVIDENCE_MAX_KB    = 10240; // 10 MB per file
-    private const EVIDENCE_DISK      = 'local'; // private disk, never public
+
+    private const EVIDENCE_MAX_KB = 10240; // 10 MB per file
+
+    private const EVIDENCE_DISK = 'local'; // private disk, never public
 
     /**
      * Field verification queue.
@@ -32,12 +37,12 @@ class BeneficiaryVerificationController extends Controller
     public function index(Request $request): View
     {
         $filters = $request->validate([
-            'search'     => ['nullable', 'string', 'max:100'],
-            'status'     => ['nullable', 'in:assigned,in_progress,completed,overdue'],
-            'priority'   => ['nullable', 'in:high,normal'],
+            'search' => ['nullable', 'string', 'max:100'],
+            'status' => ['nullable', 'in:assigned,in_progress,completed,overdue'],
+            'priority' => ['nullable', 'in:high,normal'],
             'visit_from' => ['nullable', 'date'],
-            'visit_to'   => ['nullable', 'date', 'after_or_equal:visit_from'],
-            'sort'       => ['nullable', 'in:newest,visit_asc,visit_desc'],
+            'visit_to' => ['nullable', 'date', 'after_or_equal:visit_from'],
+            'sort' => ['nullable', 'in:newest,visit_asc,visit_desc'],
         ]);
 
         $query = BeneficiaryVerification::query()
@@ -55,7 +60,7 @@ class BeneficiaryVerificationController extends Controller
         $search = trim($filters['search'] ?? '');
 
         if ($search !== '') {
-            $like = '%' . $search . '%';
+            $like = '%'.$search.'%';
 
             $query->where(function ($q) use ($like) {
                 $q->where('verification_number', 'like', $like)
@@ -86,18 +91,18 @@ class BeneficiaryVerificationController extends Controller
             $query->where('workflow_status', $status);
         }
 
-        if (!empty($filters['priority'])) {
+        if (! empty($filters['priority'])) {
             $query->where('priority', $filters['priority']);
         }
 
         /*
          * Visit date range.
          */
-        if (!empty($filters['visit_from'])) {
+        if (! empty($filters['visit_from'])) {
             $query->whereDate('visit_date', '>=', $filters['visit_from']);
         }
 
-        if (!empty($filters['visit_to'])) {
+        if (! empty($filters['visit_to'])) {
             $query->whereDate('visit_date', '<=', $filters['visit_to']);
         }
 
@@ -105,9 +110,9 @@ class BeneficiaryVerificationController extends Controller
          * Sorting.
          */
         match ($filters['sort'] ?? 'newest') {
-            'visit_asc'  => $query->orderByRaw('visit_date is null')->orderBy('visit_date')->orderByDesc('id'),
+            'visit_asc' => $query->orderByRaw('visit_date is null')->orderBy('visit_date')->orderByDesc('id'),
             'visit_desc' => $query->orderByRaw('visit_date is null')->orderByDesc('visit_date')->orderByDesc('id'),
-            default      => $query->latest('id'),
+            default => $query->latest('id'),
         };
 
         $verifications = $query
@@ -206,11 +211,11 @@ class BeneficiaryVerificationController extends Controller
     {
         $data = $request->validate([
             'application_id' => ['required', 'integer', 'exists:welfare_applications,id'],
-            'assigned_to'    => ['required', 'integer', 'exists:users,id'],
-            'visit_date'     => ['required', 'date', 'after_or_equal:today'],
-            'priority'       => ['required', 'in:high,normal'],
-            'method'         => ['nullable', 'string', 'max:50'],
-            'notes'          => ['nullable', 'string', 'max:5000'],
+            'assigned_to' => ['required', 'integer', 'exists:users,id'],
+            'visit_date' => ['required', 'date', 'after_or_equal:today'],
+            'priority' => ['required', 'in:high,normal'],
+            'method' => ['nullable', 'string', 'max:50'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ]);
 
         $application = WelfareApplication::query()
@@ -225,8 +230,7 @@ class BeneficiaryVerificationController extends Controller
             return back()
                 ->withInput()
                 ->withErrors([
-                    'application_id' =>
-                        'This application is not currently awaiting field verification.',
+                    'application_id' => 'This application is not currently awaiting field verification.',
                 ]);
         }
 
@@ -236,15 +240,14 @@ class BeneficiaryVerificationController extends Controller
         $beneficiary = $application->beneficiary;
 
         if (
-            !$beneficiary
+            ! $beneficiary
             || $beneficiary->verification_status !== 'verified'
             || $beneficiary->approval_status !== 'approved'
         ) {
             return back()
                 ->withInput()
                 ->withErrors([
-                    'application_id' =>
-                        'The beneficiary must remain verified and approved.',
+                    'application_id' => 'The beneficiary must remain verified and approved.',
                 ]);
         }
 
@@ -258,14 +261,13 @@ class BeneficiaryVerificationController extends Controller
             ->first();
 
         if (
-            !$officer
-            || !$officer->hasPermission('welfare.beneficiaries.verify')
+            ! $officer
+            || ! $officer->hasPermission('welfare.beneficiaries.verify')
         ) {
             return back()
                 ->withInput()
                 ->withErrors([
-                    'assigned_to' =>
-                        'The selected officer is not authorized for field verification.',
+                    'assigned_to' => 'The selected officer is not authorized for field verification.',
                 ]);
         }
 
@@ -282,24 +284,23 @@ class BeneficiaryVerificationController extends Controller
             return back()
                 ->withInput()
                 ->withErrors([
-                    'application_id' =>
-                        'This application already has an active field verification assignment.',
+                    'application_id' => 'This application already has an active field verification assignment.',
                 ]);
         }
 
         $verification = DB::transaction(
             function () use ($data, $application) {
                 $verification = BeneficiaryVerification::create([
-                    'beneficiary_id'  => $application->beneficiary_id,
-                    'application_id'  => $application->id,
-                    'assigned_to'     => $data['assigned_to'],
-                    'assigned_at'     => now(),
-                    'visit_date'      => $data['visit_date'],
-                    'status'          => 'pending',
+                    'beneficiary_id' => $application->beneficiary_id,
+                    'application_id' => $application->id,
+                    'assigned_to' => $data['assigned_to'],
+                    'assigned_at' => now(),
+                    'visit_date' => $data['visit_date'],
+                    'status' => 'pending',
                     'workflow_status' => 'assigned',
-                    'priority'        => $data['priority'],
-                    'method'          => $data['method'] ?? 'field_visit',
-                    'notes'           => $data['notes'] ?? null,
+                    'priority' => $data['priority'],
+                    'method' => $data['method'] ?? 'field_visit',
+                    'notes' => $data['notes'] ?? null,
                 ]);
 
                 /*
@@ -307,8 +308,7 @@ class BeneficiaryVerificationController extends Controller
                  * from the newly created primary key.
                  */
                 $verification->update([
-                    'verification_number' =>
-                        'VER-' . str_pad($verification->id, 5, '0', STR_PAD_LEFT),
+                    'verification_number' => 'VER-'.str_pad($verification->id, 5, '0', STR_PAD_LEFT),
                 ]);
 
                 /*
@@ -372,14 +372,13 @@ class BeneficiaryVerificationController extends Controller
          */
         if (! $this->isAssignedOfficer($verification)) {
             return back()->withErrors([
-                'assigned_to' =>
-                    'Only the assigned field officer can start this verification.',
+                'assigned_to' => 'Only the assigned field officer can start this verification.',
             ]);
         }
 
         $verification->update([
             'workflow_status' => 'in_progress',
-            'started_at'      => now(),
+            'started_at' => now(),
         ]);
 
         return back()->with(
@@ -399,8 +398,7 @@ class BeneficiaryVerificationController extends Controller
     ): RedirectResponse {
         if ($verification->workflow_status !== 'in_progress') {
             return back()->withErrors([
-                'status' =>
-                    'Only verifications currently in progress can be completed.',
+                'status' => 'Only verifications currently in progress can be completed.',
             ]);
         }
 
@@ -410,8 +408,7 @@ class BeneficiaryVerificationController extends Controller
          */
         if (! $this->isAssignedOfficer($verification)) {
             return back()->withErrors([
-                'assigned_to' =>
-                    'Only the assigned field officer can complete this verification.',
+                'assigned_to' => 'Only the assigned field officer can complete this verification.',
             ]);
         }
 
@@ -422,44 +419,39 @@ class BeneficiaryVerificationController extends Controller
          * if they differ from your form and DB column.
          */
         $rules = [
-            'recommendation'       => ['required', Rule::in(['approve', 'revise', 'reject'])],
-            'findings'             => ['required', 'string', 'max:10000'],
-            'notes'                => ['nullable', 'string', 'max:5000'],
+            'recommendation' => ['required', Rule::in(['approve', 'revise', 'reject'])],
+            'findings' => ['required', 'string', 'max:10000'],
+            'notes' => ['nullable', 'string', 'max:5000'],
             'recommendation_notes' => ['nullable', 'string', 'max:5000'],
-            'checklist'            => ['nullable', 'array'],
-            'checklist.*'          => ['nullable', 'boolean'],
+            'checklist' => ['nullable', 'array'],
+            'checklist.*' => ['nullable', 'boolean'],
 
             // Evidence is mandatory only when recommending approval
             // (matches the form's client-side rule).
             'evidence' => [
                 Rule::requiredIf(fn () => $request->input('recommendation') === 'approve'),
                 'array',
-                'max:' . self::EVIDENCE_MAX_FILES,
+                'max:'.self::EVIDENCE_MAX_FILES,
             ],
             'evidence.*' => [
                 'file',
                 'mimes:pdf,jpg,jpeg,png,webp',
-                'max:' . (int) floor($limits['per_file'] / 1024),
+                'max:'.(int) floor($limits['per_file'] / 1024),
             ],
         ];
 
         $messages = [
-            'evidence.required' =>
-                'Please upload at least one photo or document as evidence before recommending approval.',
-            'evidence.max' =>
-                'You can upload a maximum of ' . self::EVIDENCE_MAX_FILES . ' evidence files.',
-            'evidence.*.uploaded' =>
-                'An evidence file could not be uploaded. The server limit is '
-                . $this->formatBytes($limits['per_file']) . ' per file.',
-            'evidence.*.mimes' =>
-                'Evidence must be a PDF, JPG, PNG or WEBP file.',
-            'evidence.*.max' =>
-                'Each evidence file must be ' . $this->formatBytes($limits['per_file']) . ' or smaller.',
+            'evidence.required' => 'Please upload at least one photo or document as evidence before recommending approval.',
+            'evidence.max' => 'You can upload a maximum of '.self::EVIDENCE_MAX_FILES.' evidence files.',
+            'evidence.*.uploaded' => 'An evidence file could not be uploaded. The server limit is '
+                .$this->formatBytes($limits['per_file']).' per file.',
+            'evidence.*.mimes' => 'Evidence must be a PDF, JPG, PNG or WEBP file.',
+            'evidence.*.max' => 'Each evidence file must be '.$this->formatBytes($limits['per_file']).' or smaller.',
         ];
 
         $data = $request->validate($rules, $messages);
 
-        /** @var array<int, \Illuminate\Http\UploadedFile> $files */
+        /** @var array<int, UploadedFile> $files */
         $files = array_values($request->file('evidence', []));
 
         /*
@@ -534,8 +526,9 @@ class BeneficiaryVerificationController extends Controller
                  * Store evidence on the private disk.
                  */
                 foreach ($files as $file) {
+                    app(UploadValidator::class)->inspect($file);
                     $path = $file->store(
-                        'welfare/verification/' . $locked->id,
+                        'welfare/verification/'.$locked->id,
                         self::EVIDENCE_DISK
                     );
 
@@ -548,31 +541,31 @@ class BeneficiaryVerificationController extends Controller
                     $storedPaths[] = $path;
 
                     $locked->evidence()->create([
-                        'uploaded_by'   => auth()->id(),
-                        'disk'          => self::EVIDENCE_DISK,
-                        'path'          => $path,
+                        'uploaded_by' => auth()->id(),
+                        'disk' => self::EVIDENCE_DISK,
+                        'path' => $path,
                         'original_name' => mb_substr(
                             basename($file->getClientOriginalName()),
                             0,
                             255
                         ),
-                        'mime_type'     => $file->getMimeType(),
-                        'size'          => $file->getSize(),
+                        'mime_type' => $file->getMimeType(),
+                        'size' => $file->getSize(),
                     ]);
                 }
 
                 $locked->update([
-                    'verification_date'    => now()->toDateString(),
-                    'verified_by'          => auth()->id(),
-                    'status'               => $data['recommendation'] === 'reject'
+                    'verification_date' => now()->toDateString(),
+                    'verified_by' => auth()->id(),
+                    'status' => $data['recommendation'] === 'reject'
                         ? 'rejected'
                         : 'verified',
-                    'workflow_status'      => 'completed',
-                    'completed_at'         => now(),
-                    'findings'             => $data['findings'],
-                    'checklist'            => $checklist,
-                    'notes'                => $data['notes'] ?? null,
-                    'recommendation'       => $data['recommendation'],
+                    'workflow_status' => 'completed',
+                    'completed_at' => now(),
+                    'findings' => $data['findings'],
+                    'checklist' => $checklist,
+                    'notes' => $data['notes'] ?? null,
+                    'recommendation' => $data['recommendation'],
                     'recommendation_notes' => $data['recommendation_notes'] ?? null,
                 ]);
 
@@ -581,11 +574,11 @@ class BeneficiaryVerificationController extends Controller
                  * appropriate decision on the recommendation.
                  */
                 $application->update([
-                    'status'               => 'recommendation',
-                    'recommended_amount'   => $application->requested_amount,
+                    'status' => 'recommendation',
+                    'recommended_amount' => $application->requested_amount,
                     'recommendation_notes' => $data['recommendation_notes'] ?? null,
-                    'recommended_by'       => auth()->id(),
-                    'recommended_at'       => now(),
+                    'recommended_by' => auth()->id(),
+                    'recommended_at' => now(),
                 ]);
             });
         } catch (Throwable $e) {
@@ -605,14 +598,13 @@ class BeneficiaryVerificationController extends Controller
 
             Log::error('Field verification completion failed', [
                 'verification_id' => $verification->id,
-                'exception'       => $e,
+                'exception' => $e,
             ]);
 
             return back()
                 ->withInput()
                 ->withErrors([
-                    'status' =>
-                        'Something went wrong while saving the verification. Nothing was saved, please try again.',
+                    'status' => 'Something went wrong while saving the verification. Nothing was saved, please try again.',
                 ]);
         }
 
@@ -644,22 +636,7 @@ class BeneficiaryVerificationController extends Controller
 
         abort_unless($disk->exists($evidence->path), 404);
 
-        if ($request->boolean('download')) {
-            return $disk->download(
-                $evidence->path,
-                $evidence->original_name
-            );
-        }
-
-        return $disk->response(
-            $evidence->path,
-            $evidence->original_name,
-            [
-                'Content-Type'           => $evidence->mime_type
-                    ?: 'application/octet-stream',
-                'X-Content-Type-Options' => 'nosniff',
-            ]
-        );
+        return app(DocumentService::class)->sourceDownload($request->user(), 'verification:'.$evidence->id);
     }
 
     /**
@@ -689,13 +666,13 @@ class BeneficiaryVerificationController extends Controller
         }
 
         $postMax = $this->iniBytes('post_max_size');
-        $total   = $postMax > 0
+        $total = $postMax > 0
             ? max($perFile, $postMax - 512 * 1024) // leave room for form fields
             : $perFile * self::EVIDENCE_MAX_FILES;
 
         return [
-            'per_file'  => $perFile,
-            'total'     => $total,
+            'per_file' => $perFile,
+            'total' => $total,
             'max_files' => self::EVIDENCE_MAX_FILES,
         ];
     }
@@ -711,9 +688,9 @@ class BeneficiaryVerificationController extends Controller
         $number = (int) $value;
 
         return match (strtolower(substr($value, -1))) {
-            'g'     => $number * 1024 * 1024 * 1024,
-            'm'     => $number * 1024 * 1024,
-            'k'     => $number * 1024,
+            'g' => $number * 1024 * 1024 * 1024,
+            'm' => $number * 1024 * 1024,
+            'k' => $number * 1024,
             default => $number,
         };
     }
@@ -721,7 +698,7 @@ class BeneficiaryVerificationController extends Controller
     private function formatBytes(int $bytes): string
     {
         return $bytes >= 1048576
-            ? rtrim(rtrim(number_format($bytes / 1048576, 1), '0'), '.') . ' MB'
-            : max(1, (int) round($bytes / 1024)) . ' KB';
+            ? rtrim(rtrim(number_format($bytes / 1048576, 1), '0'), '.').' MB'
+            : max(1, (int) round($bytes / 1024)).' KB';
     }
 }

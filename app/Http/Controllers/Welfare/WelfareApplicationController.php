@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Welfare;
 
-use App\Domain\Finance\Support\Money;
+use App\Domain\Documents\Models\LibraryDocument;
+use App\Domain\Documents\Services\DocumentRegistry;
+use App\Domain\Documents\Services\DocumentService;
+use App\Domain\Documents\Services\UploadValidator;
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Finance\Support\Money;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Applications\Models\WelfareApplicationReview;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
@@ -13,9 +17,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WelfareApplicationController extends Controller
 {
@@ -42,32 +46,32 @@ class WelfareApplicationController extends Controller
                     'like',
                     "%{$search}%"
                 )
-                ->orWhere(
-                    'request_type',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'purpose_details',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhereHas(
-                    'beneficiary',
-                    function ($beneficiaryQuery) use ($search) {
-                        $beneficiaryQuery
-                            ->where(
-                                'full_name',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'beneficiary_number',
-                                'like',
-                                "%{$search}%"
-                            );
-                    }
-                );
+                    ->orWhere(
+                        'request_type',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhere(
+                        'purpose_details',
+                        'like',
+                        "%{$search}%"
+                    )
+                    ->orWhereHas(
+                        'beneficiary',
+                        function ($beneficiaryQuery) use ($search) {
+                            $beneficiaryQuery
+                                ->where(
+                                    'full_name',
+                                    'like',
+                                    "%{$search}%"
+                                )
+                                ->orWhere(
+                                    'beneficiary_number',
+                                    'like',
+                                    "%{$search}%"
+                                );
+                        }
+                    );
             });
         }
 
@@ -212,8 +216,7 @@ class WelfareApplicationController extends Controller
             return back()
                 ->withInput()
                 ->withErrors([
-                    'beneficiary_id' =>
-                        'The selected beneficiary must be verified and approved before an application can be submitted.',
+                    'beneficiary_id' => 'The selected beneficiary must be verified and approved before an application can be submitted.',
                 ]);
         }
 
@@ -222,7 +225,7 @@ class WelfareApplicationController extends Controller
          */
         $fund = null;
 
-        if (!empty($data['fund_id'])) {
+        if (! empty($data['fund_id'])) {
             $fund = Fund::query()
                 ->whereKey($data['fund_id'])
                 ->firstOrFail();
@@ -231,8 +234,7 @@ class WelfareApplicationController extends Controller
                 return back()
                     ->withInput()
                     ->withErrors([
-                        'fund_id' =>
-                            'The selected funding source is not active.',
+                        'fund_id' => 'The selected funding source is not active.',
                     ]);
             }
         }
@@ -252,8 +254,7 @@ class WelfareApplicationController extends Controller
             return back()
                 ->withInput()
                 ->withErrors([
-                    'applicant_contribution' =>
-                        'Applicant contribution cannot exceed the requested amount.',
+                    'applicant_contribution' => 'Applicant contribution cannot exceed the requested amount.',
                 ]);
         }
 
@@ -263,72 +264,76 @@ class WelfareApplicationController extends Controller
         /*
          * Create the application atomically.
          */
-        $application = DB::transaction(
-            function () use (
-                $data,
-                $organizationContribution
-            ) {
-                $lastApplication =
-                    WelfareApplication::withTrashed()
-                        ->orderByDesc('id')
-                        ->lockForUpdate()
-                        ->first();
+        $stored = [];
+        try {
+            $application = DB::transaction(function () use ($request, $data, $organizationContribution, &$stored) {
+                $application = DB::transaction(
+                    function () use (
+                        $data,
+                        $organizationContribution
+                    ) {
+                        $lastApplication =
+                            WelfareApplication::withTrashed()
+                                ->orderByDesc('id')
+                                ->lockForUpdate()
+                                ->first();
 
-                $nextNumber =
-                    ($lastApplication?->id ?? 0) + 1;
+                        $nextNumber =
+                            ($lastApplication?->id ?? 0) + 1;
 
-                $data['application_number'] =
-                    'APP-' . str_pad(
-                        $nextNumber,
-                        5,
-                        '0',
-                        STR_PAD_LEFT
-                    );
+                        $data['application_number'] =
+                            'APP-'.str_pad(
+                                $nextNumber,
+                                5,
+                                '0',
+                                STR_PAD_LEFT
+                            );
 
-                $data['applicant_contribution'] =
-                    Money::decimal(Money::minor($data['applicant_contribution'] ?? 0));
+                        $data['applicant_contribution'] =
+                            Money::decimal(Money::minor($data['applicant_contribution'] ?? 0));
 
-                $data['organization_contribution'] =
-                    $organizationContribution;
+                        $data['organization_contribution'] =
+                            $organizationContribution;
 
-                /*
-                 * New applications always start here.
-                 */
-                $data['status'] = 'submitted';
+                        /*
+                         * New applications always start here.
+                         */
+                        $data['status'] = 'submitted';
 
-                $data['submitted_at'] = now();
+                        $data['submitted_at'] = now();
 
-                $data['submitted_by'] =
-                    auth()->id();
+                        $data['submitted_by'] =
+                            auth()->id();
 
-                $data['has_supporting_document'] =
-                    (bool) (
-                        $data['has_supporting_document']
-                        ?? false
-                    );
+                        $data['has_supporting_document'] =
+                            (bool) (
+                                $data['has_supporting_document']
+                                ?? false
+                            );
 
-                return WelfareApplication::create($data);
-            }
-        );
-
-        /*
-         * Store supporting documents.
-         */
-        if ($request->hasFile('supporting_documents')) {
-
-            foreach (
-                $request->file('supporting_documents')
-                as $file
-            ) {
-                $file->store(
-                    'welfare/applications/' . $application->id,
-                    'private'
+                        return WelfareApplication::create($data);
+                    }
                 );
-            }
 
-            $application->update([
-                'has_supporting_document' => true,
-            ]);
+                foreach ($request->file('supporting_documents', []) as $file) {
+                    app(UploadValidator::class)->inspect($file);
+                    $path = $file->store('welfare/applications/'.$application->id, 'private');
+                    if (! $path) {
+                        throw ValidationException::withMessages(['supporting_documents' => 'The file could not be stored.']);
+                    }
+                    $stored[] = $path;
+                    app(DocumentRegistry::class)->register('welfare_file:'.$application->id.':'.hash('sha256', $path), 'welfare', $application->id, 'Other', 'private', $path, $file->getClientOriginalName(), auth()->id(), now());
+                }
+                if ($stored) {
+                    $application->update(['has_supporting_document' => true]);
+                }
+
+                return $application;
+            });
+        } catch (\Throwable $e) {
+            foreach ($stored as $path) {
+                Storage::disk('private')->delete($path);
+            }throw $e;
         }
 
         return redirect()
@@ -343,9 +348,9 @@ class WelfareApplicationController extends Controller
     }
 
     /**
-         * Show application details.
-         */
-        /**
+     * Show application details.
+     */
+    /**
      * Show application details.
      */
     public function show(
@@ -361,42 +366,26 @@ class WelfareApplicationController extends Controller
             'agreement',
             'assistanceIncludingArchived',
 
-        'verifications' => function ($query) {
-            $query
-                ->latest('id')
-                ->with([
-                    'assignedTo',
-                    'verifiedBy',
-                ]);
-        },
-        'reviews' => function ($query) {
-            $query
-                ->orderBy('id')
-                ->with('decidedBy');
-        },
-    ]);
+            'verifications' => function ($query) {
+                $query
+                    ->latest('id')
+                    ->with([
+                        'assignedTo',
+                        'verifiedBy',
+                    ]);
+            },
+            'reviews' => function ($query) {
+                $query
+                    ->orderBy('id')
+                    ->with('decidedBy');
+            },
+        ]);
 
-        $documents = collect();
+        $documents = LibraryDocument::where('parent_type', 'welfare')->where('parent_id', $application->id)->where('source_key', 'like', 'welfare_file:%')->with('versions')->get()->map(function ($d) use ($application) {
+            $v = $d->versions->first();
 
-        $directory = 'welfare/applications/' . $application->id;
-
-        if (Storage::disk('private')->exists($directory)) {
-            $documents = collect(
-                Storage::disk('private')->files($directory)
-            )->map(function ($path) use ($application) {
-                return [
-                    'name' => basename($path),
-                    'url' => route(
-                        'welfare.applications.documents.show',
-                        [$application, basename($path)]
-                    ),
-                    'size' => Storage::disk('private')->size($path),
-                    'extension' => strtolower(
-                        pathinfo($path, PATHINFO_EXTENSION)
-                    ),
-                ];
-            });
-        }
+            return ['name' => $v->original_name ?? $d->number, 'url' => route('welfare.applications.documents.show', [$application, basename($v->path)]), 'size' => $v->size ?? 0, 'extension' => strtolower(pathinfo($v->path, PATHINFO_EXTENSION))];
+        });
 
         return view(
             'welfare.applications.show',
@@ -417,15 +406,11 @@ class WelfareApplicationController extends Controller
             404
         );
 
-        $path = 'welfare/applications/' . $application->id . '/' . $document;
+        $path = 'welfare/applications/'.$application->id.'/'.$document;
 
         abort_unless(Storage::disk('private')->exists($path), 404);
 
-        return Storage::disk('private')->response(
-            $path,
-            $document,
-            ['Cache-Control' => 'private, no-store']
-        );
+        return app(DocumentService::class)->sourceDownload(auth()->user(), 'welfare_file:'.$application->id.':'.hash('sha256', $path));
     }
 
     /**
@@ -469,7 +454,7 @@ class WelfareApplicationController extends Controller
             $this->assertDecisionActor($locked, 'recommendation', 'Implementation Committee');
             $this->assertEligibleBeneficiary($locked);
 
-            if (!$locked->verifications()->where('workflow_status', 'completed')->exists()) {
+            if (! $locked->verifications()->where('workflow_status', 'completed')->exists()) {
                 throw ValidationException::withMessages([
                     'status' => 'A completed field verification is required before the committee can make a recommendation.',
                 ]);
@@ -556,7 +541,7 @@ class WelfareApplicationController extends Controller
             $this->assertDecisionActor($locked, 'general_secretary_review', 'General Secretary');
             $this->assertEligibleBeneficiary($locked);
 
-            if (!$locked->reviews()->where('stage', 'implementation_committee')->where('decision', 'approve')->exists()) {
+            if (! $locked->reviews()->where('stage', 'implementation_committee')->where('decision', 'approve')->exists()) {
                 throw ValidationException::withMessages([
                     'status' => 'An Implementation Committee recommendation is required before General Secretary review.',
                 ]);
@@ -639,7 +624,7 @@ class WelfareApplicationController extends Controller
             $this->assertDecisionActor($locked, 'committee_review', 'Decision-Making Committee');
             $this->assertEligibleBeneficiary($locked);
 
-            if (!$locked->reviews()->where('stage', 'general_secretary')->where('decision', 'approve')->exists()) {
+            if (! $locked->reviews()->where('stage', 'general_secretary')->where('decision', 'approve')->exists()) {
                 throw ValidationException::withMessages([
                     'status' => 'General Secretary review must be completed before the Decision-Making Committee can decide.',
                 ]);
@@ -750,7 +735,7 @@ class WelfareApplicationController extends Controller
         $beneficiary = $application->beneficiary;
 
         if (
-            !$beneficiary
+            ! $beneficiary
             || $beneficiary->verification_status !== 'verified'
             || $beneficiary->approval_status !== 'approved'
         ) {
@@ -774,7 +759,7 @@ class WelfareApplicationController extends Controller
             ->value('id') ?? 0);
 
         return WelfareApplicationReview::create([
-            'review_number' => 'REV-' . str_pad(
+            'review_number' => 'REV-'.str_pad(
                 $lastId + 1,
                 5,
                 '0',

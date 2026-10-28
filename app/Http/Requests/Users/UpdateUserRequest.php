@@ -34,7 +34,7 @@ class UpdateUserRequest extends FormRequest
             'password' => [
                 'nullable',
                 'string',
-                'min:8',
+                'min:12',
                 'confirmed',
             ],
 
