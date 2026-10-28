@@ -14,9 +14,15 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
-            'journal_mode' => null,
-            'synchronous' => null,
+            // Keep SQLite reliable for the local multi-request development server.
+            // MEMORY temp storage avoids dependence on the terminal process's TEMP
+            // directory, while WAL and a bounded wait reduce writer contention.
+            'pragmas' => [
+                'temp_store' => env('DB_TEMP_STORE', 'MEMORY'),
+            ],
+            'busy_timeout' => (int) env('DB_BUSY_TIMEOUT', 5000),
+            'journal_mode' => env('DB_JOURNAL_MODE', 'WAL'),
+            'synchronous' => env('DB_SYNCHRONOUS', 'NORMAL'),
         ],
 
         'mysql' => [
