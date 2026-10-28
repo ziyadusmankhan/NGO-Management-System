@@ -324,42 +324,13 @@ require __DIR__.'/business.php';
 require __DIR__.'/projects.php';
 
 require __DIR__.'/qard.php';
-
-Route::get('/operations/tasks', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Tasks']);
-})->name('operations.tasks.index');
-
-Route::get('/operations/tasks/create', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Tasks']);
-})->name('operations.tasks.create');
-
-Route::get('/operations/tasks/{id}', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Tasks']);
-})->name('operations.tasks.show');
+require __DIR__.'/tasks.php';
 
 require __DIR__.'/procurement.php';
-
-Route::get('/operations/meetings', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Meetings']);
-})->name('operations.meetings.index');
-
-Route::get('/operations/meetings/create', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Meetings']);
-})->name('operations.meetings.create');
-
-Route::get('/operations/meetings/{id}', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Meetings']);
-})->name('operations.meetings.show');
+require __DIR__.'/meetings.php';
 
 require __DIR__.'/documents.php';
-
-Route::get('/records/reports', function () {
-    return view('shared.module-pending', ['moduleTitle' => 'Reports']);
-})->name('records.reports.index');
-
-Route::get('/records/reports/{id}', function ($id) {
-    return view('shared.module-pending', ['moduleTitle' => 'Reports']);
-})->name('records.reports.show');
+require __DIR__.'/reports.php';
 
 require __DIR__.'/audit.php';
 

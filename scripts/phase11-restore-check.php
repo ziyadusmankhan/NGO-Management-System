@@ -63,13 +63,17 @@ if ($hashes !== DB::table('users')->orderBy('id')->pluck('password', 'id')->all(
 }
 $checked = 0;
 foreach (SensitiveFields::TABLES as $table => $fields) {
+    if (! in_array($table, $originalTables, true)) {
+        continue;
+    }
     $rows = $original->query('SELECT * FROM "'.$table.'"');
     while ($row = $rows->fetchArray(SQLITE3_ASSOC)) {
         $current = (array) DB::table($table)->where('id', $row['id'])->first();
         foreach ($fields as $field) {
             $decoded = app(FieldEncryption::class)->decode($current[$field]);
-            // JSON histories remain their original serialized string during conversion.
-            if ($decoded !== $row[$field]) {
+            // Accept both original pre-conversion backups and later encrypted backups.
+            $sourceValue = app(FieldEncryption::class)->decode($row[$field]);
+            if ($decoded !== $sourceValue) {
                 throw new RuntimeException('Protected field preservation failed for '.$table.' #'.$row['id'].' '.$field);
             }
             $checked++;

@@ -9,8 +9,11 @@ use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Members\Models\Member;
+use App\Domain\Operations\Models\Meeting;
+use App\Domain\Operations\Models\Task;
 use App\Domain\Procurement\Models\Procurement;
 use App\Domain\Projects\Models\Project;
+use App\Domain\Reports\Models\ReportRun;
 use App\Domain\Users\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Route;
@@ -62,12 +65,13 @@ class AuditQuery
             User::class => ['users.view', 'users.show'], Member::class => ['members.view', 'members.show'], Committee::class => ['committees.view', 'committees.show'],
             Fund::class => ['finance.view', 'finance.funds.show'], Donation::class => ['finance.view', 'finance.donations.show'], Expense::class => ['finance.view', 'finance.expenses.show'],
             Project::class => ['projects.view', 'projects.show'], BusinessApplication::class => ['business.view', 'business.applications.show'], Procurement::class => ['procurement.view', 'operations.procurement.show'],
+            Task::class => ['tasks.view', 'operations.tasks.show'], Meeting::class => ['meetings.view', 'operations.meetings.show'], ReportRun::class => ['reports.view', 'records.reports.show'],
         ];
         $m = $map[$e->subject_type] ?? null;
         if (! $m || ! $user->hasPermission($m[0]) || ! Route::has($m[1])) {
             return null;
         }
 
-        return route($m[1],$e->subject_id);
+        return route($m[1], $e->subject_id);
     }
 }

@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Domain\Finance\Support\Money;
+use App\Domain\Business\Services\BusinessReportService;
+use App\Domain\Committees\Models\Committee;
 use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
-use App\Domain\Users\Models\User;
 use App\Domain\Members\Models\Member;
-use App\Domain\Committees\Models\Committee;
+use App\Domain\Operations\Models\Task;
+use App\Domain\Projects\Models\Project;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -33,7 +36,6 @@ class DashboardController extends Controller
 
         $totalCommittees = Committee::query()->count();
 
-
         /*
          * ==========================================
          * FINANCE — SOURCE OF TRUTH
@@ -52,7 +54,6 @@ class DashboardController extends Controller
             ->where('direction', 'debit')
             ->where('status', 'posted');
 
-
         /*
          * Donations this month
          */
@@ -62,7 +63,6 @@ class DashboardController extends Controller
                 now()->startOfMonth()->toDateString(),
                 now()->endOfMonth()->toDateString(),
             ]));
-
 
         /*
          * Donation count this month
@@ -74,7 +74,6 @@ class DashboardController extends Controller
                 now()->endOfMonth()->toDateString(),
             ])
             ->count();
-
 
         /*
          * Overall fund balances
@@ -92,9 +91,7 @@ class DashboardController extends Controller
             }
         );
 
-
         $totalFundBalance = Money::total($fundBalances);
-
 
         /*
          * Restricted / unrestricted fund balances
@@ -118,7 +115,6 @@ class DashboardController extends Controller
             }
         }
 
-
         /*
          * Total posted expenses
          */
@@ -127,7 +123,6 @@ class DashboardController extends Controller
 
         $totalExpenses = Money::sum((clone $postedDebits)
             ->where('type', 'expense'));
-
 
         /*
          * ==========================================
@@ -146,7 +141,6 @@ class DashboardController extends Controller
             }
         );
 
-
         /*
          * ==========================================
          * PROJECTS
@@ -159,7 +153,7 @@ class DashboardController extends Controller
 
         $projectStatusCounts = [];
         if (auth()->user()->hasPermission('projects.view')) {
-            $projectStatusCounts = \App\Domain\Projects\Models\Project::withTrashed()->selectRaw('status, COUNT(*) as aggregate')->groupBy('status')->pluck('aggregate','status')->all();
+            $projectStatusCounts = Project::withTrashed()->selectRaw('status, COUNT(*) as aggregate')->groupBy('status')->pluck('aggregate', 'status')->all();
         }
         $activeProjects = $projectStatusCounts['in_progress'] ?? 0;
 
@@ -180,7 +174,6 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-
         /*
          * ==========================================
          * PENDING EXPENSES
@@ -190,7 +183,6 @@ class DashboardController extends Controller
         $pendingExpenses = Expense::query()
             ->where('status', 'pending')
             ->count();
-
 
         /*
          * ==========================================
@@ -202,7 +194,6 @@ class DashboardController extends Controller
             ->where('status', 'pending')
             ->count();
 
-
         /*
          * ==========================================
          * VIEW
@@ -210,7 +201,16 @@ class DashboardController extends Controller
          */
 
         $businessSummary = auth()->user()->hasPermission('business.view')
-            ? app(\App\Domain\Business\Services\BusinessReportService::class)->report([])['totals'] : null;
+            ? app(BusinessReportService::class)->report([])['totals'] : null;
+
+        $upcomingTasks = collect();
+        if (auth()->user()->hasPermission('tasks.view') && Schema::hasTable('operation_tasks')) {
+            $upcomingTasks = Task::with('assignee')
+                ->whereNotIn('status', ['completed', 'cancelled'])
+                ->whereDate('due_on', '<=', today('Asia/Karachi')->addDays(14))
+                ->orderBy('due_on')->orderByRaw("CASE priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 ELSE 3 END")
+                ->limit(7)->get();
+        }
 
         return view(
             'dashboard.index',
@@ -231,7 +231,8 @@ class DashboardController extends Controller
                 'projectStatusCounts',
                 'recentTransactions',
                 'pendingExpenses',
-                'pendingDonations'
+                'pendingDonations',
+                'upcomingTasks'
             )
         );
     }

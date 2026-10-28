@@ -1026,10 +1026,13 @@
     ========================================== -->
 
     <div class="lower-grid">
-        @include('dashboard.partials.in-development', [
-            'title' => 'Upcoming Tasks',
-            'message' => 'Task scheduling is in development. Upcoming tasks will appear here when this feature is available.',
-        ])
+        @if(auth()->user()->hasPermission('tasks.view'))
+        <div class="dashboard-card"><div class="card-header-custom"><h3>Upcoming Tasks</h3><a href="{{ route('operations.tasks.index') }}">View all</a></div><div class="card-body">
+            @forelse($upcomingTasks as $task)<div style="padding:10px 0;border-bottom:1px solid var(--border)"><a href="{{ route('operations.tasks.show',$task) }}"><strong>{{ $task->title }}</strong></a><div style="color:var(--muted);font-size:12px">{{ $task->number }} · {{ $task->assignee?->name ?? 'Unassigned' }} · due {{ $task->due_on->format('d M Y') }} @if($task->overdue)· <span style="color:#a33838">overdue</span>@endif</div></div>@empty<p>No open tasks are due in the next 14 days.</p>@endforelse
+        </div></div>
+        @else
+        @include('dashboard.partials.in-development', ['title'=>'Upcoming Tasks','message'=>'Your role does not include task access.'])
+        @endif
         @include('dashboard.partials.in-development', [
             'title' => 'Recent Activity',
             'message' => 'The activity feed is in development. Organization updates will appear here when this feature is available.',

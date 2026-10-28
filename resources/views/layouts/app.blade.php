@@ -886,13 +886,13 @@
                 Operations
             </div>
 
-            <a
+            @can('tasks.view')<a
                 href="{{ route('operations.tasks.index') }}"
                 class="nav-item {{ request()->routeIs('operations.tasks.*') ? 'active' : '' }}"
             >
                 <i class="bi bi-check2-square"></i>
                 <span>Tasks</span>
-            </a>
+            </a>@endcan
 
             @if(auth()->user()->hasPermission('procurement.view'))
 <a
@@ -904,13 +904,13 @@
             </a>
 @endif
 
-            <a
+            @can('meetings.view')<a
                 href="{{ route('operations.meetings.index') }}"
                 class="nav-item {{ request()->routeIs('operations.meetings.*') ? 'active' : '' }}"
             >
                 <i class="bi bi-calendar3"></i>
                 <span>Meetings</span>
-            </a>
+            </a>@endcan
 
 
             <div class="nav-section">
@@ -925,13 +925,13 @@
                 <span>Documents</span>
             </a>
 
-            <a
+            @can('reports.view')<a
                 href="{{ route('records.reports.index') }}"
                 class="nav-item {{ request()->routeIs('records.reports.*') ? 'active' : '' }}"
             >
                 <i class="bi bi-bar-chart"></i>
                 <span>Reports</span>
-            </a>
+            </a>@endcan
 
             @can('audit.view')<a
                 href="{{ route('records.audit.index') }}"

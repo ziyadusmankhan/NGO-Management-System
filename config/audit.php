@@ -7,9 +7,13 @@ use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\FundChange;
 use App\Domain\Members\Models\Member;
+use App\Domain\Operations\Models\Meeting;
+use App\Domain\Operations\Models\Task;
+use App\Domain\Operations\Models\TaskComment;
 use App\Domain\Procurement\Models\ProcurementEvent;
 use App\Domain\Projects\Models\ProjectEvent;
 use App\Domain\Qard\Models\QardEvent;
+use App\Domain\Reports\Models\ReportRun;
 use App\Domain\Users\Models\Role;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
@@ -28,6 +32,10 @@ return [
         Role::class => ['module' => 'accounts'],
         Member::class => ['module' => 'organization'],
         Committee::class => ['module' => 'organization'],
+        Task::class => ['module' => 'operations'],
+        TaskComment::class => ['module' => 'operations'],
+        Meeting::class => ['module' => 'operations'],
+        ReportRun::class => ['module' => 'reports'],
         Donation::class => ['module' => 'finance'],
         Expense::class => ['module' => 'finance'],
         Beneficiary::class => ['module' => 'welfare'],

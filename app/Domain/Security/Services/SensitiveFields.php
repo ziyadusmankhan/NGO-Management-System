@@ -43,6 +43,9 @@ class SensitiveFields
         'procurement_receipts' => ['notes'],
         'procurement_movements' => ['notes', 'void_reason'],
         'procurement_events' => ['before_values', 'after_values'],
+        'operation_tasks' => ['description', 'expected_outcome', 'completion_notes'],
+        'operation_task_comments' => ['body'],
+        'operation_meetings' => ['agenda', 'minutes', 'decisions'],
     ];
 
     public static function fields(string $table): array

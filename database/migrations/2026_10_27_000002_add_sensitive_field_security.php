@@ -16,6 +16,11 @@ return new class extends Migration
         });
         DB::table('security_state')->insert(['key' => 'encryption', 'value' => 'converting']);
         foreach (SensitiveFields::TABLES as $table => $fields) {
+            // Later modules can opt into the same encrypted casts. Their empty tables
+            // are created after this migration on a fresh installation.
+            if (! Schema::hasTable($table)) {
+                continue;
+            }
             // Keep source column names and data. Widen non-TEXT columns for authenticated ciphertext.
             $columns = collect(Schema::getColumns($table))->keyBy('name');
             foreach ($fields as $field) {
