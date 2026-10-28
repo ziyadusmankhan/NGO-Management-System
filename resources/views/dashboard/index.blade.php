@@ -603,6 +603,7 @@
 
     <div class="stats-grid">
 
+        @can('members.view')
         <!-- Members -->
 
         <div class="stat-card">
@@ -632,12 +633,14 @@
             </div>
 
         </div>
+        @endcan
 
 
         @can('projects.view')
         <div class="stat-card"><div class="stat-top"><div class="stat-icon"><i class="bi bi-kanban"></i></div></div><div class="stat-label">Active Projects</div><div class="stat-value">{{ $activeProjects }}</div><div class="stat-description"><a href="{{ route('projects.index',['status'=>'in_progress']) }}">Projects currently In Progress</a></div></div>
         @endcan
 
+        @can('finance.view')
         <!-- Donations -->
 
         <div class="stat-card">
@@ -698,6 +701,7 @@
             </div>
 
         </div>
+        @endcan
 
     </div>
 
@@ -708,6 +712,7 @@
 
     <div class="dashboard-grid">
 
+        @can('finance.view')
         <!-- Fund Overview -->
 
         <div class="dashboard-card">
@@ -863,6 +868,7 @@
             </div>
 
         </div>
+        @endcan
 
 
         @can('projects.view')
@@ -878,6 +884,7 @@
          TRANSACTIONS
     ========================================== -->
 
+    @can('finance.view')
     <div class="dashboard-card mb-3">
 
         <div class="card-header-custom">
@@ -1019,6 +1026,7 @@
         </div>
 
     </div>
+    @endcan
 
 
     <!-- =========================================
@@ -1033,14 +1041,27 @@
         @else
         @include('dashboard.partials.in-development', ['title'=>'Upcoming Tasks','message'=>'Your role does not include task access.'])
         @endif
-        @include('dashboard.partials.in-development', [
-            'title' => 'Recent Activity',
-            'message' => 'The activity feed is in development. Organization updates will appear here when this feature is available.',
-        ])
+        <div class="dashboard-card"><div class="card-header-custom"><h3>Recent Activity</h3>@can('audit.view')<a href="{{ route('records.audit.index') }}">Open Audit Trail</a>@endcan</div><div class="card-body">
+            @forelse($recentActivity as $activity)
+                @php($event=$activity['event'])
+                <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+                    @if($activity['url'])<a href="{{ $activity['url'] }}"><strong>{{ $event->summary }}</strong></a>@else<strong>{{ $event->summary }}</strong>@endif
+                    <div style="color:var(--muted);font-size:12px">{{ str($event->module)->headline() }} · {{ $event->actor_name ?? ucfirst($event->actor_kind) }} · {{ $event->occurred_at?->timezone('Asia/Karachi')->diffForHumans() ?? 'Time unavailable' }} @if($event->subject_reference)· {{ $event->subject_reference }}@endif</div>
+                </div>
+            @empty<p>No authorized activity has been recorded yet.</p>@endforelse
+        </div></div>
     </div>
 
 @if($businessSummary !== null)
 <div class="card" style="margin-top:20px;padding:20px"><h3><a href="{{ route('business.applications.index') }}">Small Business assistance</a></h3><p>Real posted funding and principal recovery through today.</p>
 <div class="stats-grid">@foreach(['released'=>'Total released','recovered'=>'Principal recovered','outstanding'=>'Outstanding principal'] as $key=>$label)<div class="stat-card"><span>{{ $label }}</span><h3>PKR {{ \App\Domain\Finance\Support\Money::format(\App\Domain\Finance\Support\Money::decimal($businessSummary[$key])) }}</h3></div>@endforeach<div class="stat-card"><span>Businesses started</span><h3>{{ $businessSummary['started'] }}</h3></div></div></div>
+@endif
+
+@if($welfareSummary !== null)
+<div class="card" style="margin-top:20px;padding:20px"><h3><a href="{{ route('welfare.assistance.index') }}">Welfare overview</a></h3><p>Live assistance, review and student-beneficiary totals.</p><div class="stats-grid"><div class="stat-card"><span>Open assistance</span><h3>{{ $welfareSummary['open'] }}</h3></div><div class="stat-card"><span>Reviews due</span><h3>{{ $welfareSummary['review_due'] }}</h3></div><div class="stat-card"><span>Posted assistance</span><h3>PKR {{ \App\Domain\Finance\Support\Money::format($welfareSummary['paid']) }}</h3></div><div class="stat-card"><span>Student beneficiaries</span><h3>{{ $welfareSummary['students'] }}</h3></div></div></div>
+@endif
+
+@if($qardSummary !== null)
+<div class="card" style="margin-top:20px;padding:20px"><h3><a href="{{ route('qard.index') }}">Qard-e-Hasana overview</a></h3><p>Live loan and follow-up totals.</p><div class="stats-grid"><div class="stat-card"><span>Active loans</span><h3>{{ $qardSummary['active'] }}</h3></div><div class="stat-card"><span>Outstanding principal</span><h3>PKR {{ \App\Domain\Finance\Support\Money::format($qardSummary['outstanding']) }}</h3></div><div class="stat-card"><span>Follow-ups due</span><h3>{{ $qardSummary['followups'] }}</h3></div></div></div>
 @endif
 @endsection

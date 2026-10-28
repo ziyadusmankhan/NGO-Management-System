@@ -333,6 +333,7 @@ require __DIR__.'/documents.php';
 require __DIR__.'/reports.php';
 
 require __DIR__.'/audit.php';
+require __DIR__.'/phase12.php';
 
 use App\Http\Controllers\Members\MemberController;
 

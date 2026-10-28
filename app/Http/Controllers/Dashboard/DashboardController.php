@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Domain\Audit\Models\AuditEvent;
+use App\Domain\Audit\Services\AuditQuery;
 use App\Domain\Business\Services\BusinessReportService;
 use App\Domain\Committees\Models\Committee;
 use App\Domain\Finance\Donations\Models\Donation;
@@ -13,6 +15,13 @@ use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Members\Models\Member;
 use App\Domain\Operations\Models\Task;
 use App\Domain\Projects\Models\Project;
+use App\Domain\Qard\Models\QardLoan;
+use App\Domain\Qard\Models\QardMovement;
+use App\Domain\Qard\Models\QardReminder;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistanceReminder;
+use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -20,7 +29,8 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     public function index(
-        FundBalanceService $balanceService
+        FundBalanceService $balanceService,
+        AuditQuery $auditQuery
     ): View {
         /*
          * ==========================================
@@ -212,6 +222,34 @@ class DashboardController extends Controller
                 ->limit(7)->get();
         }
 
+        $welfareSummary = null;
+        if (auth()->user()->hasPermission('welfare.assistance.view')) {
+            $welfareSummary = [
+                'open' => WelfareAssistance::whereNotIn('status', ['closed', 'cancelled', 'rejected'])->count(),
+                'review_due' => WelfareAssistanceReminder::whereNull('resolved_at')->count(),
+                'paid' => Money::sum(WelfareAssistancePayment::where('status', 'posted')),
+                'students' => Beneficiary::where('category', 'student')->count(),
+            ];
+        }
+
+        $qardSummary = null;
+        if (auth()->user()->hasPermission('qard.view')) {
+            $disbursed = Money::sum(QardMovement::where('status', 'posted')->where('kind', 'disbursement'));
+            $repaid = Money::sum(QardMovement::where('status', 'posted')->where('kind', 'repayment'));
+            $qardSummary = [
+                'active' => QardLoan::where('status', 'active')->count(),
+                'outstanding' => Money::decimal(max(0, Money::minor($disbursed) - Money::minor($repaid))),
+                'followups' => QardReminder::whereNull('resolved_at')->count(),
+            ];
+        }
+
+        $recentActivity = $auditQuery->ordered(AuditEvent::where('historical', false)->where('outcome', 'success'))
+            ->limit(80)->get()->filter(fn ($event) => $auditQuery->visibleTo($event, auth()->user()))->take(8)
+            ->map(fn ($event) => [
+                'event' => $event,
+                'url' => $auditQuery->sourceLink($event, auth()->user()),
+            ])->values();
+
         return view(
             'dashboard.index',
             compact(
@@ -232,7 +270,7 @@ class DashboardController extends Controller
                 'recentTransactions',
                 'pendingExpenses',
                 'pendingDonations',
-                'upcomingTasks'
+                'upcomingTasks', 'welfareSummary', 'qardSummary', 'recentActivity'
             )
         );
     }

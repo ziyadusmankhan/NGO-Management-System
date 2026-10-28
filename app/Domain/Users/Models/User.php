@@ -5,6 +5,7 @@ namespace App\Domain\Users\Models;
 use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Audit\Services\AuditedRelations;
 use App\Domain\Members\Models\Member;
+use App\Domain\Notifications\Models\NotificationState;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -50,6 +51,11 @@ class User extends Authenticatable
     public function member(): HasOne
     {
         return $this->hasOne(Member::class);
+    }
+
+    public function notificationStates()
+    {
+        return $this->hasMany(NotificationState::class);
     }
 
     public function hasRole(string $role): bool

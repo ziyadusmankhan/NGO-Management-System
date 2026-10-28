@@ -210,6 +210,7 @@
             margin-bottom: 3px;
 
             transition: all .18s ease;
+            text-decoration: none;
         }
 
         .nav-item i {
@@ -473,6 +474,23 @@
             border: 2px solid white;
 
             box-sizing: content-box;
+        }
+
+        .notification-count {
+            position: absolute;
+            right: -6px;
+            top: -7px;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 5px;
+            border-radius: 10px;
+            background: #a33838;
+            color: white;
+            border: 2px solid white;
+            font-size: 10px;
+            line-height: 15px;
+            text-align: center;
+            font-weight: 700;
         }
 
         .profile-menu {
@@ -1011,30 +1029,35 @@
             </button>
 
 
-            <div class="global-search">
+            <form class="global-search" method="get" action="{{ route('search.index') }}">
 
                 <i class="bi bi-search"></i>
 
                 <input
                     type="search"
+                    name="q"
+                    value="{{ request()->routeIs('search.index') ? request('q') : '' }}"
+                    minlength="2"
+                    maxlength="100"
                     placeholder="Search members, projects, donations..."
+                    aria-label="Global search"
                 >
 
-            </div>
+            </form>
 
 
             <div class="topbar-spacer"></div>
 
 
-            <button
-                type="button"
+            <a
+                href="{{ route('notifications.index') }}"
                 class="topbar-action"
                 title="Notifications"
+                aria-label="Notifications{{ $notificationUnreadCount ? ': '.$notificationUnreadCount.' unread' : '' }}"
             >
                 <i class="bi bi-bell"></i>
-
-                <span class="notification-dot"></span>
-            </button>
+                @if($notificationUnreadCount)<span class="notification-count">{{ $notificationUnreadCount > 99 ? '99+' : $notificationUnreadCount }}</span>@endif
+            </a>
 
 
             <button
