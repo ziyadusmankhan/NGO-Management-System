@@ -475,7 +475,7 @@
                             style="
                                 text-align:center;
                                 padding:50px 20px;
-                                color:#89948f;
+                                color:var(--legacy-text-89948f, #89948f);
                             "
                         >
 

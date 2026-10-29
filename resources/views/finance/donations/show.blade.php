@@ -156,8 +156,8 @@
                     type="submit"
                     class="ui-btn"
                     style="
-                        color:#a85f58;
-                        border-color:#ead8d5;
+                        color:var(--legacy-text-a85f58, #a85f58);
+                        border-color:var(--legacy-border-ead8d5, #ead8d5);
                     "
                 >
                     <i class="bi bi-archive"></i>
@@ -843,7 +843,7 @@
 
 
                     <div style="
-                        color:#6e7471;
+                        color:var(--legacy-text-6e7471, #6e7471);
                         min-width:26px;
                         text-align:center;
                     ">
@@ -878,7 +878,7 @@
 
 
                     <div style="
-                        color:#6e7471;
+                        color:var(--legacy-text-6e7471, #6e7471);
                         min-width:26px;
                         text-align:center;
                     ">
@@ -913,7 +913,7 @@
 
 
                     <div style="
-                        color:#6e7471;
+                        color:var(--legacy-text-6e7471, #6e7471);
                         min-width:26px;
                         text-align:center;
                     ">
@@ -965,7 +965,7 @@
                             <span style="
                                 display:block;
                                 margin-top:4px;
-                                color:#6e7772;
+                                color:var(--legacy-text-6e7772, #6e7772);
                                 font-size:12px;
                             ">
                                 {{ $donation->transaction?->transaction_number ?? 'No Entry' }}
@@ -1002,7 +1002,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

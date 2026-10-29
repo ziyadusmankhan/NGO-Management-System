@@ -8,8 +8,8 @@
     }
 
     .audit-card {
-        background: white;
-        border: 1px solid #dce6e0;
+        background:white;
+        border:1px solid var(--legacy-border-dce6e0, #dce6e0);
         border-radius: 12px;
         padding: 20px;
         margin: 16px 0
@@ -24,7 +24,7 @@
     .audit-page label {
         display: block;
         font-size: 13px;
-        color: #43594f
+        color:var(--legacy-text-43594f, #43594f)
     }
 
     .audit-page input,
@@ -32,16 +32,16 @@
         display: block;
         width: 100%;
         padding: 9px;
-        border: 1px solid #dce6e0;
+        border:1px solid var(--legacy-border-dce6e0, #dce6e0);
         border-radius: 7px;
         margin: 5px 0
     }
 
     .audit-btn {
         display: inline-block;
-        background: #173f35;
-        color: white;
-        border: 0;
+        background:var(--legacy-surface-173f35, #173f35);
+        color:white;
+        border:0;
         border-radius: 7px;
         padding: 10px 16px;
         text-decoration: none;
@@ -62,13 +62,13 @@
     .audit-page th {
         padding: 12px;
         text-align: left;
-        border-bottom: 1px solid #e1e8e4;
+        border-bottom:1px solid var(--legacy-border-e1e8e4, #e1e8e4);
         vertical-align: top
     }
 
     .audit-page small {
         display: block;
-        color: #64786e
+        color:var(--legacy-text-64786e, #64786e)
     }
 
     .audit-page pre {
@@ -78,15 +78,15 @@
     }
 
     .audit-tag {
-        background: #edf5f1;
+        background:var(--legacy-surface-edf5f1, #edf5f1);
         border-radius: 5px;
         padding: 4px 7px
     }
 
     .audit-muted {
-        color: #64786e
+        color:var(--legacy-text-64786e, #64786e)
     }
 
     .audit-error {
-        color: #a33838
+        color:var(--legacy-text-a33838, #a33838)
     }

@@ -52,9 +52,9 @@
             margin-bottom:18px;
             padding:13px 15px;
             border-radius:10px;
-            background:#edf7f0;
-            border:1px solid #d8e9dd;
-            color:#397955;
+            background:var(--legacy-surface-edf7f0, #edf7f0);
+            border:1px solid var(--legacy-border-d8e9dd, #d8e9dd);
+            color:var(--legacy-text-397955, #397955);
             font-size:14px;
         "
     >
@@ -154,7 +154,7 @@
                 align-items:center;
                 gap:10px;
                 flex-wrap:wrap;
-                border-bottom:1px solid #eef1ef;
+                border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
             "
         >
 
@@ -363,7 +363,7 @@
                                         <div style="
                                             height:1px;
                                             margin:5px 0;
-                                            background:#eef1ef;
+                                            background:var(--legacy-surface-eef1ef, #eef1ef);
                                         "></div>
                                     @endif
 
@@ -431,7 +431,7 @@
                             style="
                                 padding:45px;
                                 text-align:center;
-                                color:#89948f;
+                                color:var(--legacy-text-89948f, #89948f);
                             "
                         >
 

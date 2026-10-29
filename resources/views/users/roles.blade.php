@@ -31,7 +31,7 @@
 
         <div style="
             padding:16px;
-            border-bottom:1px solid #eef1ef;
+            border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
         ">
             <strong style="font-size: 16px;">
                 Organization Roles
@@ -39,7 +39,7 @@
 
             <div style="
                 margin-top:4px;
-                color: #6c7470;
+                color:var(--legacy-text-6c7470, #6c7470);
                 font-size: 16px;
             ">
                 {{ $roles->count() }} configured {{ $roles->count() === 1 ? 'role' : 'roles' }}
@@ -207,7 +207,7 @@
                                             @checked($selectedRole->permissions->contains('id', $permission->id))
                                         >
 
-                                        <span style="font-size:8px;color:#77837d;">
+                                        <span style="font-size:8px;color:var(--legacy-text-77837d, #77837d);">
                                             Allowed
                                         </span>
                                     </label>

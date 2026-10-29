@@ -55,14 +55,14 @@
 
         <div class="card-body">
 
-            <strong style="color:#a85f58;">
+            <strong style="color:var(--legacy-text-a85f58, #a85f58);">
                 Please correct the following:
             </strong>
 
             <ul style="
                 margin:8px 0 0;
                 padding-left:20px;
-                color:#a85f58;
+                color:var(--legacy-text-a85f58, #a85f58);
                 font-size:12px;
             ">
 
@@ -637,7 +637,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

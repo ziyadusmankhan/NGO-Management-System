@@ -106,13 +106,13 @@
 </div>
 
 @if (session('success'))
-    <div style="margin-bottom:16px;padding:12px 16px;background:#edf7f0;border:1px solid #cfe6d8;border-radius:10px;color:#397955;font-size:16px;">
+    <div style="margin-bottom:16px;padding:12px 16px;background:var(--legacy-surface-edf7f0, #edf7f0);border:1px solid var(--legacy-border-cfe6d8, #cfe6d8);border-radius:10px;color:var(--legacy-text-397955, #397955);font-size:16px;">
         {{ session('success') }}
     </div>
 @endif
 
 @if ($errors->any())
-    <div style="margin-bottom:16px;padding:12px 16px;background:#fff0ef;border:1px solid #f0d3d1;border-radius:10px;color:#a85f58;font-size:16px;">
+    <div style="margin-bottom:16px;padding:12px 16px;background:var(--legacy-surface-fff0ef, #fff0ef);border:1px solid var(--legacy-border-f0d3d1, #f0d3d1);border-radius:10px;color:var(--legacy-text-a85f58, #a85f58);font-size:16px;">
         @foreach ($errors->all() as $error)
             <div>{{ $error }}</div>
         @endforeach
@@ -222,7 +222,7 @@
 
                                 </div>
 
-                                <p style="margin:16px 0 0;color:#6d7571;">
+                                <p style="margin:16px 0 0;color:var(--legacy-text-6d7571, #6d7571);">
                                     This agreement has not necessarily been signed. Check its signature
                                     status on the agreement details page.
                                 </p>
@@ -237,17 +237,17 @@
                                 </div>
 
                             @elseif ($application->isTestApplication())
-                                <p style="margin:0;color:#6d7571;">
+                                <p style="margin:0;color:var(--legacy-text-6d7571, #6d7571);">
                                     This is a reserved test-only application. Agreement creation is disabled.
                                 </p>
 
                             @elseif ((int) $application->submitted_by === (int) auth()->id())
-                                <p style="margin:0;color:#6d7571;">
+                                <p style="margin:0;color:var(--legacy-text-6d7571, #6d7571);">
                                     The application submitter cannot prepare its agreement.
                                 </p>
 
                             @else
-                                <p style="margin:0 0 16px;color:#6d7571;">
+                                <p style="margin:0 0 16px;color:var(--legacy-text-6d7571, #6d7571);">
                                     Final approval is recorded. No agreement has been created yet.
                                 </p>
 
@@ -363,7 +363,7 @@
                 </div>
 
                 @if ($isRejected)
-                    <p style="margin-top:14px;color:#a85f58;font-size:16px;">
+                    <p style="margin-top:14px;color:var(--legacy-text-a85f58, #a85f58);font-size:16px;">
                         This application was rejected
                         @if ($application->rejected_at)
                             on {{ $application->rejected_at->format('d M Y') }}
@@ -560,8 +560,8 @@
                             align-items:flex-start;
                             gap:10px;
                             padding:13px 15px;
-                            background:#f7f9f8;
-                            border:1px solid #e5ebe8;
+                            background:var(--legacy-surface-f7f9f8, #f7f9f8);
+                            border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
                             border-radius:10px;
                         "
                     >
@@ -584,7 +584,7 @@
                             <div
                                 style="
                                     margin-top:4px;
-                                    color:#6b7670;
+                                    color:var(--legacy-text-6b7670, #6b7670);
                                     font-size:14px;
                                     line-height:1.6;
                                 "
@@ -699,7 +699,7 @@
                                 style="
                                     display:block;
                                     margin-bottom:6px;
-                                    color:#6d7571;
+                                    color:var(--legacy-text-6d7571, #6d7571);
                                     font-size:13px;
                                     font-weight:650;
                                     text-transform:uppercase;
@@ -762,7 +762,7 @@
                                 style="
                                     display:block;
                                     margin-bottom:8px;
-                                    color:#6d7571;
+                                    color:var(--legacy-text-6d7571, #6d7571);
                                     font-size:13px;
                                     font-weight:650;
                                     text-transform:uppercase;
@@ -786,10 +786,10 @@
                                     <div
                                         style="
                                             padding:9px 11px;
-                                            border:1px solid #edf1ee;
+                                            border:1px solid var(--legacy-border-edf1ee, #edf1ee);
                                             border-radius:9px;
-                                            background:#fafcfb;
-                                            color:#59655f;
+                                            background:var(--legacy-surface-fafcfb, #fafcfb);
+                                            color:var(--legacy-text-59655f, #59655f);
                                             font-size:14px;
                                         "
                                     >
@@ -827,15 +827,15 @@
                             style="
                                 margin-top:18px;
                                 padding:13px 15px;
-                                background:#f7f9f8;
-                                border:1px solid #e5ebe8;
+                                background:var(--legacy-surface-f7f9f8, #f7f9f8);
+                                border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
                                 border-radius:10px;
                             "
                         >
 
                             <div
                                 style="
-                                    color:#6d7571;
+                                    color:var(--legacy-text-6d7571, #6d7571);
                                     font-size:13px;
                                     font-weight:650;
                                     text-transform:uppercase;
@@ -851,7 +851,7 @@
                                     margin-top:5px;
                                     font-size:17px;
                                     font-weight:700;
-                                    color:#46534c;
+                                    color:var(--legacy-text-46534c, #46534c);
                                 "
                             >
                                 {{ ucfirst($verification->recommendation) }}
@@ -863,7 +863,7 @@
                                 <div
                                     style="
                                         margin-top:7px;
-                                        color:#69766f;
+                                        color:var(--legacy-text-69766f, #69766f);
                                         line-height:1.6;
                                         font-size:14px;
                                     "
@@ -980,7 +980,7 @@
 
                 @empty
 
-                    <p style="margin:0;color:#6d7571;font-size:16px;">
+                    <p style="margin:0;color:var(--legacy-text-6d7571, #6d7571);font-size:16px;">
                         No supporting documents have been uploaded for this application.
                     </p>
 
@@ -1273,7 +1273,7 @@
                     >
                         @csrf
 
-                        <p style="margin:0 0 12px;color:#6d7571;font-size:14px;line-height:1.6;">
+                        <p style="margin:0 0 12px;color:var(--legacy-text-6d7571, #6d7571);font-size:14px;line-height:1.6;">
                             Record the committee recommendation. A positive recommendation advances the application to the General Secretary.
                         </p>
 
@@ -1307,7 +1307,7 @@
                     >
                         @csrf
 
-                        <p style="margin:0 0 12px;color:#6d7571;font-size:14px;line-height:1.6;">
+                        <p style="margin:0 0 12px;color:var(--legacy-text-6d7571, #6d7571);font-size:14px;line-height:1.6;">
                             Review the Implementation Committee recommendation and forward it to the Decision-Making Committee, return it for reconsideration, or reject it with reasons.
                         </p>
 
@@ -1330,7 +1330,7 @@
                     >
                         @csrf
 
-                        <p style="margin:0 0 12px;color:#6d7571;font-size:14px;line-height:1.6;">
+                        <p style="margin:0 0 12px;color:var(--legacy-text-6d7571, #6d7571);font-size:14px;line-height:1.6;">
                             Record the final committee decision. Approval makes the application eligible to proceed to agreement and authorized disbursement; it does not itself create a payment.
                         </p>
 
@@ -1356,7 +1356,7 @@
                     </form>
 
                 @else
-                    <p style="margin:0;color:#6d7571;font-size:16px;line-height:1.6;">
+                    <p style="margin:0;color:var(--legacy-text-6d7571, #6d7571);font-size:16px;line-height:1.6;">
                         @if ($application->status === 'approved')
                             Final approval is recorded. The next steps are the required agreement and authorized disbursement; no payment is created by this decision.
                         @elseif ($application->status === 'rejected')

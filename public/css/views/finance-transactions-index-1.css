@@ -27,7 +27,7 @@
     }
 
     .summary-card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:13px;
         padding:15px;
@@ -46,12 +46,12 @@
 
     .summary-meta {
         margin-top:4px;
-        color:#6d7572;
+        color:var(--legacy-text-6d7572, #6d7572);
         font-size:13px;
     }
 
     .main-card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -59,7 +59,7 @@
 
     .toolbar {
         padding:15px 17px;
-        border-bottom:1px solid #eef1ef;
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
         display:flex;
         gap:9px;
         flex-wrap:wrap;
@@ -76,7 +76,7 @@
         left:13px;
         top:50%;
         transform:translateY(-50%);
-        color:#6f7672;
+        color:var(--legacy-text-6f7672, #6f7672);
     }
 
     .search input {
@@ -85,7 +85,7 @@
         border:1px solid var(--border);
         border-radius:9px;
         padding:0 12px 0 36px;
-        background:#fafcfa;
+        background:var(--legacy-surface-fafcfa, #fafcfa);
         outline:none;
     }
 
@@ -95,8 +95,8 @@
         border:1px solid var(--border);
         border-radius:9px;
         padding:0 12px;
-        background:#fff;
-        color:#68756f;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-68756f, #68756f);
         font-size:14px;
         outline:none;
     }
@@ -112,8 +112,8 @@
         font-size:15px;
         font-weight:650;
         border:1px solid var(--border);
-        background:#fff;
-        color:#637069;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-637069, #637069);
         text-decoration:none;
         cursor:pointer;
     }
@@ -121,7 +121,7 @@
     .ui-btn.primary {
         background:var(--primary);
         border-color:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
     }
 
     .table-wrap {
@@ -136,9 +136,9 @@
 
     .transaction-table th {
         padding:11px 16px;
-        background:#fafcfb;
-        border-bottom:1px solid #eef1ef;
-        color:#6c7470;
+        background:var(--legacy-surface-fafcfb, #fafcfb);
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
+        color:var(--legacy-text-6c7470, #6c7470);
         font-size:12px;
         text-transform:uppercase;
         letter-spacing:.55px;
@@ -148,34 +148,34 @@
 
     .transaction-table td {
         padding:13px 16px;
-        border-bottom:1px solid #f0f3f1;
+        border-bottom:1px solid var(--legacy-border-f0f3f1, #f0f3f1);
         font-size:14px;
         vertical-align:middle;
     }
 
     .transaction-table tbody tr:hover {
-        background:#fbfcfb;
+        background:var(--legacy-surface-fbfcfb, #fbfcfb);
     }
 
     .transaction-number {
         font-weight:650;
-        color:#55635b;
+        color:var(--legacy-text-55635b, #55635b);
     }
 
     .subtext {
         margin-top:3px;
-        color:#89928e;
+        color:var(--legacy-text-89928e, #89928e);
         font-size:12px;
     }
 
     .fund-name {
         font-weight:600;
-        color:#58655f;
+        color:var(--legacy-text-58655f, #58655f);
     }
 
     .fund-reference {
         margin-top:3px;
-        color:#89928e;
+        color:var(--legacy-text-89928e, #89928e);
         font-size:12px;
     }
 
@@ -192,37 +192,37 @@
     }
 
     .type-badge.donation {
-        background:#edf7f0;
-        color:#397955;
+        background:var(--legacy-surface-edf7f0, #edf7f0);
+        color:var(--legacy-text-397955, #397955);
     }
 
     .type-badge.expense {
-        background:#fff0ef;
-        color:#a85f58;
+        background:var(--legacy-surface-fff0ef, #fff0ef);
+        color:var(--legacy-text-a85f58, #a85f58);
     }
 
     .type-badge.other {
-        background:#eef3f8;
-        color:#55758d;
+        background:var(--legacy-surface-eef3f8, #eef3f8);
+        color:var(--legacy-text-55758d, #55758d);
     }
 
     .status-badge {
-        background:#edf7f0;
-        color:#397955;
+        background:var(--legacy-surface-edf7f0, #edf7f0);
+        color:var(--legacy-text-397955, #397955);
     }
 
     .credit {
-        color:#397955;
+        color:var(--legacy-text-397955, #397955);
         font-weight:700;
     }
 
     .debit {
-        color:#a85f58;
+        color:var(--legacy-text-a85f58, #a85f58);
         font-weight:700;
     }
 
     .balance {
-        color:#4a5750;
+        color:var(--legacy-text-4a5750, #4a5750);
         font-weight:650;
     }
 
@@ -230,24 +230,24 @@
         width:30px;
         height:30px;
         border:1px solid var(--border);
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border-radius:8px;
         display:inline-flex;
         align-items:center;
         justify-content:center;
-        color:#6c7771;
+        color:var(--legacy-text-6c7771, #6c7771);
         text-decoration:none;
     }
 
     .empty {
         padding:50px;
         text-align:center;
-        color:#89948f;
+        color:var(--legacy-text-89948f, #89948f);
     }
 
     .table-footer {
         padding:14px 18px;
-        border-top:1px solid #eef1ef;
+        border-top:1px solid var(--legacy-border-eef1ef, #eef1ef);
         display:flex;
         justify-content:space-between;
         align-items:center;
@@ -255,7 +255,7 @@
     }
 
     .result {
-        color:#6e7672;
+        color:var(--legacy-text-6e7672, #6e7672);
         font-size:13px;
     }
 

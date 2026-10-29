@@ -32,7 +32,7 @@
 
     .meta {
         margin-top:4px;
-        color:#8d9993;
+        color:var(--legacy-text-8d9993, #8d9993);
         font-size:10px;
     }
 
@@ -51,8 +51,8 @@
         justify-content:center;
         gap:7px;
         border:1px solid var(--border);
-        background:#fff;
-        color:#65726c;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-65726c, #65726c);
         font-size:10px;
         font-weight:650;
         text-decoration:none;
@@ -61,13 +61,13 @@
 
     .btn.primary {
         background:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
         border-color:var(--primary);
     }
 
     .btn.danger {
-        color:#a85f58;
-        border-color:#ead8d5;
+        color:var(--legacy-text-a85f58, #a85f58);
+        border-color:var(--legacy-border-ead8d5, #ead8d5);
     }
 
     .layout {
@@ -77,7 +77,7 @@
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -86,7 +86,7 @@
 
     .card-head {
         padding:16px 19px;
-        border-bottom:1px solid #eef1ef;
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
     }
 
     .card-head strong {
@@ -96,7 +96,7 @@
     .card-head span {
         display:block;
         margin-top:4px;
-        color:#929d97;
+        color:var(--legacy-text-929d97, #929d97);
         font-size:9px;
     }
 
@@ -122,39 +122,39 @@
     }
 
     .status-active {
-        background:#edf7f0;
-        color:#397955;
+        background:var(--legacy-surface-edf7f0, #edf7f0);
+        color:var(--legacy-text-397955, #397955);
     }
 
     .status-active::before {
-        background:#4c9a6c;
+        background:var(--legacy-surface-4c9a6c, #4c9a6c);
     }
 
     .status-inactive {
-        background:#f1f3f2;
-        color:#6a766f;
+        background:var(--legacy-surface-f1f3f2, #f1f3f2);
+        color:var(--legacy-text-6a766f, #6a766f);
     }
 
     .status-inactive::before {
-        background:#9aa49f;
+        background:var(--legacy-surface-9aa49f, #9aa49f);
     }
 
     .status-suspended {
-        background:#fff4ed;
-        color:#9d674b;
+        background:var(--legacy-surface-fff4ed, #fff4ed);
+        color:var(--legacy-text-9d674b, #9d674b);
     }
 
     .status-suspended::before {
-        background:#c98561;
+        background:var(--legacy-surface-c98561, #c98561);
     }
 
     .status-resigned {
-        background:#f3f1f7;
-        color:#786d8f;
+        background:var(--legacy-surface-f3f1f7, #f3f1f7);
+        color:var(--legacy-text-786d8f, #786d8f);
     }
 
     .status-resigned::before {
-        background:#9586a8;
+        background:var(--legacy-surface-9586a8, #9586a8);
     }
 
     .info-grid {
@@ -166,7 +166,7 @@
     .info label {
         display:block;
         margin-bottom:5px;
-        color:#98a29d;
+        color:var(--legacy-text-98a29d, #98a29d);
         font-size:8px;
         text-transform:uppercase;
     }
@@ -175,7 +175,7 @@
     .info p {
         display:block;
         margin:0;
-        color:#4a5750;
+        color:var(--legacy-text-4a5750, #4a5750);
         font-size:10px;
         line-height:1.6;
     }
@@ -189,7 +189,7 @@
         justify-content:space-between;
         gap:10px;
         padding:9px 0;
-        border-bottom:1px solid #f0f3f1;
+        border-bottom:1px solid var(--legacy-border-f0f3f1, #f0f3f1);
         font-size:9px;
     }
 
@@ -198,11 +198,11 @@
     }
 
     .side-row span:first-child {
-        color:#98a29d;
+        color:var(--legacy-text-98a29d, #98a29d);
     }
 
     .side-row span:last-child {
-        color:#4a5750;
+        color:var(--legacy-text-4a5750, #4a5750);
         font-weight:650;
         text-align:right;
     }
@@ -211,8 +211,8 @@
         display:flex;
         gap:9px;
         padding:12px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
+        background:var(--legacy-surface-f7f9f8, #f7f9f8);
+        border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
         border-radius:10px;
     }
 
@@ -223,7 +223,7 @@
 
     .notice p {
         margin:0;
-        color:#748079;
+        color:var(--legacy-text-748079, #748079);
         font-size:8px;
         line-height:1.6;
     }

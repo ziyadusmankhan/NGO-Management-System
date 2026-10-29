@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Domain\Members\Models\Member;
+use App\Domain\Committees\Models\Committee;
 use App\Domain\Users\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,7 @@ class UiRedesignTest extends TestCase
         $application = $this->signedApplication($admin);
         $assistance = $this->legacyAssistance($application, 'approved');
         $member = Member::create(['member_number' => 'MEM-UI-001', 'first_name' => 'Sample', 'last_name' => 'Member', 'status' => 'active']);
+        Committee::create(['committee_number'=>'COM-UI-001','name'=>'Education Committee','type'=>'implementation','status'=>'active','established_date'=>'2026-01-01']);
         $routes = [];
         foreach (Route::getRoutes() as $route) {
             $name = $route->getName();

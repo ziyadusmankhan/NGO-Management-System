@@ -52,7 +52,7 @@
         <div class="form-card-body">
 
             <div style="
-                color:#a85f58;
+                color:var(--legacy-text-a85f58, #a85f58);
                 font-size:14px;
                 font-weight:650;
                 margin-bottom:8px;
@@ -63,7 +63,7 @@
             <ul style="
                 margin:0;
                 padding-left:20px;
-                color:#a85f58;
+                color:var(--legacy-text-a85f58, #a85f58);
                 font-size:13px;
             ">
 
@@ -506,12 +506,12 @@
 
                     <div
                         style="
-                            border:1px dashed #cbd6d0;
+                            border:1px dashed var(--legacy-border-cbd6d0, #cbd6d0);
                             border-radius:11px;
                             padding:22px;
                             text-align:center;
-                            background:#fbfcfb;
-                            color:#6c7470;
+                            background:var(--legacy-surface-fbfcfb, #fbfcfb);
+                            color:var(--legacy-text-6c7470, #6c7470);
                             font-size:14px;
                         "
                     >

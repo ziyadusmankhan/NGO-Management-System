@@ -407,7 +407,7 @@
                             @if($payment->status === 'void')
 
                                 <span style="
-                                    color:#a34f4f;
+                                    color:var(--legacy-text-a34f4f, #a34f4f);
                                     text-decoration:line-through;
                                 ">
                                     PKR {{ \App\Domain\Finance\Support\Money::format($payment->amount) }}
@@ -416,7 +416,7 @@
                                 <span style="
                                     display:block;
                                     margin-top:3px;
-                                    color:#a34f4f;
+                                    color:var(--legacy-text-a34f4f, #a34f4f);
                                     font-size:12px;
                                     font-weight:650;
                                 ">
@@ -523,7 +523,7 @@
                         display:flex;
                         gap:12px;
                         padding:12px 0;
-                        border-bottom:1px solid #eef1ef;
+                        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
                     ">
 
                         <div style="
@@ -560,7 +560,7 @@
                             <span style="
                                 display:block;
                                 margin-top:3px;
-                                color:#6c7570;
+                                color:var(--legacy-text-6c7570, #6c7570);
                                 font-size:12px;
                             ">
                                 {{ $review->review_date->format('d M Y') }}
@@ -592,7 +592,7 @@
 
                                 <p style="
                                     margin:7px 0 0;
-                                    color:#65706a;
+                                    color:var(--legacy-text-65706a, #65706a);
                                     font-size:13px;
                                     line-height:1.55;
                                 ">
@@ -649,7 +649,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:17px 0;
                 "></div>
 

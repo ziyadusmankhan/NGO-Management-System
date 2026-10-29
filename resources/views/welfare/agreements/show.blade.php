@@ -20,25 +20,25 @@
     @endif
 
     @if (session('success'))
-        <div style="padding:14px;margin-bottom:18px;border:1px solid #b7dfca;border-radius:8px;background:#f1fbf5;color:#176b4d;">
+        <div style="padding:14px;margin-bottom:18px;border:1px solid var(--legacy-border-b7dfca, #b7dfca);border-radius:8px;background:var(--legacy-surface-f1fbf5, #f1fbf5);color:var(--legacy-text-176b4d, #176b4d);">
             {{ session('success') }}
         </div>
     @endif
 
     @if (session('info'))
-        <div style="padding:14px;margin-bottom:18px;border:1px solid #ccd5d0;border-radius:8px;background:#f7faf8;">
+        <div style="padding:14px;margin-bottom:18px;border:1px solid var(--legacy-border-ccd5d0, #ccd5d0);border-radius:8px;background:var(--legacy-surface-f7faf8, #f7faf8);">
             {{ session('info') }}
         </div>
     @endif
 
     <div style="margin-bottom:22px;">
         <h1 style="margin:0 0 8px;">Welfare Agreement</h1>
-        <p style="color:#6d7571;margin:0;">
+        <p style="color:var(--legacy-text-6d7571, #6d7571);margin:0;">
             Agreement {{ $agreement->agreement_number }}
         </p>
     </div>
 
-    <div style="background:#fff;border:1px solid #e2e7e4;border-radius:12px;padding:24px;margin-bottom:20px;">
+    <div style="background:var(--legacy-surface-fff, #fff);border:1px solid var(--legacy-border-e2e7e4, #e2e7e4);border-radius:12px;padding:24px;margin-bottom:20px;">
 
         <p>
             <strong>Application:</strong>
@@ -65,20 +65,20 @@
             {{ $agreement->effective_date?->format('d M Y') ?? 'Not set' }}
         </p>
 
-        <hr style="border:0;border-top:1px solid #e2e7e4;margin:20px 0;">
+        <hr style="border:0;border-top:1px solid var(--legacy-border-e2e7e4, #e2e7e4);margin:20px 0;">
 
         <h2 style="font-size:18px;">Agreement terms</h2>
         <div style="white-space:pre-wrap;line-height:1.7;">{{ $agreement->terms }}</div>
 
         @if ($agreement->notes)
-            <hr style="border:0;border-top:1px solid #e2e7e4;margin:20px 0;">
+            <hr style="border:0;border-top:1px solid var(--legacy-border-e2e7e4, #e2e7e4);margin:20px 0;">
 
             <h2 style="font-size:18px;">Internal notes</h2>
             <div style="white-space:pre-wrap;line-height:1.7;">{{ $agreement->notes }}</div>
         @endif
     </div>
 
-    <div style="background:#f7faf8;border:1px solid #e2e7e4;border-radius:12px;padding:20px;margin-bottom:20px;">
+    <div style="background:var(--legacy-surface-f7faf8, #f7faf8);border:1px solid var(--legacy-border-e2e7e4, #e2e7e4);border-radius:12px;padding:20px;margin-bottom:20px;">
         <strong>Signature status</strong>
 
         <p>
@@ -93,7 +93,7 @@
                     'application' => $application,
                     'party' => 'beneficiary',
                 ]) }}"
-                style="color:#176b4d;"
+                style="color:var(--legacy-text-176b4d, #176b4d);"
             >
                 View beneficiary signature evidence
             </a>@endif
@@ -110,7 +110,7 @@
                     'application' => $application,
                     'party' => 'organization',
                 ]) }}"
-                style="color:#176b4d;"
+                style="color:var(--legacy-text-176b4d, #176b4d);"
             >
                 View organization signature evidence
             </a>@endif
@@ -133,18 +133,18 @@
     </div>
     
     <!-- SIGNATURE AUDIT TRAIL -->
-        <div style="background:#fff;border:1px solid #e2e7e4;border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div style="background:var(--legacy-surface-fff, #fff);border:1px solid var(--legacy-border-e2e7e4, #e2e7e4);border-radius:12px;padding:24px;margin-bottom:20px;">
 
             <h2 style="font-size:18px;margin-top:0;">Signature Verification Audit Trail</h2>
 
-            <p style="color:#6d7571;line-height:1.6;">
+            <p style="color:var(--legacy-text-6d7571, #6d7571);line-height:1.6;">
                 This section records the signatory, verification staff member,
                 timestamp, and private evidence status for each party.
             </p>
 
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;">
 
-                <div style="background:#f7faf8;border:1px solid #e2e7e4;border-radius:9px;padding:16px;">
+                <div style="background:var(--legacy-surface-f7faf8, #f7faf8);border:1px solid var(--legacy-border-e2e7e4, #e2e7e4);border-radius:9px;padding:16px;">
                     <h3 style="font-size:16px;margin-top:0;">Beneficiary</h3>
 
                     <p>
@@ -168,7 +168,7 @@
                     </p>
                 </div>
 
-                <div style="background:#f7faf8;border:1px solid #e2e7e4;border-radius:9px;padding:16px;">
+                <div style="background:var(--legacy-surface-f7faf8, #f7faf8);border:1px solid var(--legacy-border-e2e7e4, #e2e7e4);border-radius:9px;padding:16px;">
                     <h3 style="font-size:16px;margin-top:0;">Organization</h3>
 
                     <p>
@@ -197,7 +197,7 @@
 
     @if (auth()->user()?->hasPermission('welfare.agreements.manage'))
 
-            <div style="background:#fff;border:1px solid #e2e7e4;border-radius:12px;padding:24px;margin-bottom:20px;">
+            <div style="background:var(--legacy-surface-fff, #fff);border:1px solid var(--legacy-border-e2e7e4, #e2e7e4);border-radius:12px;padding:24px;margin-bottom:20px;">
 
                 <h2 style="font-size:18px;margin-top:0;">Agreement Actions</h2>
 
@@ -207,7 +207,7 @@
                     </div>
                 @elseif ($agreement->status === 'draft')
 
-                    <p style="line-height:1.6;color:#6d7571;">
+                    <p style="line-height:1.6;color:var(--legacy-text-6d7571, #6d7571);">
                         Mark the draft as prepared only after its contents have been reviewed
                         and the document is ready for signing.
                     </p>
@@ -221,7 +221,7 @@
 
                         <button
                             type="submit"
-                            style="padding:11px 18px;border:0;border-radius:8px;background:#176b4d;color:white;font-weight:600;cursor:pointer;"
+                            style="padding:11px 18px;border:0;border-radius:8px;background:var(--legacy-surface-176b4d, #176b4d);color:white;font-weight:600;cursor:pointer;"
                         >
                             Mark as Prepared
                         </button>
@@ -229,7 +229,7 @@
 
                 @elseif ($agreement->status === 'prepared')
 
-                    <p style="line-height:1.6;color:#6d7571;">
+                    <p style="line-height:1.6;color:var(--legacy-text-6d7571, #6d7571);">
                         Record a signature only after the signed agreement document has
                         been received and the signatory's signature has been verified.
                         These forms record verification details; they do not create
@@ -242,7 +242,7 @@
                             method="POST"
                             enctype="multipart/form-data"
                             action="{{ route('welfare.applications.agreement.signature', ['application' => $application, 'party' => 'beneficiary']) }}"
-                            style="border-top:1px solid #e2e7e4;padding-top:18px;margin-top:18px;"
+                            style="border-top:1px solid var(--legacy-border-e2e7e4, #e2e7e4);padding-top:18px;margin-top:18px;"
                         >
                             @csrf
 
@@ -259,7 +259,7 @@
                                 maxlength="255"
                                 required
                                 value="{{ old('signature_party') === 'beneficiary' ? old('signatory_name') : '' }}"
-                                style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccd5d0;border-radius:7px;margin:8px 0 14px;"
+                                style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--legacy-border-ccd5d0, #ccd5d0);border-radius:7px;margin:8px 0 14px;"
                             >
                             <label for="beneficiary_document">
                                 Signed agreement evidence (PDF, JPG or PNG; maximum 10 MB)
@@ -288,7 +288,7 @@
 
                             <button
                                 type="submit"
-                                style="padding:11px 18px;border:0;border-radius:8px;background:#176b4d;color:white;font-weight:600;cursor:pointer;"
+                                style="padding:11px 18px;border:0;border-radius:8px;background:var(--legacy-surface-176b4d, #176b4d);color:white;font-weight:600;cursor:pointer;"
                             >
                                 Record Beneficiary Signature
                             </button>
@@ -310,7 +310,7 @@
                             method="POST"
                             enctype="multipart/form-data"
                             action="{{ route('welfare.applications.agreement.signature', ['application' => $application, 'party' => 'organization']) }}"
-                            style="border-top:1px solid #e2e7e4;padding-top:18px;margin-top:18px;"
+                            style="border-top:1px solid var(--legacy-border-e2e7e4, #e2e7e4);padding-top:18px;margin-top:18px;"
                         >
                             @csrf
 
@@ -327,7 +327,7 @@
                                 maxlength="255"
                                 required
                                 value="{{ old('signature_party') === 'organization' ? old('signatory_name') : '' }}"
-                                style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccd5d0;border-radius:7px;margin:8px 0 14px;"
+                                style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--legacy-border-ccd5d0, #ccd5d0);border-radius:7px;margin:8px 0 14px;"
                             >
 
                             <label for="organization_document">
@@ -357,7 +357,7 @@
 
                             <button
                                 type="submit"
-                                style="padding:11px 18px;border:0;border-radius:8px;background:#176b4d;color:white;font-weight:600;cursor:pointer;"
+                                style="padding:11px 18px;border:0;border-radius:8px;background:var(--legacy-surface-176b4d, #176b4d);color:white;font-weight:600;cursor:pointer;"
                             >
                                 Record Organization Signature
                             </button>
@@ -375,17 +375,17 @@
 
                 @elseif ($agreement->status === 'signed')
 
-                    <p style="color:#176b4d;font-weight:600;">
+                    <p style="color:var(--legacy-text-176b4d, #176b4d);font-weight:600;">
                         Both signature records are complete.
                     </p>
 
-                    <p style="color:#6d7571;">
+                    <p style="color:var(--legacy-text-6d7571, #6d7571);">
                         Signing does not itself authorize payment or create a welfare assistance record.
                     </p>
 
                 @else
 
-                    <p style="color:#6d7571;">
+                    <p style="color:var(--legacy-text-6d7571, #6d7571);">
                         No actions are available for this agreement's current status.
                     </p>
 
@@ -398,7 +398,7 @@
     @if (auth()->user()?->hasPermission('welfare.agreements.view'))
             @if(auth()->user()?->hasPermission('welfare.agreements.view'))<a
                 href="{{ route('welfare.applications.agreement.print', $application) }}"
-                style="display:inline-block;margin-right:12px;color:#176b4d;text-decoration:none;"
+                style="display:inline-block;margin-right:12px;color:var(--legacy-text-176b4d, #176b4d);text-decoration:none;"
             >
                 Print Agreement
             </a>@endif
@@ -406,7 +406,7 @@
         
     @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
         href="{{ route('welfare.applications.show', $application) }}"
-        style="color:#176b4d;text-decoration:none;"
+        style="color:var(--legacy-text-176b4d, #176b4d);text-decoration:none;"
     >
         &larr; Return to application
     </a>@endif

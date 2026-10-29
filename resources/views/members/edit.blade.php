@@ -82,7 +82,7 @@
             <div class="edit-body">
 
                 <div style="
-                    color:#a85f58;
+                    color:var(--legacy-text-a85f58, #a85f58);
                     font-size:10px;
                     font-weight:650;
                 ">
@@ -92,7 +92,7 @@
                 <ul style="
                     margin:8px 0 0;
                     padding-left:18px;
-                    color:#a85f58;
+                    color:var(--legacy-text-a85f58, #a85f58);
                     font-size:8px;
                 ">
 
@@ -381,10 +381,10 @@
 
                     <div style="
                         padding:13px;
-                        background:#f7f9f8;
-                        border:1px solid #e5ebe8;
+                        background:var(--legacy-surface-f7f9f8, #f7f9f8);
+                        border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
                         border-radius:10px;
-                        color:#748079;
+                        color:var(--legacy-text-748079, #748079);
                         font-size:8px;
                         line-height:1.6;
                     ">
@@ -441,7 +441,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

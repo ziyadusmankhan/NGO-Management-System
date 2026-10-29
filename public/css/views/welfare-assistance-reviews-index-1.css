@@ -28,8 +28,8 @@
         justify-content:center;
         gap:7px;
         border:1px solid var(--border);
-        background:#fff;
-        color:#637069;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-637069, #637069);
         font-size:14px;
         font-weight:650;
         text-decoration:none;
@@ -43,7 +43,7 @@
     }
 
     .stat {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:13px;
         padding:16px;
@@ -52,7 +52,7 @@
     }
 
     .stat-label {
-        color:#6d7671;
+        color:var(--legacy-text-6d7671, #6d7671);
         font-size:13px;
     }
 
@@ -63,7 +63,7 @@
     }
 
     .toolbar {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         padding:14px;
@@ -91,12 +91,12 @@
         padding:0 11px;
         border:1px solid var(--border);
         border-radius:9px;
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         font-size:14px;
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -114,9 +114,9 @@
 
     th {
         padding:11px 16px;
-        background:#fafcfb;
-        border-bottom:1px solid #edf1ee;
-        color:#6d7671;
+        background:var(--legacy-surface-fafcfb, #fafcfb);
+        border-bottom:1px solid var(--legacy-border-edf1ee, #edf1ee);
+        color:var(--legacy-text-6d7671, #6d7671);
         font-size:12px;
         text-transform:uppercase;
         letter-spacing:.5px;
@@ -125,7 +125,7 @@
 
     td {
         padding:14px 16px;
-        border-bottom:1px solid #f0f3f1;
+        border-bottom:1px solid var(--legacy-border-f0f3f1, #f0f3f1);
         font-size:14px;
         vertical-align:middle;
     }
@@ -136,7 +136,7 @@
 
     .sub {
         margin-top:3px;
-        color:#7b8580;
+        color:var(--legacy-text-7b8580, #7b8580);
         font-size:12px;
     }
 
@@ -153,12 +153,12 @@
     .empty {
         padding:45px 20px;
         text-align:center;
-        color:#737d78;
+        color:var(--legacy-text-737d78, #737d78);
     }
 
     .pagination {
         padding:15px;
-        border-top:1px solid #eef1ef;
+        border-top:1px solid var(--legacy-border-eef1ef, #eef1ef);
     }
 
     @media(max-width:900px) {

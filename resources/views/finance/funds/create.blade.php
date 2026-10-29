@@ -14,14 +14,14 @@
 
         <div class="card-body">
 
-            <strong style="color:#a85f58;">
+            <strong style="color:var(--legacy-text-a85f58, #a85f58);">
                 Please correct the following:
             </strong>
 
             <ul style="
                 margin:8px 0 0;
                 padding-left:20px;
-                color:#a85f58;
+                color:var(--legacy-text-a85f58, #a85f58);
             ">
 
                 @foreach ($errors->all() as $error)

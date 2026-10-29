@@ -26,8 +26,8 @@
         padding:0 14px;
         border:1px solid var(--border);
         border-radius:9px;
-        background:#fff;
-        color:#596760;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-596760, #596760);
         text-decoration:none;
         font-weight:650;
     }
@@ -35,7 +35,7 @@
     .ui-btn.primary {
         background:var(--primary);
         border-color:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
     }
 
     .stats {
@@ -46,7 +46,7 @@
     }
 
     .stat {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         padding:18px;
@@ -64,7 +64,7 @@
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -86,7 +86,7 @@
         font-size:12px;
         text-transform:uppercase;
         letter-spacing:.4px;
-        color:#718078;
+        color:var(--legacy-text-718078, #718078);
         white-space:nowrap;
     }
 
@@ -113,23 +113,23 @@
     }
 
     .pending {
-        background:#fff7df;
-        color:#87671d;
+        background:var(--legacy-surface-fff7df, #fff7df);
+        color:var(--legacy-text-87671d, #87671d);
     }
 
     .approved {
-        background:#eaf6ef;
-        color:#28704a;
+        background:var(--legacy-surface-eaf6ef, #eaf6ef);
+        color:var(--legacy-text-28704a, #28704a);
     }
 
     .rejected {
-        background:#fbeceb;
-        color:#9a4037;
+        background:var(--legacy-surface-fbeceb, #fbeceb);
+        color:var(--legacy-text-9a4037, #9a4037);
     }
 
     .neutral {
-        background:#eef1ef;
-        color:#68736e;
+        background:var(--legacy-surface-eef1ef, #eef1ef);
+        color:var(--legacy-text-68736e, #68736e);
     }
 
     .action {
@@ -140,8 +140,8 @@
         justify-content:center;
         border:1px solid var(--border);
         border-radius:8px;
-        background:#fff;
-        color:#5d6963;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-5d6963, #5d6963);
         text-decoration:none;
     }
 
@@ -174,4 +174,4 @@
             grid-template-columns:1fr;
         }
     }
-    .badge-soft.closed { background:#eef0ef; color:#59635d; }
+    .badge-soft.closed { background:var(--legacy-surface-eef0ef, #eef0ef); color:var(--legacy-text-59635d, #59635d); }

@@ -219,8 +219,8 @@
                     class="committee-status"
                     style="
                         @if ($committee->status !== 'active')
-                            background:#f1f3f2;
-                            color:#6a766f;
+                            background:var(--legacy-surface-f1f3f2, #f1f3f2);
+                            color:var(--legacy-text-6a766f, #6a766f);
                         @endif
                     "
                 >
@@ -295,10 +295,10 @@
                 grid-column:1/-1;
                 padding:50px;
                 text-align:center;
-                background:#fff;
+                background:var(--legacy-surface-fff, #fff);
                 border:1px solid var(--border);
                 border-radius:14px;
-                color:#89948f;
+                color:var(--legacy-text-89948f, #89948f);
             "
         >
 

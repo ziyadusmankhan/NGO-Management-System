@@ -24,7 +24,7 @@
                 </div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap">
                     <form method="post" action="{{ route('notifications.change') }}">@csrf<input type="hidden" name="key" value="{{ $notification['key'] }}"><input type="hidden" name="action" value="{{ $notification['dismissed_at'] ? 'restore' : ($notification['read_at'] ? 'unread' : 'read') }}"><button class="audit-btn">{{ $notification['dismissed_at'] ? 'Restore' : ($notification['read_at'] ? 'Mark unread' : 'Mark read') }}</button></form>
-                    @if(!$notification['dismissed_at'])<form method="post" action="{{ route('notifications.change') }}">@csrf<input type="hidden" name="key" value="{{ $notification['key'] }}"><input type="hidden" name="action" value="dismiss"><button class="audit-btn" style="background:#68756f">Dismiss</button></form>@endif
+                    @if(!$notification['dismissed_at'])<form method="post" action="{{ route('notifications.change') }}">@csrf<input type="hidden" name="key" value="{{ $notification['key'] }}"><input type="hidden" name="action" value="dismiss"><button class="audit-btn" style="background:var(--legacy-surface-68756f, #68756f)">Dismiss</button></form>@endif
                 </div>
             </div>
         </div>

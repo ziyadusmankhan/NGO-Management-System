@@ -89,8 +89,8 @@
                     class="active-badge"
                     style="
                         @if ($committee->status !== 'active')
-                            background:#f1f3f2;
-                            color:#6a766f;
+                            background:var(--legacy-surface-f1f3f2, #f1f3f2);
+                            color:var(--legacy-text-6a766f, #6a766f);
                         @endif
                     "
                 >
@@ -103,7 +103,7 @@
 
                 <p style="
                     margin:0 0 17px;
-                    color:#69766f;
+                    color:var(--legacy-text-69766f, #69766f);
                     font-size: 16px;
                     line-height:1.7;
                 ">
@@ -312,7 +312,7 @@
                     <div style="
                         padding:30px;
                         text-align:center;
-                        color:#89948f;
+                        color:var(--legacy-text-89948f, #89948f);
                         font-size:16px;
                     ">
                         No members are currently assigned to this committee.
@@ -349,7 +349,7 @@
 
                     <div style="
                         padding:10px 0;
-                        color:#89948f;
+                        color:var(--legacy-text-89948f, #89948f);
                         font-size:16px;
                     ">
                         There are no active members available to assign.
@@ -406,7 +406,7 @@
                                 </select>
 
                                 @error('member_id')
-                                    <div style="color:#b3413c;font-size:14px;margin-top:5px;">
+                                    <div style="color:var(--legacy-text-b3413c, #b3413c);font-size:14px;margin-top:5px;">
                                         {{ $message }}
                                     </div>
                                 @enderror
@@ -444,7 +444,7 @@
                                 </select>
 
                                 @error('position')
-                                    <div style="color:#b3413c;font-size:14px;margin-top:5px;">
+                                    <div style="color:var(--legacy-text-b3413c, #b3413c);font-size:14px;margin-top:5px;">
                                         {{ $message }}
                                     </div>
                                 @enderror

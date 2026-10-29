@@ -6,6 +6,7 @@ const { chromium } = require('playwright');
  const root = process.cwd(), previews = path.join(root,'tmp/ui-previews');
  const browser = await chromium.launch({headless:true, ...(process.env.UI_BROWSER_PATH ? {executablePath:process.env.UI_BROWSER_PATH} : {})});
  const page = await browser.newPage();
+ if(process.env.UI_THEME) await page.addInitScript(theme=>localStorage.setItem('foundation-theme',theme),process.env.UI_THEME);
  const errors = [], results=[];
  page.on('pageerror',error=>errors.push(page.url()+': '+error.message));
  await page.route('http://localhost/**',async route=>{
@@ -30,10 +31,11 @@ const { chromium } = require('playwright');
     tiny:[...document.querySelectorAll('main p,main label,main td,main button')].filter(e=>e.getClientRects().length && parseFloat(getComputedStyle(e).fontSize)<11).length,
     unlabeled:[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(e=>e.getClientRects().length && !e.labels?.length && !e.getAttribute('aria-label') && !e.getAttribute('aria-labelledby')).length,
     tinyElements:[...document.querySelectorAll('main p,main label,main td,main button')].filter(e=>e.getClientRects().length && parseFloat(getComputedStyle(e).fontSize)<11).map(e=>e.outerHTML.slice(0,200)),
-    missingLabels:[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(e=>e.getClientRects().length && !e.labels?.length && !e.getAttribute('aria-label') && !e.getAttribute('aria-labelledby')).map(e=>e.outerHTML.slice(0,180))
+    missingLabels:[...document.querySelectorAll('input:not([type=hidden]),select,textarea')].filter(e=>e.getClientRects().length && !e.labels?.length && !e.getAttribute('aria-label') && !e.getAttribute('aria-labelledby')).map(e=>e.outerHTML.slice(0,180)),
+    whiteSurfaces:document.documentElement.dataset.theme==='dark'?[...document.querySelectorAll('main *')].filter(e=>{if(!e.getClientRects().length)return false;const c=getComputedStyle(e).backgroundColor.match(/^rgb\((\d+), (\d+), (\d+)\)$/);return c&&c.slice(1).every(v=>+v>225);}).map(e=>e.tagName+'.'+e.className):[]
    }));
    results.push({file,viewport:width,...check});
-   if (['dashboard.html','members.create.html','members.index.html','operations.tasks.index.html','login.html','users.roles.html'].includes(file) && [1440,390].includes(width)) await page.screenshot({path:path.join(root,'tmp',`ui-${file}-${width}.png`),fullPage:true});
+   if (['dashboard.html','members.create.html','members.index.html','committees.index.html','users.index.html','operations.tasks.index.html','login.html','users.roles.html'].includes(file) && [1440,390].includes(width)) await page.screenshot({path:path.join(root,'tmp',`ui-${file}-${width}-${process.env.UI_THEME||'light'}.png`),fullPage:true});
   }
  }
  await page.setViewportSize({width:390,height:844});
@@ -44,7 +46,7 @@ const { chromium } = require('playwright');
  const drawerClosed=await page.locator('#sidebar').evaluate(e=>!e.classList.contains('open')&&e.inert);
  const themeToggle=page.getByRole('button',{name:'Switch to dark theme'});
  let themeChecks=null;
- if(await themeToggle.count()) {
+ if(!process.env.UI_THEME && await themeToggle.count()) {
   await themeToggle.click();
   await page.reload({waitUntil:'networkidle'});
   const persisted=await page.locator('html').getAttribute('data-theme')==='dark';
@@ -61,6 +63,6 @@ const { chromium } = require('playwright');
  }
  const report={results,errors:[...new Set(errors)],drawerOpen,drawerClosed,themeChecks};
  fs.writeFileSync(path.join(root,'tmp/ui-browser-results.json'),JSON.stringify(report,null,2));
- console.log(JSON.stringify({pages:results.length/5,checks:results.length,overflows:results.filter(r=>r.overflow),tinyText:results.filter(r=>r.tiny),unlabeled:results.filter(r=>r.unlabeled),errors:report.errors,drawerOpen,drawerClosed,themeChecks},null,2));
+ console.log(JSON.stringify({pages:results.length/5,checks:results.length,overflows:results.filter(r=>r.overflow),whiteSurfaces:results.filter(r=>r.whiteSurfaces.length),tinyText:results.filter(r=>r.tiny),unlabeled:results.filter(r=>r.unlabeled),errors:report.errors,drawerOpen,drawerClosed,themeChecks},null,2));
  await browser.close();
 })().catch(e=>{console.error(e);process.exitCode=1});

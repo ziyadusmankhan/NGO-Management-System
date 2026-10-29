@@ -31,8 +31,8 @@
         padding:0 14px;
         border:1px solid var(--border);
         border-radius:9px;
-        background:#fff;
-        color:#596760;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-596760, #596760);
         text-decoration:none;
         font-weight:650;
         cursor:pointer;
@@ -41,7 +41,7 @@
     .ui-btn.primary {
         background:var(--primary);
         border-color:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
     }
 
     .layout {
@@ -51,7 +51,7 @@
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -97,14 +97,14 @@
 
     .summary-box {
         padding:14px;
-        border:1px solid #e8eeeb;
+        border:1px solid var(--legacy-border-e8eeeb, #e8eeeb);
         border-radius:10px;
-        background:#fafcfb;
+        background:var(--legacy-surface-fafcfb, #fafcfb);
     }
 
     .summary-box label {
         display:block;
-        color:#6d7571;
+        color:var(--legacy-text-6d7571, #6d7571);
         font-size:12px;
         text-transform:uppercase;
         letter-spacing:.4px;
@@ -121,9 +121,9 @@
         gap:10px;
         padding:13px;
         border-radius:10px;
-        background:#f7f9f8;
-        border:1px solid #e4ebe7;
-        color:#66726c;
+        background:var(--legacy-surface-f7f9f8, #f7f9f8);
+        border:1px solid var(--legacy-border-e4ebe7, #e4ebe7);
+        color:var(--legacy-text-66726c, #66726c);
         font-size:14px;
         line-height:1.6;
     }
@@ -151,7 +151,7 @@
         justify-content:space-between;
         gap:10px;
         padding:10px 0;
-        border-bottom:1px solid #eef1ef;
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
         font-size:14px;
     }
 
@@ -160,7 +160,7 @@
     }
 
     .side-row span:first-child {
-        color:#6d7571;
+        color:var(--legacy-text-6d7571, #6d7571);
     }
 
     .side-row span:last-child {

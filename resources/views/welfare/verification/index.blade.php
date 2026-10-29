@@ -74,14 +74,14 @@
 
 
 @if (session('success'))
-    <div style="margin-bottom:18px;padding:13px 15px;background:#edf7f0;border:1px solid #d4eadb;border-radius:11px;color:#397955;font-size:15px;">
+    <div style="margin-bottom:18px;padding:13px 15px;background:var(--legacy-surface-edf7f0, #edf7f0);border:1px solid var(--legacy-border-d4eadb, #d4eadb);border-radius:11px;color:var(--legacy-text-397955, #397955);font-size:15px;">
         <i class="bi bi-check-circle"></i>
         {{ session('success') }}
     </div>
 @endif
 
 @if ($errors->any())
-    <div style="margin-bottom:18px;padding:13px 15px;background:#fff5f4;border:1px solid #f0d6d3;border-radius:11px;color:#a85f58;font-size:15px;">
+    <div style="margin-bottom:18px;padding:13px 15px;background:var(--legacy-surface-fff5f4, #fff5f4);border:1px solid var(--legacy-border-f0d6d3, #f0d6d3);border-radius:11px;color:var(--legacy-text-a85f58, #a85f58);font-size:15px;">
         <i class="bi bi-exclamation-circle"></i>
         {{ $errors->first() }}
     </div>
@@ -306,7 +306,7 @@
                 @empty
 
                     <tr>
-                        <td colspan="7" style="padding:45px 20px;text-align:center;color:#6d7571;">
+                        <td colspan="7" style="padding:45px 20px;text-align:center;color:var(--legacy-text-6d7571, #6d7571);">
                             <div style="font-size:30px;margin-bottom:10px;">
                                 <i class="bi bi-clipboard-check"></i>
                             </div>

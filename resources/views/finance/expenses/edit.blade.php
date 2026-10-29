@@ -127,9 +127,9 @@
                             margin-top:8px;
                             padding:9px 11px;
                             border-radius:8px;
-                            background:#fff5e9;
-                            border:1px solid #ead9bc;
-                            color:#8a6637;
+                            background:var(--legacy-surface-fff5e9, #fff5e9);
+                            border:1px solid var(--legacy-border-ead9bc, #ead9bc);
+                            color:var(--legacy-text-8a6637, #8a6637);
                             font-size:13px;
                         "
                     ></div>

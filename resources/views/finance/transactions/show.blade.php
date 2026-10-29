@@ -292,7 +292,7 @@
 
                         <div style="
                             margin-top:12px;
-                            color:#68756e;
+                            color:var(--legacy-text-68756e, #68756e);
                             font-size:13px;
                         ">
                             Opening Balance:
@@ -305,7 +305,7 @@
 
                 @else
 
-                    <div style="color:#89948f;">
+                    <div style="color:var(--legacy-text-89948f, #89948f);">
                         No fund is attached to this transaction.
                     </div>
 
@@ -334,7 +334,7 @@
 
                         <div style="
                             margin-top:5px;
-                            color:#6d7571;
+                            color:var(--legacy-text-6d7571, #6d7571);
                             font-size:13px;
                         ">
                             {{ $transaction->reference }}
@@ -356,7 +356,7 @@
 
                 @else
 
-                    <div style="color:#89948f;">
+                    <div style="color:var(--legacy-text-89948f, #89948f);">
                         Source record is unavailable.
                     </div>
 
@@ -389,7 +389,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

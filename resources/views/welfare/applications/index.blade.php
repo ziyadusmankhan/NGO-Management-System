@@ -266,7 +266,7 @@
                     <tr>
                         <td
                             colspan="8"
-                            style="text-align:center; padding:28px 18px; color:#6d7571;"
+                            style="text-align:center; padding:28px 18px; color:var(--legacy-text-6d7571, #6d7571);"
                         >
                             No applications found.
                         </td>

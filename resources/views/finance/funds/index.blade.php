@@ -463,7 +463,7 @@
                     <div
                         style="
                             margin-top:3px;
-                            color:#929b96;
+                            color:var(--legacy-text-929b96, #929b96);
                             font-size:11px;
                         "
                     >
@@ -493,12 +493,12 @@
         <div
             style="
                 grid-column:1/-1;
-                background:#fff;
+                background:var(--legacy-surface-fff, #fff);
                 border:1px solid var(--border);
                 border-radius:14px;
                 padding:50px;
                 text-align:center;
-                color:#89948f;
+                color:var(--legacy-text-89948f, #89948f);
             "
         >
 

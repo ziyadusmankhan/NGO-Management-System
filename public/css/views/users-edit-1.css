@@ -39,15 +39,15 @@
     }
 
     .btn-ui.secondary {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
-        color:#637069;
+        color:var(--legacy-text-637069, #637069);
     }
 
     .btn-ui.primary {
         background:var(--primary);
         border:1px solid var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
     }
 
     .layout {
@@ -57,7 +57,7 @@
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -66,7 +66,7 @@
 
     .card-head {
         padding:17px 20px;
-        border-bottom:1px solid #eef1ef;
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
     }
 
     .card-head strong {
@@ -76,7 +76,7 @@
     .card-head span {
         display:block;
         margin-top:4px;
-        color:#929d97;
+        color:var(--legacy-text-929d97, #929d97);
         font-size:9px;
     }
 
@@ -97,13 +97,13 @@
     .label {
         display:block;
         margin-bottom:7px;
-        color:#36433d;
+        color:var(--legacy-text-36433d, #36433d);
         font-size:10px;
         font-weight:650;
     }
 
     .required {
-        color:#b35b4b;
+        color:var(--legacy-text-b35b4b, #b35b4b);
     }
 
     .control,
@@ -113,7 +113,7 @@
         border:1px solid var(--border);
         border-radius:9px;
         padding:0 12px;
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         color:var(--text);
         font-size:10px;
         outline:none;
@@ -121,20 +121,20 @@
 
     .control:focus,
     .select:focus {
-        border-color:#6b7670;
+        border-color:var(--legacy-border-6b7670, #6b7670);
         box-shadow:0 0 0 3px rgba(23,63,53,.055);
     }
 
     .help {
         margin-top:5px;
-        color:#6d7571;
+        color:var(--legacy-text-6d7571, #6d7571);
         font-size:9px;
         line-height:1.5;
     }
 
     .error {
         margin-top:5px;
-        color:#a85f58;
+        color:var(--legacy-text-a85f58, #a85f58);
         font-size:8px;
     }
 
@@ -172,19 +172,19 @@
 
     .role-option label span {
         margin-top:4px;
-        color:#6c7470;
+        color:var(--legacy-text-6c7470, #6c7470);
         font-size:8px;
         line-height:1.4;
     }
 
     .role-option input:checked + label {
         background:var(--primary-soft);
-        border-color:#6b7570;
+        border-color:var(--legacy-border-6b7570, #6b7570);
         color:var(--primary);
     }
 
     .preview {
-        background:linear-gradient(145deg,#f8faf9,#f2f6f4);
+        background:linear-gradient(145deg,var(--legacy-surface-f8faf9, #f8faf9),var(--legacy-surface-f2f6f4, #f2f6f4));
         border:1px solid var(--border);
         border-radius:14px;
         padding:20px;
@@ -192,7 +192,7 @@
     }
 
     .preview-label {
-        color:#6d7672;
+        color:var(--legacy-text-6d7672, #6d7672);
         font-size:8px;
         text-transform:uppercase;
         letter-spacing:.8px;
@@ -204,7 +204,7 @@
         margin:15px 0 11px;
         border-radius:18px;
         background:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
         display:flex;
         align-items:center;
         justify-content:center;
@@ -219,13 +219,13 @@
 
     .preview-email {
         margin-top:4px;
-        color:#6c7570;
+        color:var(--legacy-text-6c7570, #6c7570);
         font-size:9px;
     }
 
     .preview-divider {
         height:1px;
-        background:#dde5e1;
+        background:var(--legacy-surface-dde5e1, #dde5e1);
         margin:16px 0;
     }
 
@@ -238,12 +238,12 @@
     }
 
     .preview-row span:first-child {
-        color:#6e7672;
+        color:var(--legacy-text-6e7672, #6e7672);
     }
 
     .preview-row span:last-child {
         font-weight:650;
-        color:#4a5750;
+        color:var(--legacy-text-4a5750, #4a5750);
         text-align:right;
     }
 
@@ -252,8 +252,8 @@
         gap:9px;
         padding:12px;
         border-radius:10px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
+        background:var(--legacy-surface-f7f9f8, #f7f9f8);
+        border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
     }
 
     .notice i {
@@ -263,7 +263,7 @@
 
     .notice p {
         margin:0;
-        color:#6b766f;
+        color:var(--legacy-text-6b766f, #6b766f);
         font-size:8px;
         line-height:1.6;
     }

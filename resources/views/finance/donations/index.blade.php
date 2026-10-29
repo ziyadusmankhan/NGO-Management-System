@@ -404,7 +404,7 @@
                                     <span style="
                                         display:block;
                                         margin-top:4px;
-                                        color:#6e7772;
+                                        color:var(--legacy-text-6e7772, #6e7772);
                                         font-size:12px;
                                     ">
                                         {{ $donation->transaction?->transaction_number ?? 'No Entry' }}

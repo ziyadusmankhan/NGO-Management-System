@@ -65,10 +65,10 @@
             style="
                 margin-bottom:18px;
                 padding:14px 16px;
-                background:#fff5f3;
-                border:1px solid #efd8d3;
+                background:var(--legacy-surface-fff5f3, #fff5f3);
+                border:1px solid var(--legacy-border-efd8d3, #efd8d3);
                 border-radius:12px;
-                color:#8f5148;
+                color:var(--legacy-text-8f5148, #8f5148);
             "
         >
 

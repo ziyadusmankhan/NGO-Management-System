@@ -95,7 +95,7 @@
                 <button
                     type="submit"
                     class="ui-btn"
-                    style="color:#a85f58;"
+                    style="color:var(--legacy-text-a85f58, #a85f58);"
                     onclick="return confirm('Reject this expense?')"
                 >
                     <i class="bi bi-x-circle"></i>
@@ -133,7 +133,7 @@
                     <button
                         type="submit"
                         class="ui-btn"
-                        style="color:#a85f58;"
+                        style="color:var(--legacy-text-a85f58, #a85f58);"
                         onclick="return confirm('Reject this expense?')"
                     >
                         <i class="bi bi-x-circle"></i>
@@ -577,7 +577,7 @@
 
                     <div style="
                         padding:20px 0;
-                        color:#89948f;
+                        color:var(--legacy-text-89948f, #89948f);
                         text-align:center;
                         font-size:14px;
                     ">
@@ -859,7 +859,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

@@ -111,7 +111,7 @@
                             padding:0 11px;
                             border:1px solid var(--border);
                             border-radius:9px;
-                            background:#fff;
+                            background:var(--legacy-surface-fff, #fff);
                             font-size:13px;
                             outline:none;
                         "
@@ -121,9 +121,9 @@
                         type="submit"
                         class="ui-btn"
                         style="
-                            color:#a34f4f;
-                            border-color:#e5cfcf;
-                            background:#fffafa;
+                            color:var(--legacy-text-a34f4f, #a34f4f);
+                            border-color:var(--legacy-border-e5cfcf, #e5cfcf);
+                            background:var(--legacy-surface-fffafa, #fffafa);
                         "
                     >
                         <i class="bi bi-x-circle"></i>
@@ -656,7 +656,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

@@ -952,7 +952,7 @@
 
                 <div class="settings-card-header">
 
-                    <strong style="color:#8f5d51;">
+                    <strong style="color:var(--legacy-text-8f5d51, #8f5d51);">
                         Sensitive Security Actions
                     </strong>
 

@@ -25,8 +25,8 @@
         padding:0 14px;
         border:1px solid var(--border);
         border-radius:9px;
-        background:#fff;
-        color:#596760;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-596760, #596760);
         text-decoration:none;
         font-weight:650;
     }
@@ -34,11 +34,11 @@
     .ui-btn.primary {
         background:var(--primary);
         border-color:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -69,6 +69,6 @@
         font-weight:700;
         color:var(--primary);
         padding-bottom:9px;
-        border-bottom:1px solid #edf1ef;
+        border-bottom:1px solid var(--legacy-border-edf1ef, #edf1ef);
         margin-bottom:2px;
     }

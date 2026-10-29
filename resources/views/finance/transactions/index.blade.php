@@ -487,8 +487,8 @@
     display:flex;
     gap:10px;
     padding:14px 16px;
-    background:#f7f9f8;
-    border:1px solid #e5ebe8;
+    background:var(--legacy-surface-f7f9f8, #f7f9f8);
+    border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
     border-radius:13px;
 ">
 
@@ -505,7 +505,7 @@
 
         <p style="
             margin:4px 0 0;
-            color:#6b7670;
+            color:var(--legacy-text-6b7670, #6b7670);
             font-size:13px;
             line-height:1.6;
         ">

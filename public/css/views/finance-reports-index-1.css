@@ -9,12 +9,12 @@
     .report-title {
         font-size:24px;
         font-weight:700;
-        color:#26312c;
+        color:var(--legacy-text-26312c, #26312c);
     }
 
     .report-subtitle {
         margin-top:5px;
-        color:#6d7671;
+        color:var(--legacy-text-6d7671, #6d7671);
         font-size:14px;
     }
 
@@ -33,8 +33,8 @@
         padding:0 13px;
         border:1px solid var(--border);
         border-radius:9px;
-        background:#fff;
-        color:#5f6c66;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-5f6c66, #5f6c66);
         text-decoration:none;
         font-size:14px;
         font-weight:650;
@@ -44,11 +44,11 @@
     .report-btn.primary {
         background:var(--primary);
         border-color:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -57,7 +57,7 @@
 
     .card-head {
         padding:16px 19px;
-        border-bottom:1px solid #eef1ef;
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
         display:flex;
         justify-content:space-between;
         align-items:center;
@@ -71,7 +71,7 @@
     .card-head span {
         display:block;
         margin-top:4px;
-        color:#6c7470;
+        color:var(--legacy-text-6c7470, #6c7470);
         font-size:13px;
     }
 
@@ -87,8 +87,8 @@
 
     .summary-box {
         padding:14px;
-        background:#fafcfb;
-        border:1px solid #edf1ee;
+        background:var(--legacy-surface-fafcfb, #fafcfb);
+        border:1px solid var(--legacy-border-edf1ee, #edf1ee);
         border-radius:10px;
     }
 
@@ -98,7 +98,7 @@
 
     .summary-box label {
         display:block;
-        color:#6d7571;
+        color:var(--legacy-text-6d7571, #6d7571);
         font-size:12px;
         text-transform:uppercase;
         letter-spacing:.5px;
@@ -108,7 +108,7 @@
         display:block;
         margin-top:6px;
         font-size:17px;
-        color:#334039;
+        color:var(--legacy-text-334039, #334039);
     }
 
     .filters {
@@ -121,7 +121,7 @@
     .field label {
         display:block;
         margin-bottom:6px;
-        color:#66716b;
+        color:var(--legacy-text-66716b, #66716b);
         font-size:13px;
         font-weight:650;
     }
@@ -131,10 +131,10 @@
         width:100%;
         height:40px;
         padding:0 10px;
-        border:1px solid #dfe6e2;
+        border:1px solid var(--legacy-border-dfe6e2, #dfe6e2);
         border-radius:8px;
-        background:#fff;
-        color:#39453f;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-39453f, #39453f);
         outline:none;
     }
 
@@ -150,9 +150,9 @@
 
     th {
         padding:11px 12px;
-        background:#fafcfb;
-        border-bottom:1px solid #eef1ef;
-        color:#6c7470;
+        background:var(--legacy-surface-fafcfb, #fafcfb);
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
+        color:var(--legacy-text-6c7470, #6c7470);
         font-size:12px;
         text-transform:uppercase;
         letter-spacing:.5px;
@@ -162,7 +162,7 @@
 
     td {
         padding:12px;
-        border-bottom:1px solid #f0f3f1;
+        border-bottom:1px solid var(--legacy-border-f0f3f1, #f0f3f1);
         font-size:14px;
         vertical-align:middle;
     }
@@ -172,12 +172,12 @@
     }
 
     .credit {
-        color:#397955;
+        color:var(--legacy-text-397955, #397955);
         font-weight:650;
     }
 
     .debit {
-        color:#a85f58;
+        color:var(--legacy-text-a85f58, #a85f58);
         font-weight:650;
     }
 
@@ -185,8 +185,8 @@
         display:inline-flex;
         padding:5px 8px;
         border-radius:20px;
-        background:#edf7f0;
-        color:#397955;
+        background:var(--legacy-surface-edf7f0, #edf7f0);
+        color:var(--legacy-text-397955, #397955);
         font-size:12px;
         font-weight:650;
     }
@@ -201,11 +201,11 @@
     .empty {
         padding:30px;
         text-align:center;
-        color:#7a847f;
+        color:var(--legacy-text-7a847f, #7a847f);
     }
 
     .table-note {
-        color:#707b75;
+        color:var(--legacy-text-707b75, #707b75);
         font-size:12px;
     }
 

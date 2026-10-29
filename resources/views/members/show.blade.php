@@ -290,7 +290,7 @@
                             align-items:center;
                             gap:11px;
                             padding:11px 0;
-                            border-bottom:1px solid #f0f3f1;
+                            border-bottom:1px solid var(--legacy-border-f0f3f1, #f0f3f1);
                         "
                     >
 
@@ -320,7 +320,7 @@
 
                             <div style="
                                 margin-top:3px;
-                                color:#98a29d;
+                                color:var(--legacy-text-98a29d, #98a29d);
                                 font-size:8px;
                             ">
                                 {{ $committee->committee_number }}
@@ -409,7 +409,7 @@
                     style="
                         text-align:center;
                         margin-top:4px;
-                        color:#8d9892;
+                        color:var(--legacy-text-8d9892, #8d9892);
                         font-size:9px;
                     "
                 >
@@ -418,7 +418,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

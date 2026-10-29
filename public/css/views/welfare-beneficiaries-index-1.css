@@ -26,8 +26,8 @@
         padding:0 14px;
         border:1px solid var(--border);
         border-radius:9px;
-        background:#fff;
-        color:#596760;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-596760, #596760);
         text-decoration:none;
         font-weight:650;
         cursor:pointer;
@@ -36,7 +36,7 @@
     .ui-btn.primary {
         background:var(--primary);
         border-color:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
     }
 
     .stats-grid {
@@ -47,7 +47,7 @@
     }
 
     .stat-card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         padding:18px;
@@ -77,7 +77,7 @@
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -99,14 +99,14 @@
     .form-label {
         font-size:13px;
         font-weight:650;
-        color:#435049;
+        color:var(--legacy-text-435049, #435049);
     }
 
     .table th {
         font-size:12px;
         text-transform:uppercase;
         letter-spacing:.4px;
-        color:#718078;
+        color:var(--legacy-text-718078, #718078);
         white-space:nowrap;
     }
 
@@ -135,24 +135,24 @@
     }
 
     .badge-pending {
-        background:#fff7df;
-        color:#87671d;
+        background:var(--legacy-surface-fff7df, #fff7df);
+        color:var(--legacy-text-87671d, #87671d);
     }
 
     .badge-verified,
     .badge-approved {
-        background:#eaf6ef;
-        color:#28704a;
+        background:var(--legacy-surface-eaf6ef, #eaf6ef);
+        color:var(--legacy-text-28704a, #28704a);
     }
 
     .badge-rejected {
-        background:#fbeceb;
-        color:#9a4037;
+        background:var(--legacy-surface-fbeceb, #fbeceb);
+        color:var(--legacy-text-9a4037, #9a4037);
     }
 
     .badge-neutral {
-        background:#eef1ef;
-        color:#68736e;
+        background:var(--legacy-surface-eef1ef, #eef1ef);
+        color:var(--legacy-text-68736e, #68736e);
     }
 
     .action-row {
@@ -169,8 +169,8 @@
         justify-content:center;
         border:1px solid var(--border);
         border-radius:8px;
-        background:#fff;
-        color:#5d6963;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-5d6963, #5d6963);
     }
 
     .icon-btn:hover {

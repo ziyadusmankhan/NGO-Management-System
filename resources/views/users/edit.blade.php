@@ -59,7 +59,7 @@
         <div class="card-body">
 
             <div style="
-                color:#a85f58;
+                color:var(--legacy-text-a85f58, #a85f58);
                 font-size:10px;
                 font-weight:650;
                 margin-bottom:8px;
@@ -70,7 +70,7 @@
             <ul style="
                 margin:0;
                 padding-left:18px;
-                color:#a85f58;
+                color:var(--legacy-text-a85f58, #a85f58);
                 font-size:8px;
             ">
 
@@ -324,7 +324,7 @@
                                 grid-column:1/-1;
                                 padding:20px;
                                 text-align:center;
-                                color:#89948f;
+                                color:var(--legacy-text-89948f, #89948f);
                                 font-size:9px;
                             ">
 

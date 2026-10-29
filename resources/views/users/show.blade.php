@@ -120,7 +120,7 @@
 
                     <div class="item">
                         <label>Status</label>
-                        <span class="status" @if(!$user->isActive()) style="background:#fbeaea;color:#a13d3d;" @endif>
+                        <span class="status" @if(!$user->isActive()) style="background:var(--legacy-surface-fbeaea, #fbeaea);color:var(--legacy-text-a13d3d, #a13d3d);" @endif>
                             {{ ucfirst($user->status) }}
                         </span>
                     </div>

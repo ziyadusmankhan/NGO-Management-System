@@ -15,7 +15,7 @@
         cursor: pointer;
         font-weight: 700;
         padding: 12px;
-        background: #edf5f1;
+        background:var(--legacy-surface-edf5f1, #edf5f1);
         border-radius: 8px
     }
 
@@ -25,7 +25,7 @@
 
     .procurement-page .item-row {
         padding: 14px;
-        border: 1px solid #dce6e0;
+        border:1px solid var(--legacy-border-dce6e0, #dce6e0);
         border-radius: 10px;
         margin: 10px 0
     }
@@ -40,7 +40,7 @@
 
     .procurement-page small {
         display: block;
-        color: #65746b
+        color:var(--legacy-text-65746b, #65746b)
     }
 
     .procurement-page pre {
@@ -55,7 +55,7 @@
 
     .procurement-page .notice {
         padding: 12px;
-        background: #fff6df;
+        background:var(--legacy-surface-fff6df, #fff6df);
         border-radius: 8px;
         margin: 12px 0
     }

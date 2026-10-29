@@ -307,7 +307,7 @@
                             style="
                                 text-align:center;
                                 padding:45px;
-                                color:#89948f;
+                                color:var(--legacy-text-89948f, #89948f);
                             "
                         >
 

@@ -51,11 +51,11 @@
 
                 @if ($errors->any())
 
-                    <div class="notice" style="background:#fff5f4;border-color:#f0d6d3;">
+                    <div class="notice" style="background:var(--legacy-surface-fff5f4, #fff5f4);border-color:var(--legacy-border-f0d6d3, #f0d6d3);">
 
                         <i
                             class="bi bi-exclamation-circle"
-                            style="color:#a85f58;"
+                            style="color:var(--legacy-text-a85f58, #a85f58);"
                         ></i>
 
                         <div>

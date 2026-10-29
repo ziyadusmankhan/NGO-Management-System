@@ -305,7 +305,7 @@
 
                     <label for="evidenceInput">
                         Evidence photos / documents
-                        <span id="evidenceRequired" style="color:#a33;{{ $needsEvidence ? '' : 'display:none' }}">* required for approval</span>
+                        <span id="evidenceRequired" style="color:var(--legacy-text-a33, #a33);{{ $needsEvidence ? '' : 'display:none' }}">* required for approval</span>
                     </label>
 
                     <label class="dropzone" id="dropzone" for="evidenceInput">
@@ -398,7 +398,7 @@
                 <div class="side-number">{{ $progress }}%</div>
                 <div class="side-label">Verification Complete</div>
 
-                <div style="height:1px;background:#eef1ef;margin:16px 0;"></div>
+                <div style="height:1px;background:var(--legacy-surface-eef1ef, #eef1ef);margin:16px 0;"></div>
 
                 <div class="side-row">
                     <span>Status</span>

@@ -10,10 +10,14 @@
 [data-theme=dark] .page-content :is(h1,h2,h3,h4,label,.form-label,.field-label,table){color:var(--text)}
 [data-theme=dark] .page-content th{background:#203128;color:#c4d4ca;border-color:var(--border)}
 [data-theme=dark] .page-content td{border-color:var(--border)}
+[data-theme=dark] .page-content .table{--bs-table-bg:var(--surface);--bs-table-color:var(--text);--bs-table-border-color:var(--border);--bs-table-striped-bg:#203128;--bs-table-striped-color:var(--text);--bs-table-hover-bg:#203128;--bs-table-hover-color:var(--text)}
+[data-theme=dark] .page-content .table>:not(caption)>*>*{background-color:var(--surface);color:var(--text);border-color:var(--border)}
+[data-theme=dark] .page-content :is(.alert-light,.alert-info){background:#20394e;color:#c6dff5;border-color:#3b5d7e}
+[data-theme=dark] .page-content .form-btn.secondary{background:#22362b;color:#d5e8dd;border-color:#60796a}
 [data-theme=dark] .page-content :is(.meta,.hint,.help-text,.form-text,.summary-meta,.transaction-sub,.info-row,.label,.role-info span,.permission-description,.member-meta,.user-meta){color:var(--muted)}
 [data-theme=dark] .page-content :is(.info-item,.financial-box,.role-item.active,.stat-icon,.input-group-text,.settings-nav,.settings-nav-item.active){background:#203128!important;color:#d5e8dd!important;border-color:var(--border)}
 [data-theme=dark] .page-content tbody tr:hover{background:#203128}
-[data-theme=dark] .page-content [style*="background:"]{background-color:var(--surface)!important;color:var(--text)}
+/* Inline legacy colors also use tokens; keep semantic warnings/success surfaces. */
 [data-theme=dark] .page-content :is(.btn-primary,.primary-btn,.qbtn,.audit-btn,.btn-primary-custom,.users-btn.primary,.btn-ui.primary){background:#31765b;color:white}
 [data-theme=dark] .page-content :is(.btn-secondary,.secondary-btn,.btn-outline,.btn-light,.qbtn.secondary,.btn-ui,.users-btn,.btn-secondary-custom){background:#22362b;color:#d5e8dd;border-color:#60796a}
 [data-theme=dark] .page-content :is(.btn-danger,.danger-btn,.qbtn.danger){background:#a73542;color:white}
@@ -27,6 +31,13 @@
 [data-theme=dark] .page-content :is(.alert-success,.qsuccess,.success){background:#203f2e;color:#a0dfb6}
 [data-theme=dark] .page-content :is(.alert-danger,.qerror,.error){background:#48252c;color:#ffb7bf}
 [data-theme=dark] .page-content nav[role=navigation] a{background:var(--surface);color:var(--text)}
+[data-theme=dark] .page-content :is(.committee-btn.primary,.btn.primary,.save-btn.primary){background:#31765b;color:#fff;border-color:#60796a}
+[data-theme=dark] .page-content :is(.committee-btn.secondary,.icon-btn,.btn.secondary,.save-btn:not(.primary)){background:#22362b;color:#d5e8dd;border-color:#60796a}
+[data-theme=dark] .page-content :is(input,select,textarea)::placeholder{color:#adbbb2;opacity:1}
+.page-content :is(.status,.status-badge){white-space:nowrap;overflow-wrap:normal;word-break:normal}
+.page-content .role-badge{white-space:normal;max-width:260px;overflow-wrap:anywhere;word-break:normal}
+.page-content .user-profile{min-width:210px}.page-content .user-name{white-space:normal}.page-content .user-email{overflow-wrap:anywhere}
+.page-content td:last-child :is(button,a){white-space:nowrap;overflow-wrap:normal;word-break:normal}
 [data-theme=dark] .login-panel,[data-theme=dark] body>main{background:#18251f;color:#e6efe9;border-color:#34473c}
 [data-theme=dark] :is(.login-header p,.login-bottom,.security-note,.form-label){color:#bdcfc3}
 [data-theme=dark] :is(.form-control,body>main input){background:#132019;color:#e6efe9;border-color:#60796a}

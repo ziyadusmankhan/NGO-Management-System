@@ -7,13 +7,13 @@
 
     <div style="margin-bottom:24px;">
         <h1 style="margin:0 0 8px;">Prepare Welfare Agreement</h1>
-        <p style="color:#6d7571;margin:0;">
+        <p style="color:var(--legacy-text-6d7571, #6d7571);margin:0;">
             Prepare a draft for an application that has received final approval.
         </p>
     </div>
 
     @if ($errors->any())
-        <div style="padding:14px;margin-bottom:18px;border:1px solid #e5b5b5;border-radius:8px;background:#fff5f5;color:#9b2525;">
+        <div style="padding:14px;margin-bottom:18px;border:1px solid var(--legacy-border-e5b5b5, #e5b5b5);border-radius:8px;background:var(--legacy-surface-fff5f5, #fff5f5);color:var(--legacy-text-9b2525, #9b2525);">
             <strong>Please correct the following:</strong>
             <ul style="margin:8px 0 0;">
                 @foreach ($errors->all() as $error)
@@ -23,7 +23,7 @@
         </div>
     @endif
 
-    <div style="background:#fff;border:1px solid #e2e7e4;border-radius:12px;padding:24px;margin-bottom:20px;">
+    <div style="background:var(--legacy-surface-fff, #fff);border:1px solid var(--legacy-border-e2e7e4, #e2e7e4);border-radius:12px;padding:24px;margin-bottom:20px;">
         <h2 style="font-size:18px;margin:0 0 18px;">Application summary</h2>
 
         <p>
@@ -49,7 +49,7 @@
     <form
         method="POST"
         action="{{ route('welfare.applications.agreement.store', $application) }}"
-        style="background:#fff;border:1px solid #e2e7e4;border-radius:12px;padding:24px;"
+        style="background:var(--legacy-surface-fff, #fff);border:1px solid var(--legacy-border-e2e7e4, #e2e7e4);border-radius:12px;padding:24px;"
     >
         @csrf
 
@@ -63,11 +63,11 @@
                 id="agreement_date"
                 name="agreement_date"
                 value="{{ old('agreement_date') }}"
-                style="width:100%;padding:11px;border:1px solid #ccd5d0;border-radius:7px;"
+                style="width:100%;padding:11px;border:1px solid var(--legacy-border-ccd5d0, #ccd5d0);border-radius:7px;"
             >
 
             @error('agreement_date')
-                <p style="color:#b42318;">{{ $message }}</p>
+                <p style="color:var(--legacy-text-b42318, #b42318);">{{ $message }}</p>
             @enderror
         </div>
 
@@ -81,11 +81,11 @@
                 id="effective_date"
                 name="effective_date"
                 value="{{ old('effective_date') }}"
-                style="width:100%;padding:11px;border:1px solid #ccd5d0;border-radius:7px;"
+                style="width:100%;padding:11px;border:1px solid var(--legacy-border-ccd5d0, #ccd5d0);border-radius:7px;"
             >
 
             @error('effective_date')
-                <p style="color:#b42318;">{{ $message }}</p>
+                <p style="color:var(--legacy-text-b42318, #b42318);">{{ $message }}</p>
             @enderror
         </div>
 
@@ -101,11 +101,11 @@
                 maxlength="20000"
                 required
                 placeholder="Describe the approved support, purpose, responsibilities, conditions, timeline, and any applicable recovery or monitoring arrangements."
-                style="width:100%;padding:12px;border:1px solid #ccd5d0;border-radius:7px;"
+                style="width:100%;padding:12px;border:1px solid var(--legacy-border-ccd5d0, #ccd5d0);border-radius:7px;"
             >{{ old('terms') }}</textarea>
 
             @error('terms')
-                <p style="color:#b42318;">{{ $message }}</p>
+                <p style="color:var(--legacy-text-b42318, #b42318);">{{ $message }}</p>
             @enderror
         </div>
 
@@ -119,29 +119,29 @@
                 name="notes"
                 rows="3"
                 maxlength="5000"
-                style="width:100%;padding:12px;border:1px solid #ccd5d0;border-radius:7px;"
+                style="width:100%;padding:12px;border:1px solid var(--legacy-border-ccd5d0, #ccd5d0);border-radius:7px;"
             >{{ old('notes') }}</textarea>
 
             @error('notes')
-                <p style="color:#b42318;">{{ $message }}</p>
+                <p style="color:var(--legacy-text-b42318, #b42318);">{{ $message }}</p>
             @enderror
         </div>
 
-        <p style="color:#6d7571;font-size:14px;line-height:1.6;">
+        <p style="color:var(--legacy-text-6d7571, #6d7571);font-size:14px;line-height:1.6;">
             Saving this form creates a draft agreement only. It does not record signatures,
             create welfare assistance, or generate a financial transaction.
         </p>
 
         <button
             type="submit"
-            style="padding:12px 20px;border:0;border-radius:8px;background:#176b4d;color:white;font-weight:600;cursor:pointer;"
+            style="padding:12px 20px;border:0;border-radius:8px;background:var(--legacy-surface-176b4d, #176b4d);color:white;font-weight:600;cursor:pointer;"
         >
             Save Draft Agreement
         </button>
 
         @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
             href="{{ route('welfare.applications.show', $application) }}"
-            style="display:inline-block;margin-left:12px;color:#44534b;text-decoration:none;"
+            style="display:inline-block;margin-left:12px;color:var(--legacy-text-44534b, #44534b);text-decoration:none;"
         >
             Cancel
         </a>@endif

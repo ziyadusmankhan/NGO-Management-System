@@ -28,7 +28,7 @@
     .summary-card,
     .fund-card,
     .toolbar-card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
     }
@@ -68,7 +68,7 @@
         left:13px;
         top:50%;
         transform:translateY(-50%);
-        color:#6f7672;
+        color:var(--legacy-text-6f7672, #6f7672);
     }
 
     .search input {
@@ -77,7 +77,7 @@
         border:1px solid var(--border);
         border-radius:9px;
         padding:0 12px 0 36px;
-        background:#fafcfa;
+        background:var(--legacy-surface-fafcfa, #fafcfa);
     }
 
     .fund-grid {
@@ -104,15 +104,15 @@
 
     .fund-reference {
         margin-top:4px;
-        color:#7a847f;
+        color:var(--legacy-text-7a847f, #7a847f);
         font-size:13px;
     }
 
     .badge {
         padding:5px 9px;
         border-radius:20px;
-        background:#f1eef7;
-        color:#77668c;
+        background:var(--legacy-surface-f1eef7, #f1eef7);
+        color:var(--legacy-text-77668c, #77668c);
         font-size:13px;
         font-weight:650;
     }
@@ -120,13 +120,13 @@
     .balance {
         margin-top:16px;
         padding:14px;
-        background:#fafcfb;
-        border:1px solid #edf1ee;
+        background:var(--legacy-surface-fafcfb, #fafcfb);
+        border:1px solid var(--legacy-border-edf1ee, #edf1ee);
         border-radius:10px;
     }
 
     .balance-label {
-        color:#6d7571;
+        color:var(--legacy-text-6d7571, #6d7571);
         font-size:13px;
         text-transform:uppercase;
     }
@@ -147,14 +147,14 @@
 
     .stat {
         padding:10px;
-        background:#fafcfb;
-        border:1px solid #edf1ee;
+        background:var(--legacy-surface-fafcfb, #fafcfb);
+        border:1px solid var(--legacy-border-edf1ee, #edf1ee);
         border-radius:8px;
     }
 
     .stat span {
         display:block;
-        color:#6d7571;
+        color:var(--legacy-text-6d7571, #6d7571);
         font-size:12px;
     }
 
@@ -167,7 +167,7 @@
     .controls {
         margin-top:15px;
         padding-top:14px;
-        border-top:1px solid #eef1ef;
+        border-top:1px solid var(--legacy-border-eef1ef, #eef1ef);
     }
 
     .controls-title {
@@ -185,14 +185,14 @@
     .control-item {
         padding:8px 10px;
         border-radius:8px;
-        background:#f7f9f8;
+        background:var(--legacy-surface-f7f9f8, #f7f9f8);
         font-size:12px;
-        color:#65716b;
+        color:var(--legacy-text-65716b, #65716b);
     }
 
     .control-item.enabled {
-        color:#397955;
-        background:#edf7f0;
+        color:var(--legacy-text-397955, #397955);
+        background:var(--legacy-surface-edf7f0, #edf7f0);
     }
 
     @media(max-width:800px) {

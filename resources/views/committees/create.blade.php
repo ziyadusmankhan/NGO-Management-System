@@ -15,9 +15,9 @@
             margin-bottom:18px;
             padding:13px 15px;
             border-radius:10px;
-            background:#fff0ef;
-            border:1px solid #ead8d5;
-            color:#a85f58;
+            background:var(--legacy-surface-fff0ef, #fff0ef);
+            border:1px solid var(--legacy-border-ead8d5, #ead8d5);
+            color:var(--legacy-text-a85f58, #a85f58);
             font-size:13px;
         "
     >

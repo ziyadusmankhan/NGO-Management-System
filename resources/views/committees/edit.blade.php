@@ -62,7 +62,7 @@
             <div class="card-body">
 
                 <strong style="
-                    color:#a85f58;
+                    color:var(--legacy-text-a85f58, #a85f58);
                     font-size:10px;
                 ">
                     Please correct the following:
@@ -71,7 +71,7 @@
                 <ul style="
                     margin:8px 0 0;
                     padding-left:18px;
-                    color:#a85f58;
+                    color:var(--legacy-text-a85f58, #a85f58);
                     font-size:8px;
                 ">
 
@@ -352,7 +352,7 @@
                 <div style="
                     margin-top:4px;
                     text-align:center;
-                    color:#929d97;
+                    color:var(--legacy-text-929d97, #929d97);
                     font-size:8px;
                 ">
                     Committee Reference
@@ -360,7 +360,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

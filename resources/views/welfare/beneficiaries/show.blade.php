@@ -348,9 +348,9 @@
 
                 @empty
 
-                    <div style="padding:22px 0;text-align:center;color:#6c7470;">
+                    <div style="padding:22px 0;text-align:center;color:var(--legacy-text-6c7470, #6c7470);">
                         <i class="bi bi-heart" style="font-size:28px;"></i>
-                        <div style="margin-top:8px;font-weight:650;color:#46534d;">
+                        <div style="margin-top:8px;font-weight:650;color:var(--legacy-text-46534d, #46534d);">
                             No assistance recorded
                         </div>
                         <div style="margin-top:4px;">
@@ -436,13 +436,13 @@
                             </div>
 
                             @if($verification->findings)
-                                <div style="margin-top:7px;color:#5f6c65;line-height:1.6;">
+                                <div style="margin-top:7px;color:var(--legacy-text-5f6c65, #5f6c65);line-height:1.6;">
                                     {{ $verification->findings }}
                                 </div>
                             @endif
 
                             @if($verification->notes)
-                                <div style="margin-top:5px;color:#6c7470;line-height:1.6;">
+                                <div style="margin-top:5px;color:var(--legacy-text-6c7470, #6c7470);line-height:1.6;">
                                     {{ $verification->notes }}
                                 </div>
                             @endif
@@ -453,7 +453,7 @@
 
                 @empty
 
-                    <div style="padding:18px 0;text-align:center;color:#6c7470;">
+                    <div style="padding:18px 0;text-align:center;color:var(--legacy-text-6c7470, #6c7470);">
                         No verification history has been recorded yet.
                     </div>
 
@@ -608,7 +608,7 @@
 
                 @if(!$hasWorkflowAction)
 
-                    <div style="margin-top:16px;color:#6c7470;">
+                    <div style="margin-top:16px;color:var(--legacy-text-6c7470, #6c7470);">
                         No workflow action is currently available for this beneficiary.
                     </div>
 
@@ -639,7 +639,7 @@
 
                 <div class="card-body">
 
-                    <div style="color:#59665f;line-height:1.7;">
+                    <div style="color:var(--legacy-text-59665f, #59665f);line-height:1.7;">
                         {{ $beneficiary->notes }}
                     </div>
 

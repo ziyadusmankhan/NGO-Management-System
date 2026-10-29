@@ -23,7 +23,8 @@
 
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('css/foundation-ui.css') }}?v=1">
-    <link rel="stylesheet" href="{{ asset('css/foundation-theme.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/foundation-legacy-tokens.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/foundation-theme.css') }}?v=2">
 </head>
 
 <body>

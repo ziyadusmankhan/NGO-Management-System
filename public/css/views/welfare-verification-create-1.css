@@ -31,8 +31,8 @@
         font-size:16px;
         font-weight:650;
         border:1px solid var(--border);
-        background:#fff;
-        color:#637069;
+        background:var(--legacy-surface-fff, #fff);
+        color:var(--legacy-text-637069, #637069);
         cursor:pointer;
         text-decoration:none;
     }
@@ -40,7 +40,7 @@
     .ui-btn.primary {
         background:var(--primary);
         border-color:var(--primary);
-        color:#fff;
+        color:var(--legacy-text-fff, #fff);
     }
 
     .layout {
@@ -50,7 +50,7 @@
     }
 
     .card {
-        background:#fff;
+        background:var(--legacy-surface-fff, #fff);
         border:1px solid var(--border);
         border-radius:14px;
         overflow:hidden;
@@ -59,7 +59,7 @@
 
     .card-head {
         padding:16px 19px;
-        border-bottom:1px solid #eef1ef;
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
     }
 
     .card-head strong {
@@ -70,7 +70,7 @@
     .card-head span {
         display:block;
         margin-top:4px;
-        color:#6c7470;
+        color:var(--legacy-text-6c7470, #6c7470);
         font-size:16px;
     }
 
@@ -89,13 +89,13 @@
     .field label {
         display:block;
         margin-bottom:7px;
-        color:#59655f;
+        color:var(--legacy-text-59655f, #59655f);
         font-size:16px;
         font-weight:650;
     }
 
     .field label .required {
-        color:#a85f58;
+        color:var(--legacy-text-a85f58, #a85f58);
     }
 
     .field select,
@@ -104,8 +104,8 @@
         width:100%;
         border:1px solid var(--border);
         border-radius:9px;
-        background:#fafcfa;
-        color:#46534c;
+        background:var(--legacy-surface-fafcfa, #fafcfa);
+        color:var(--legacy-text-46534c, #46534c);
         font-size:16px;
         outline:none;
     }
@@ -126,14 +126,14 @@
     .field select:focus,
     .field input:focus,
     .field textarea:focus {
-        background:#fff;
-        border-color:#6e7772;
+        background:var(--legacy-surface-fff, #fff);
+        border-color:var(--legacy-border-6e7772, #6e7772);
         box-shadow:0 0 0 3px rgba(23,63,53,.06);
     }
 
     .help {
         margin-top:5px;
-        color:#7a827e;
+        color:var(--legacy-text-7a827e, #7a827e);
         font-size:14px;
         line-height:1.5;
     }
@@ -146,7 +146,7 @@
 
     .error {
         margin-top:5px;
-        color:#a85f58;
+        color:var(--legacy-text-a85f58, #a85f58);
         font-size:14px;
     }
 
@@ -154,8 +154,8 @@
         display:flex;
         gap:10px;
         padding:13px 15px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
+        background:var(--legacy-surface-f7f9f8, #f7f9f8);
+        border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
         border-radius:11px;
         margin-bottom:17px;
     }
@@ -173,16 +173,16 @@
 
     .notice p {
         margin:4px 0 0;
-        color:#6b7670;
+        color:var(--legacy-text-6b7670, #6b7670);
         font-size:14px;
         line-height:1.6;
     }
 
     .application-preview {
         padding:13px;
-        border:1px solid #edf1ee;
+        border:1px solid var(--legacy-border-edf1ee, #edf1ee);
         border-radius:10px;
-        background:#fafcfb;
+        background:var(--legacy-surface-fafcfb, #fafcfb);
     }
 
     .preview-row {
@@ -190,7 +190,7 @@
         justify-content:space-between;
         gap:12px;
         padding:9px 0;
-        border-bottom:1px solid #eef1ef;
+        border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
         font-size:15px;
     }
 
@@ -204,11 +204,11 @@
     }
 
     .preview-row span:first-child {
-        color:#6d7571;
+        color:var(--legacy-text-6d7571, #6d7571);
     }
 
     .preview-row span:last-child {
-        color:#46534c;
+        color:var(--legacy-text-46534c, #46534c);
         font-weight:650;
         text-align:right;
     }
@@ -218,8 +218,8 @@
         gap:9px;
         padding:12px;
         border-radius:10px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
+        background:var(--legacy-surface-f7f9f8, #f7f9f8);
+        border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
         margin-top:15px;
     }
 
@@ -230,7 +230,7 @@
 
     .side-note p {
         margin:0;
-        color:#6b766f;
+        color:var(--legacy-text-6b766f, #6b766f);
         font-size:14px;
         line-height:1.6;
     }
@@ -245,7 +245,7 @@
     .empty-state {
         padding:28px 20px;
         text-align:center;
-        color:#6d7571;
+        color:var(--legacy-text-6d7571, #6d7571);
         font-size:15px;
         line-height:1.6;
     }
