@@ -39,7 +39,8 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
-            'engine' => null,
+            'engine' => 'InnoDB',
+            'timezone' => '+00:00',
         ],
 
     ],
