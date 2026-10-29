@@ -608,21 +608,19 @@
         document.getElementById('previewAvatar');
 
 
-    memberNameInput.addEventListener(
+    memberNameInput?.addEventListener(
         'input',
         function () {
 
             const name =
                 this.value.trim();
 
-            previewName.textContent =
-                name || 'New Member';
+            if (previewName) previewName.textContent = name || 'New Member';
 
 
             if (!name) {
 
-                previewAvatar.textContent =
-                    '?';
+                if (previewAvatar) previewAvatar.textContent = '?';
 
                 return;
 
@@ -642,8 +640,7 @@
                     .join('');
 
 
-            previewAvatar.textContent =
-                initials;
+            if (previewAvatar) previewAvatar.textContent = initials;
 
         }
     );
@@ -660,14 +657,14 @@
         document.getElementById('previewPosition');
 
 
-    committeeSelect.addEventListener(
+    committeeSelect?.addEventListener(
         'change',
         function () {
 
             const option =
                 this.options[this.selectedIndex];
 
-            previewCommittee.textContent =
+            if (previewCommittee) previewCommittee.textContent =
                 option.value
                     ? option.text.split(' — ')[0]
                     : 'Not assigned';
@@ -676,11 +673,11 @@
     );
 
 
-    committeePosition.addEventListener(
+    committeePosition?.addEventListener(
         'change',
         function () {
 
-            previewPosition.textContent =
+            if (previewPosition) previewPosition.textContent =
                 this.value || 'Member';
 
         }

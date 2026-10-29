@@ -59,7 +59,7 @@ class ProjectWorkflowService
             foreach ($files as $kind => $file) {
                 if ($file) {
                     app(UploadValidator::class)->inspect($file);
-                    $path = $file->store('projects', 'private');
+                    $path = $file->storeAs('projects', Str::uuid().'.'.strtolower($file->getClientOriginalExtension()), 'private');
                     if (! $path) {
                         throw new \RuntimeException('Evidence could not be saved.');
                     } $stored[$kind] = ['path' => $path, 'original_name' => $file->getClientOriginalName(), 'sha256' => hash_file('sha256', $file->getRealPath())];

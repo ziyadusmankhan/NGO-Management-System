@@ -22,6 +22,7 @@
     </div>
 
     <div class="users-actions">
+        @include('shared.directory-export', ['exportRoute'=>'users.export'])
 
         @if(auth()->user()?->hasPermission('roles.manage'))<a
             href="{{ route('users.roles') }}"
@@ -79,7 +80,7 @@
 
     <!-- TOOLBAR -->
 
-    <div class="toolbar">
+    <form class="toolbar" method="get" action="{{ route('users.index') }}">
 
         <div class="search-box">
 
@@ -88,6 +89,7 @@
             <input
                 type="text"
                 id="userSearch"
+                name="search" value="{{ request('search') }}"
                 placeholder="Search users, email or role..."
             >
 
@@ -97,6 +99,7 @@
         <select
             class="filter-select"
             id="roleFilter"
+            name="role" onchange="this.form.requestSubmit()"
         >
 
             <option value="">
@@ -108,7 +111,7 @@
                 as $role
             )
 
-                <option value="{{ $role->slug }}">
+                <option value="{{ $role->slug }}" @selected(request('role')===$role->slug)>
                     {{ $role->name }}
                 </option>
 
@@ -117,21 +120,22 @@
         </select>
 
 
-        <select class="filter-select" id="userStatusFilter">
+        <select class="filter-select" id="userStatusFilter" name="status" onchange="this.form.requestSubmit()">
 
             <option value="">All Statuses</option>
 
-            <option value="active">
+            <option value="active" @selected(request('status')==='active')>
                 Active
             </option>
 
-            <option value="inactive">
+            <option value="inactive" @selected(request('status')==='inactive')>
                 Inactive
             </option>
 
         </select>
 
-    </div>
+        <button type="submit" class="users-btn primary"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+    </form>
 
 
     <!-- TABLE -->
@@ -224,19 +228,15 @@
 
                         <td>
 
-                            @if ($role)
-
-                                <span class="role-badge {{ $roleClass }}">
-                                    {{ $role->name }}
-                                </span>
-
-                            @else
+                            @forelse ($user->roles as $assignedRole)
+                                <span class="role-badge" style="display:inline-block;margin:2px 0;">{{ $assignedRole->name }}</span>
+                            @empty
 
                                 <span class="role-badge">
                                     No Role
                                 </span>
 
-                            @endif
+                            @endforelse
 
                         </td>
 
@@ -370,86 +370,3 @@
 </div>
 
 @endsection
-
-
-@push('scripts')
-
-<script>
-
-    const userSearch =
-        document.getElementById('userSearch');
-
-    const roleFilter =
-        document.getElementById('roleFilter');
-
-    const userStatusFilter =
-        document.getElementById('userStatusFilter');
-
-    const userRows =
-        document.querySelectorAll('#usersTableBody tr');
-
-
-    function filterUsers() {
-
-        const search =
-            userSearch.value.toLowerCase().trim();
-
-        const role =
-            roleFilter.value;
-
-        const status =
-            userStatusFilter.value;
-
-
-        userRows.forEach(row => {
-
-            const text =
-                row.textContent.toLowerCase();
-
-            const rowRole =
-                row.dataset.role;
-
-            const rowStatus =
-                row.dataset.status;
-
-
-            const matchesSearch =
-                !search || text.includes(search);
-
-            const matchesRole =
-                !role || rowRole === role;
-
-            const matchesStatus =
-                !status || rowStatus === status;
-
-
-            row.style.display =
-                matchesSearch &&
-                matchesRole &&
-                matchesStatus
-                    ? ''
-                    : 'none';
-
-        });
-
-    }
-
-
-    userSearch.addEventListener(
-        'input',
-        filterUsers
-    );
-
-    roleFilter.addEventListener(
-        'change',
-        filterUsers
-    );
-
-    userStatusFilter.addEventListener(
-        'change',
-        filterUsers
-    );
-
-</script>
-
-@endpush

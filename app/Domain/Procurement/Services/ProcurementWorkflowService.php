@@ -69,7 +69,9 @@ class ProcurementWorkflowService
         try {
             if ($f = $input['evidence'] ?? null) {
                 app(UploadValidator::class)->inspect($f);
-                $path = $f->store('procurement', 'private');
+                // A retry may reuse the upload object and its cached hashName.
+                // Give each staging attempt its own path so cleanup cannot erase retained evidence.
+                $path = $f->storeAs('procurement', Str::uuid().'.'.strtolower($f->getClientOriginalExtension()), 'private');
                 if (! $path) {
                     throw new \RuntimeException('Evidence could not be saved.');
                 } $stored = ['path' => $path, 'original_name' => $f->getClientOriginalName(), 'sha256' => hash_file('sha256', $f->getRealPath())];

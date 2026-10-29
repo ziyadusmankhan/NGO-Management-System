@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="vendor/autoload.php" colors="true" cacheDirectory=".phpunit.cache/mysql">
+ <testsuites><testsuite name="MySQL workflows">
+  <file>tests/Feature/BusinessWorkflowTest.php</file>
+  <file>tests/Feature/ProjectWorkflowTest.php</file>
+  <file>tests/Feature/ProcurementWorkflowTest.php</file>
+  <file>tests/Feature/QardWorkflowTest.php</file>
+ </testsuite></testsuites>
+ <php>
+  <env name="APP_ENV" value="testing" force="true"/>
+  <env name="MYSQL_INTEGRATION_TESTS" value="1" force="true"/>
+  <env name="APP_URL" value="http://localhost" force="true"/>
+  <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" force="true"/>
+  <env name="SECURITY_LOOKUP_KEY" value="dGVzdGluZy1vbmx5LWtleS0zMi1ieXRlcy1sb25nISE=" force="true"/>
+  <env name="DB_CONNECTION" value="mysql" force="true"/>
+  <env name="CACHE_STORE" value="array" force="true"/>
+  <env name="SESSION_DRIVER" value="array" force="true"/>
+  <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+  <env name="MAIL_MAILER" value="array" force="true"/>
+  <env name="BCRYPT_ROUNDS" value="4" force="true"/>
+ </php>
+</phpunit>

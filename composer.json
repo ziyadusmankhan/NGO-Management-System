@@ -9,6 +9,7 @@
         "laravel/fortify": "^1.0",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
+        "mpdf/mpdf": "~8.2",
         "phpoffice/phpspreadsheet": "^5.10"
     },
     "require-dev": {

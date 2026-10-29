@@ -35,8 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Trust VS Code tunnel proxy headers for HTTPS & redirects
-        $middleware->trustProxies(at: array_values(array_filter(array_map('trim', explode(',', (string) env('TRUSTED_PROXIES', ''))), fn ($proxy) => $proxy !== '*')));
+        // Read proxy configuration at request time, after .env has loaded.
+        $middleware->replace(\Illuminate\Http\Middleware\TrustProxies::class, \App\Http\Middleware\TrustConfiguredProxies::class);
 
         $middleware->appendToGroup('web', CaptureAuditRequest::class);
         $middleware->appendToGroup('web', EnforceSessionSecurity::class);

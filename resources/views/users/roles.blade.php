@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+@include('shared.action-feedback')
 <div class="alert alert-light">Before changing account access, <a href="{{ route('security.confirm') }}">confirm your password</a>. Confirmation lasts 15 minutes.</div>
 
 
@@ -19,6 +20,8 @@
             Configure what each organizational role can view and manage.
         </p>
     </div>
+
+    @include('shared.directory-export', ['exportRoute'=>'users.roles.export'])
 
 </div>
 

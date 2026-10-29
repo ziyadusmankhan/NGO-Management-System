@@ -10,11 +10,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('security_state', function (Blueprint $t) {
-            $t->string('key')->primary();
-            $t->text('value');
-        });
-        DB::table('security_state')->insert(['key' => 'encryption', 'value' => 'converting']);
+        if (! Schema::hasTable('security_state')) {
+            Schema::create('security_state', function (Blueprint $t) {
+                $t->string('key')->primary();
+                $t->text('value');
+            });
+        }
+        DB::table('security_state')->insertOrIgnore(['key' => 'encryption', 'value' => 'converting']);
         foreach (SensitiveFields::TABLES as $table => $fields) {
             // Later modules can opt into the same encrypted casts. Their empty tables
             // are created after this migration on a fresh installation.
@@ -27,12 +29,16 @@ return new class extends Migration
                 $info = $columns[$field];
                 if (! in_array(strtolower($info['type_name']), ['text', 'longtext', 'mediumtext'])) {
                     // Member CNIC uniqueness moves to its keyed lookup, including archived members.
-                    if ($table === 'members' && $field === 'cnic') {
-                        Schema::table($table, fn (Blueprint $t) => $t->dropUnique(['cnic']));
+                    foreach (Schema::getIndexes($table) as $index) {
+                        if (! $index['primary'] && in_array($field, $index['columns'])) {
+                            Schema::table($table, function (Blueprint $t) use ($index) {
+                                $index['unique'] ? $t->dropUnique($index['name']) : $t->dropIndex($index['name']);
+                            });
+                        }
                     }
                     Schema::table($table, fn (Blueprint $t) => $t->text($field)->nullable($info['nullable'])->change());
                 }
-                if (SensitiveFields::indexed($field)) {
+                if (SensitiveFields::indexed($field) && ! Schema::hasColumn($table, $field.'_lookup')) {
                     Schema::table($table, function (Blueprint $t) use ($field, $table) {
                         $c = $t->string($field.'_lookup', 64)->nullable();
                         if ($table === 'members' && $field === 'cnic') {

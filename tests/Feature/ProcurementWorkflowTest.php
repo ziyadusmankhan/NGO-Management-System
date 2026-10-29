@@ -47,7 +47,9 @@ class ProcurementWorkflowTest extends TestCase
         $s = app(ProcurementPaymentService::class);
         $d = $this->purchasePayment($p, $l, '10.25');
         $m = $s->record($p, 'pay', $d, $payer);
+        $originalEvidence = $p->documents()->where('kind', 'pay')->where('record_id', $m->id)->firstOrFail();
         $this->assertSame($m->id, $s->record($p, 'pay', $d, $payer)->id);
+        Storage::disk('private')->assertExists($originalEvidence->path);
         $this->assertSame(48975, $p->invoiceBalance($l));
         $this->denied(fn () => $s->record($p, 'pay', $this->purchasePayment($p, $l, '500.00'), $payer));
         $s->record($p, 'pay', $this->purchasePayment($p, $l, '489.75'), $payer);

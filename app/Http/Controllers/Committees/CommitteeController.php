@@ -15,10 +15,9 @@ class CommitteeController extends Controller
 {
     public function index(): View
     {
-        $committees = Committee::query()
-            ->withCount('members')
-            ->latest('id')
-            ->paginate(15);
+        $directory = app(\App\Domain\Organization\Services\DirectoryQuery::class);
+        $committees = $directory->query('committees', $directory->filters(request(), 'committees'))->paginate(15)->withQueryString();
+        $committeeTypes = Committee::query()->distinct()->orderBy('type')->pluck('type');
 
         $totalCommittees = Committee::count();
 
@@ -32,7 +31,8 @@ class CommitteeController extends Controller
             compact(
                 'committees',
                 'totalCommittees',
-                'activeCommittees'
+                'activeCommittees',
+                'committeeTypes'
             )
         );
     }

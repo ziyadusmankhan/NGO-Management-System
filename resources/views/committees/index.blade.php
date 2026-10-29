@@ -27,10 +27,7 @@
 
     <div class="committee-actions">
 
-        <button class="committee-btn secondary">
-            <i class="bi bi-download"></i>
-            Export
-        </button>
+        @include('shared.directory-export', ['exportRoute'=>'committees.export'])
 
         @if(auth()->user()?->hasPermission('committees.create'))<a
             href="{{ route('committees.create') }}"
@@ -125,7 +122,7 @@
      SEARCH / FILTERS
 ========================================== -->
 
-<div class="committee-toolbar">
+<form class="committee-toolbar" method="get" action="{{ route('committees.index') }}">
 
     <div class="search-box">
 
@@ -134,48 +131,40 @@
         <input
             type="text"
             id="committeeSearch"
+            name="search" value="{{ request('search') }}"
             placeholder="Search committees, responsibilities..."
         >
 
     </div>
 
 
-    <select class="filter-select" id="committeeStatus">
+    <select class="filter-select" id="committeeStatus" name="status" onchange="this.form.requestSubmit()">
 
         <option value="">All Statuses</option>
 
-        <option value="active">
+        <option value="active" @selected(request('status')==='active')>
             Active
         </option>
 
-        <option value="inactive">
+        <option value="inactive" @selected(request('status')==='inactive')>
             Inactive
         </option>
 
     </select>
 
 
-    <select class="filter-select">
+    <select class="filter-select" name="type" aria-label="Committee type" onchange="this.form.requestSubmit()">
 
         <option value="">
             All Types
         </option>
 
-        <option>
-            Decision-Making
-        </option>
-
-        <option>
-            Implementation
-        </option>
-
-        <option>
-            Administration
-        </option>
+        @foreach($committeeTypes as $type)<option value="{{ $type }}" @selected(request('type')===$type)>{{ $type==='decision'?'Decision-Making':str($type)->headline() }}</option>@endforeach
 
     </select>
 
-</div>
+    <button type="submit" class="committee-btn primary"><i class="bi bi-search" aria-hidden="true"></i> Search</button>
+</form>
 
 
 <!-- =========================================
@@ -352,65 +341,3 @@
 </div>
 
 @endsection
-
-
-@push('scripts')
-
-<script>
-
-    const committeeSearch =
-        document.getElementById('committeeSearch');
-
-    const committeeStatus =
-        document.getElementById('committeeStatus');
-
-    const committeeCards =
-        document.querySelectorAll('.committee-card');
-
-
-    function filterCommittees() {
-
-        const search =
-            committeeSearch.value.toLowerCase().trim();
-
-        const status =
-            committeeStatus.value;
-
-
-        committeeCards.forEach(card => {
-
-            const text =
-                card.textContent.toLowerCase();
-
-            const cardStatus =
-                card.dataset.status;
-
-            const matchesSearch =
-                !search || text.includes(search);
-
-            const matchesStatus =
-                !status || cardStatus === status;
-
-            card.style.display =
-                matchesSearch && matchesStatus
-                    ? ''
-                    : 'none';
-
-        });
-
-    }
-
-
-    committeeSearch.addEventListener(
-        'input',
-        filterCommittees
-    );
-
-    committeeStatus.addEventListener(
-        'change',
-        filterCommittees
-    );
-
-</script>
-
-@endpush
