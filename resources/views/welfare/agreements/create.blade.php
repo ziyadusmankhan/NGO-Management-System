@@ -139,12 +139,12 @@
             Save Draft Agreement
         </button>
 
-        <a
+        @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
             href="{{ route('welfare.applications.show', $application) }}"
             style="display:inline-block;margin-left:12px;color:#44534b;text-decoration:none;"
         >
             Cancel
-        </a>
+        </a>@endif
     </form>
 </div>
 @endsection

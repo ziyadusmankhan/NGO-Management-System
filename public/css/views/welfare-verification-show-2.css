@@ -1,0 +1,7 @@
+.flash{padding:12px 14px;border-radius:10px;margin-bottom:16px;font-size:14px}
+    .flash.ok{background:#e8f5ee;color:#1e6b45}
+    .flash.err{background:#fdecec;color:#a33}
+    .vform label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
+    .vform textarea,.vform select{width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 11px;font:inherit;background:#fff}
+    .vform .check{display:flex;align-items:center;gap:8px;font-weight:400;margin:8px 0}
+    .vform .err-text{color:#a33;font-size:12px;margin-top:4px}

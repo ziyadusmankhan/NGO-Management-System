@@ -6,5 +6,5 @@
 @include('qard.partials.feedback')
 <form class="qcard" method="post" action="{{ route('qard.repay',$loan) }}">@csrf
 @include('qard.partials.payment',['maximum'=>$remaining,'kind'=>'repayment'])
-<div class="qactions"><button class="qbtn">Record repayment</button><a class="qbtn secondary" href="{{ route('qard.show',$loan) }}">Cancel</a></div></form></div>
+<div class="qactions"><button class="qbtn">Record repayment</button>@if(auth()->user()?->hasPermission('qard.view'))<a class="qbtn secondary" href="{{ route('qard.show',$loan) }}">Cancel</a>@endif</div></form></div>
 @endsection

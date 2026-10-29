@@ -3,207 +3,7 @@
 @section('title', 'Welfare Assistance Details')
 
 @push('styles')
-<style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:22px;
-    }
-
-    .page-header h1 {
-        margin:0;
-        font-size:25px;
-        font-weight:700;
-    }
-
-    .page-header p {
-        margin:6px 0 0;
-        color:var(--muted);
-    }
-
-    .actions {
-        display:flex;
-        gap:8px;
-        flex-wrap:wrap;
-    }
-
-    .ui-btn {
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        min-height:40px;
-        padding:0 14px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        background:#fff;
-        color:#596760;
-        text-decoration:none;
-        font-weight:650;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .ui-btn.danger {
-        background:#fff;
-        border-color:#e4c4c0;
-        color:#9a4037;
-    }
-
-    .layout {
-        display:grid;
-        grid-template-columns:minmax(0,1fr) 310px;
-        gap:18px;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-        margin-bottom:18px;
-    }
-
-    .card-head {
-        padding:17px 20px;
-        border-bottom:1px solid var(--border);
-    }
-
-    .card-head strong {
-        font-size:16px;
-    }
-
-    .card-head span {
-        display:block;
-        margin-top:4px;
-        color:var(--muted);
-        font-size:14px;
-    }
-
-    .card-body {
-        padding:20px;
-    }
-
-    .grid {
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:18px 24px;
-    }
-
-    .item label {
-        display:block;
-        color:#6d7571;
-        font-size:12px;
-        text-transform:uppercase;
-        letter-spacing:.5px;
-        margin-bottom:5px;
-    }
-
-    .item strong {
-        display:block;
-        color:#3e4b45;
-        font-size:15px;
-    }
-
-    .status {
-        display:inline-flex;
-        padding:6px 10px;
-        border-radius:999px;
-        font-size:12px;
-        font-weight:700;
-    }
-
-    .status.pending {
-        background:#fff7df;
-        color:#87671d;
-    }
-
-    .status.approved {
-        background:#eaf6ef;
-        color:#28704a;
-    }
-
-    .status.rejected {
-        background:#fbeceb;
-        color:#9a4037;
-    }
-
-    .notice {
-        display:flex;
-        gap:10px;
-        padding:13px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
-        border-radius:10px;
-        color:#66726c;
-        line-height:1.6;
-        font-size:14px;
-    }
-
-    .notice i {
-        color:var(--primary);
-        font-size:18px;
-    }
-
-    .side-number {
-        text-align:center;
-        font-size:28px;
-        font-weight:700;
-        color:var(--primary);
-    }
-
-    .side-label {
-        text-align:center;
-        color:var(--muted);
-        margin-top:4px;
-    }
-
-    .side-row {
-        display:flex;
-        justify-content:space-between;
-        gap:12px;
-        padding:10px 0;
-        border-bottom:1px solid #eef1ef;
-        font-size:14px;
-    }
-
-    .side-row:last-child {
-        border-bottom:none;
-    }
-
-    .side-row span:first-child {
-        color:#6d7571;
-    }
-
-    .side-row span:last-child {
-        font-weight:650;
-        color:#47554e;
-        text-align:right;
-    }
-
-    @media(max-width:900px) {
-        .layout {
-            grid-template-columns:1fr;
-        }
-    }
-
-    @media(max-width:650px) {
-        .page-header {
-            flex-direction:column;
-        }
-
-        .grid {
-            grid-template-columns:1fr;
-        }
-    }
-    .status.closed { background:#eef0ef; color:#59635d; }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/welfare-assistance-show-1.css') }}">
 @endpush
 
 @section('content')
@@ -241,44 +41,44 @@
     <div class="actions">
 
     @can('welfare.reviews.view')
-    <a
+    @if(auth()->user()?->hasPermission('welfare.assistance.view') && auth()->user()?->hasPermission('welfare.reviews.view'))<a
         href="{{ route('welfare.assistance.reviews.index') }}"
         class="ui-btn"
     >
         <i class="bi bi-clipboard-check"></i>
         Review Queue
-    </a>
+    </a>@endif
     @endcan
 
-        <a
+        @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
             href="{{ route('welfare.assistance.index') }}"
             class="ui-btn"
         >
             <i class="bi bi-arrow-left"></i>
             Back
-        </a>
+        </a>@endif
 
         @can('welfare.assistance.manage')
             @if(in_array($assistance->status, ['pending', 'rejected'], true))
-                <a
+                @if(auth()->user()?->hasPermission('welfare.assistance.view') && auth()->user()?->hasPermission('welfare.assistance.manage'))<a
                     href="{{ route('welfare.assistance.edit', $assistance) }}"
                     class="ui-btn primary"
                 >
                     <i class="bi bi-pencil"></i>
                     Edit
-                </a>
+                </a>@endif
             @endif
         @endcan
         @can('welfare.assistance.manage')
             @if($assistance->status === 'approved')
 
-                <a
+                @if(auth()->user()?->hasPermission('welfare.assistance.view') && auth()->user()?->hasPermission('welfare.assistance.manage'))<a
                     href="{{ route('welfare.assistance.payments.create', $assistance) }}"
                     class="ui-btn primary"
                 >
                     <i class="bi bi-wallet2"></i>
                     Record Payment
-                </a>
+                </a>@endif
 
             @endif
         @endcan
@@ -288,7 +88,7 @@
             && auth()->user()->hasPermission('welfare.reviews.manage')
         )
 
-            <a
+            @if(auth()->user()?->hasPermission('welfare.assistance.view') && auth()->user()?->hasPermission('welfare.reviews.view') && auth()->user()?->hasPermission('welfare.reviews.manage'))<a
                 href="{{ route(
                     'welfare.assistance.reviews.create',
                     $assistance
@@ -297,7 +97,7 @@
             >
                 <i class="bi bi-clipboard-check"></i>
                 Record Review
-            </a>
+            </a>@endif
 
         @endif
 
@@ -353,10 +153,10 @@
 <div class="card mb-3"><div class="card-body">
     @if($assistance->application)
         <strong>Source application:</strong>
-        <a href="{{ route('welfare.applications.show', $assistance->application) }}">{{ $assistance->application->application_number }}</a>
+        @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a href="{{ route('welfare.applications.show', $assistance->application) }}">{{ $assistance->application->application_number }}</a>@endif
         @can('welfare.agreements.view')
             @if($assistance->application->agreement)
-                · <a href="{{ route('welfare.applications.agreement.show', $assistance->application) }}">Signed agreement {{ $assistance->application->agreement->agreement_number }}</a>
+                · @if(auth()->user()?->hasPermission('welfare.agreements.view'))<a href="{{ route('welfare.applications.agreement.show', $assistance->application) }}">Signed agreement {{ $assistance->application->agreement->agreement_number }}</a>@endif
             @endif
         @endcan
     @elseif($assistance->application_id)
@@ -630,7 +430,7 @@
                             @endif
 
 
-                            <a
+                            @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
                                 href="{{ route(
                                     'welfare.assistance.payments.show',
                                     [
@@ -648,7 +448,7 @@
                             >
                                 View Details
                                 <i class="bi bi-arrow-right"></i>
-                            </a>
+                            </a>@endif
 
                         </div>
 
@@ -695,7 +495,7 @@
                     && auth()->user()->hasPermission('welfare.reviews.manage')
                 )
 
-                    <a
+                    @if(auth()->user()?->hasPermission('welfare.assistance.view') && auth()->user()?->hasPermission('welfare.reviews.view') && auth()->user()?->hasPermission('welfare.reviews.manage'))<a
                         href="{{ route(
                             'welfare.assistance.reviews.create',
                             $assistance
@@ -704,7 +504,7 @@
                     >
                         <i class="bi bi-plus-lg"></i>
                         Record Review
-                    </a>
+                    </a>@endif
 
                 @endif
 

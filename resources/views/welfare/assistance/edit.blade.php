@@ -270,12 +270,12 @@
 
             <div class="d-flex justify-content-end gap-2 mt-4">
 
-                <a
+                @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
                     href="{{ route('welfare.assistance.show', $assistance) }}"
                     class="ui-btn"
                 >
                     Cancel
-                </a>
+                </a>@endif
 
                 <button type="submit" class="ui-btn primary">
                     Update Assistance

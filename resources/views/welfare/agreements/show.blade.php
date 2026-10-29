@@ -88,7 +88,7 @@
         </p>
 
         @if ($agreement->beneficiary_document_path)
-            <a
+            @if(auth()->user()?->hasPermission('welfare.agreements.view'))<a
                 href="{{ route('welfare.applications.agreement.evidence', [
                     'application' => $application,
                     'party' => 'beneficiary',
@@ -96,7 +96,7 @@
                 style="color:#176b4d;"
             >
                 View beneficiary signature evidence
-            </a>
+            </a>@endif
         @endif
 
         <p>
@@ -105,7 +105,7 @@
         </p>
 
         @if ($agreement->organization_document_path)
-            <a
+            @if(auth()->user()?->hasPermission('welfare.agreements.view'))<a
                 href="{{ route('welfare.applications.agreement.evidence', [
                     'application' => $application,
                     'party' => 'organization',
@@ -113,7 +113,7 @@
                 style="color:#176b4d;"
             >
                 View organization signature evidence
-            </a>
+            </a>@endif
         @endif
 
         
@@ -396,20 +396,20 @@
         @endif
 
     @if (auth()->user()?->hasPermission('welfare.agreements.view'))
-            <a
+            @if(auth()->user()?->hasPermission('welfare.agreements.view'))<a
                 href="{{ route('welfare.applications.agreement.print', $application) }}"
                 style="display:inline-block;margin-right:12px;color:#176b4d;text-decoration:none;"
             >
                 Print Agreement
-            </a>
+            </a>@endif
         @endif
         
-    <a
+    @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
         href="{{ route('welfare.applications.show', $application) }}"
         style="color:#176b4d;text-decoration:none;"
     >
         &larr; Return to application
-    </a>
+    </a>@endif
 </div>
     @can('welfare.assistance.view')
         <div class="card mt-4"><div class="card-body">
@@ -418,14 +418,14 @@
                 @if($assistance->trashed())
                     <p>Assistance {{ $assistance->assistance_number }} is archived. This application cannot create another assistance.</p>
                 @else
-                    <a href="{{ route('welfare.assistance.show', $assistance) }}">{{ $assistance->assistance_number }} · {{ ucfirst($assistance->status) }}</a>
+                    @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a href="{{ route('welfare.assistance.show', $assistance) }}">{{ $assistance->assistance_number }} · {{ ucfirst($assistance->status) }}</a>@endif
                 @endif
             @elseif($assistanceError)
                 <p>{{ $assistanceError }}</p>
             @else
                 @can('welfare.assistance.manage')
                     <p>Create a pending assistance using this agreement's amount and the application's beneficiary, purpose and authorized fund. No payment is created.</p>
-                    <a class="btn btn-success" href="{{ route('welfare.assistance.create', ['application_id' => $application->id]) }}">Create assistance</a>
+                    @if(auth()->user()?->hasPermission('welfare.assistance.view') && auth()->user()?->hasPermission('welfare.assistance.manage'))<a class="btn btn-success" href="{{ route('welfare.assistance.create', ['application_id' => $application->id]) }}">Create assistance</a>@endif
                 @endcan
             @endif
         </div></div>

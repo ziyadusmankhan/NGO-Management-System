@@ -228,6 +228,7 @@
             <input
                 type="number"
                 name="monthly_income"
+                aria-label="Monthly income (PKR)"
                 min="0"
                 step="0.01"
                 class="form-control @error('monthly_income') is-invalid @enderror"

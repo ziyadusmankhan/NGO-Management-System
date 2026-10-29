@@ -2,7 +2,7 @@
 @section('title', $application ? 'Edit Business Application' : 'New Business Application')
 @push('styles') @include('business.partials.style') @endpush
 @section('content')
-<div class="qard-page"><div class="business-hero"><div><h1>{{ $application ? 'Edit '.$application->number : 'New business application' }}</h1><p class="qmuted">Save a draft first. All funding requires verification, independent decisions, and a signed agreement.</p></div><a class="qbtn secondary" href="{{ route('business.applications.index') }}">Back</a></div>
+<div class="qard-page"><div class="business-hero"><div><h1>{{ $application ? 'Edit '.$application->number : 'New business application' }}</h1><p class="qmuted">Save a draft first. All funding requires verification, independent decisions, and a signed agreement.</p></div>@if(auth()->user()?->hasPermission('business.view'))<a class="qbtn secondary" href="{{ route('business.applications.index') }}">Back</a>@endif</div>
 @include('qard.partials.feedback')
 @if($categories->isEmpty())<p class="qalert">An administrator must add a business category before you can save an application.</p>@endif
 <form method="post" enctype="multipart/form-data" action="{{ $application ? route('business.applications.update', $application) : route('business.applications.store') }}">@csrf
@@ -35,7 +35,7 @@
 <x-business-field label="Combined price-check evidence" name="price_check_file" type="file" :required="false" />
 <x-business-field label="Application documents or photographs" name="attachments[]" type="file" multiple :required="false" />
 </div>@if($application)<p class="qhint">Existing evidence remains in history. After a rejected application or revised approval, upload fresh evidence for the new revision.</p>@endif</div>
-<div class="qactions"><button class="qbtn">Save draft</button><a class="qbtn secondary" href="{{ route('business.applications.index') }}">Cancel</a></div>
+<div class="qactions"><button class="qbtn">Save draft</button>@if(auth()->user()?->hasPermission('business.view'))<a class="qbtn secondary" href="{{ route('business.applications.index') }}">Cancel</a>@endif</div>
 </form>
 <template id="budget-template">@include('business.partials.budget-row', ['i'=>'__INDEX__', 'item'=>['description'=>'','cost'=>'','applicant_amount'=>'0.00','release_method'=>'cash','price_checks'=>[]]])</template>
 </div>

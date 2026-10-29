@@ -3,146 +3,7 @@
 @section('title', 'Edit Expense')
 
 @push('styles')
-<style>
-    .page-wrap {
-        max-width:1000px;
-        margin:0 auto;
-    }
-
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:20px;
-        gap:16px;
-    }
-
-    .page-header h1 {
-        margin:0;
-        font-size: 22px;
-        font-weight:700;
-    }
-
-    .page-header p {
-        margin:6px 0 0;
-        color:var(--muted);
-    }
-
-    .ui-btn {
-        height:40px;
-        padding:0 14px;
-        border-radius:10px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        font-size: 15px;
-        font-weight:650;
-        border:1px solid var(--border);
-        background:#fff;
-        color:#637069;
-        text-decoration:none;
-        cursor:pointer;
-        white-space:nowrap;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        padding:24px;
-    }
-
-    .grid {
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:18px;
-    }
-
-    .full {
-        grid-column:1/-1;
-    }
-
-    .label {
-        display:block;
-        margin-bottom:7px;
-        color:#36433d;
-        font-size: 15px;
-        font-weight:650;
-    }
-
-    .control,
-    .select {
-        width:100%;
-        height:42px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        padding:0 12px;
-        background:#fff;
-        color:var(--text);
-        font-size: 15px;
-        outline:none;
-    }
-
-    textarea.control {
-        height:auto;
-        min-height:105px;
-        padding:11px 12px;
-        resize:vertical;
-        line-height:1.6;
-    }
-
-    .control:focus,
-    .select:focus {
-        border-color: #6b7670;
-        box-shadow:0 0 0 3px rgba(23,63,53,.055);
-    }
-
-    .control[readonly] {
-        background:#fafcfb;
-        color:#6c7470;
-    }
-
-    .form-actions {
-        margin-top:24px;
-        display:flex;
-        justify-content:flex-end;
-        gap:10px;
-    }
-
-    @media(max-width:700px) {
-        .page-header {
-            flex-direction:column;
-            align-items:flex-start;
-        }
-
-        .page-header .ui-btn {
-            width:100%;
-        }
-
-        .card {
-            padding:18px;
-        }
-
-        .grid {
-            grid-template-columns:1fr;
-        }
-
-        .form-actions {
-            flex-direction:column-reverse;
-        }
-
-        .form-actions .ui-btn {
-            width:100%;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/finance-expenses-edit-1.css') }}">
 @endpush
 
 @section('content')
@@ -161,13 +22,13 @@
             </p>
         </div>
 
-        <a
+        @if(auth()->user()?->hasPermission('finance.view'))<a
             href="{{ route('finance.expenses.show', $expense) }}"
             class="ui-btn"
         >
             <i class="bi bi-arrow-left"></i>
             Back
-        </a>
+        </a>@endif
 
     </div>
 
@@ -521,12 +382,12 @@
 
             <div class="form-actions">
 
-                <a
+                @if(auth()->user()?->hasPermission('finance.view'))<a
                     href="{{ route('finance.expenses.show', $expense) }}"
                     class="ui-btn"
                 >
                     Cancel
-                </a>
+                </a>@endif
 
                 <button
                     type="submit"

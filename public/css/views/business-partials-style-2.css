@@ -1,0 +1,10 @@
+@media print {
+    @page { size: A4 landscape; margin: 12mm; }
+    .main-area { margin-left: 0 !important; width: 100% !important; }
+    .qard-page { max-width: none !important; }
+    .qard-page .qtable { overflow: visible; break-inside: auto; }
+    .qard-page table { width: 100%; table-layout: fixed; font-size: 10pt; }
+    .qard-page .qtable td, .qard-page .qtable th { min-width: 0; overflow-wrap: anywhere; padding: 6px; }
+    .qard-page tr { break-inside: avoid; }
+    .qard-page thead { display: table-header-group; }
+}

@@ -32,9 +32,9 @@
     <div class="card"><div class="card-body">
         <h2 class="h5">Approved details</h2>
         <dl class="row">
-            <dt class="col-sm-3">Application</dt><dd class="col-sm-9"><a href="{{ route('welfare.applications.show', $selected) }}">{{ $selected->application_number }}</a></dd>
+            <dt class="col-sm-3">Application</dt><dd class="col-sm-9">@if(auth()->user()?->hasPermission('welfare.assistance.view'))<a href="{{ route('welfare.applications.show', $selected) }}">{{ $selected->application_number }}</a>@endif</dd>
             <dt class="col-sm-3">Agreement</dt><dd class="col-sm-9">
-                @can('welfare.agreements.view')<a href="{{ route('welfare.applications.agreement.show', $selected) }}">{{ $selected->agreement->agreement_number }}</a>
+                @can('welfare.agreements.view')@if(auth()->user()?->hasPermission('welfare.agreements.view'))<a href="{{ route('welfare.applications.agreement.show', $selected) }}">{{ $selected->agreement->agreement_number }}</a>@endif
                 @else {{ $selected->agreement->agreement_number }} @endcan · Signed
             </dd>
             <dt class="col-sm-3">Beneficiary</dt><dd class="col-sm-9">{{ $selected->beneficiary->full_name }}</dd>
@@ -52,7 +52,7 @@
             <div class="mb-3"><label class="form-label" for="notes">Notes</label><textarea class="form-control" id="notes" name="notes" maxlength="5000" rows="3">{{ old('notes') }}</textarea></div>
             <p>These approved details are copied automatically. Creation records no payment or ledger transaction.</p>
             <button class="btn btn-success" type="submit">Create pending assistance</button>
-            <a class="btn btn-outline-secondary" href="{{ route('welfare.assistance.index') }}">Cancel</a>
+            @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a class="btn btn-outline-secondary" href="{{ route('welfare.assistance.index') }}">Cancel</a>@endif
         </form>
     </div></div>
 @endif

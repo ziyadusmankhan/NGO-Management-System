@@ -14,8 +14,9 @@
             </thead>
             <tbody>@forelse($procurementPayments as $m)
                 <tr>
-                    <td>@if(auth()->user()->hasPermission('procurement.view'))<a
-                    href="{{ route('operations.procurement.show', $m->procurement) }}">{{ $m->procurement->number }}</a>@else
+                    <td>@if(auth()->user()->hasPermission('procurement.view'))@if(auth()->user()?->hasPermission('procurement.view'))<a
+                    href="{{ route('operations.procurement.show', $m->procurement) }}">{{ $m->procurement->number }}</a>@endif
+@else
                             {{ $m->procurement->number }} @endif · #{{ $m->id }}</td>
                     <td>{{ $m->payment_date->format('d M Y') }}</td>
                     <td>PKR {{ \App\Domain\Finance\Support\Money::format($m->amount) }}</td>

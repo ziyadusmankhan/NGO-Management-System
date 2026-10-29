@@ -2,7 +2,7 @@
 @section('title',$document->number)
 @push('styles')@include('records.audit.style')@endpush
 @section('content')<div class="audit-page">
-<a href="{{ route('records.documents.index') }}">Back to Documents</a>
+@if(auth()->user()?->hasPermission('documents.view'))<a href="{{ route('records.documents.index') }}">Back to Documents</a>@endif
 <h1>{{ $document->title }}</h1>
 <p>{{ $document->number }} · {{ $document->category }} · {{ $document->parent_reference??'Organization record' }} · {{ $document->archived_at?'Archived':'Active' }}</p>@include('qard.partials.feedback')
 <div class="audit-card">
@@ -23,7 +23,8 @@
 <td>{{ $v->original_name??'Original filename unavailable' }}<br>{{ $v->mime_type??'Unknown type' }} · {{ $v->size===null?'Unknown size':number_format($v->size/1024,1).' KB' }}</td>
 <td>{{ $v->uploaded_at?->timezone('Asia/Karachi')->format('d M Y H:i')??'Unavailable' }}<br>{{ $v->uploaded_by?'User #'.$v->uploaded_by:'Uploader unavailable' }}</td>
 <td>{{ ucfirst($v->status) }}<br><small>{{ $v->validation_status }}</small><details><summary>SHA-256 checksum</summary><code style="overflow-wrap:anywhere">{{ $v->sha256??'Unavailable' }}</code></details></td>
-<td>@if($v->status==='available'&&($document->parent_type||auth()->user()->hasPermission('documents.download')))<a href="{{ route('records.documents.download',[$document,$v]) }}">Download v{{ $v->version }}</a>@endif</td>
+<td>@if($v->status==='available'&&($document->parent_type||auth()->user()->hasPermission('documents.download')))@if(auth()->user()?->hasPermission('documents.view'))<a href="{{ route('records.documents.download',[$document,$v]) }}">Download v{{ $v->version }}</a>@endif
+@endif</td>
 </tr>@endforeach</tbody>
 </table>
 </div>

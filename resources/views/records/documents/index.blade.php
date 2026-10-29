@@ -4,7 +4,8 @@
 @section('content')<div class="audit-page">
 <h1>Documents Library</h1>
 <p>Private evidence and organization records you are authorized to access.</p>@include('qard.partials.feedback')
-@can('documents.upload')<a class="audit-btn" href="{{ route('records.documents.create') }}">Upload document</a>@endcan
+@can('documents.upload')@if(auth()->user()?->hasPermission('documents.view') && auth()->user()?->hasPermission('documents.upload'))<a class="audit-btn" href="{{ route('records.documents.create') }}">Upload document</a>@endif
+@endcan
 <form class="audit-card audit-grid" method="get">
 <label>Title<input name="search" value="{{ request('search') }}">
 </label>
@@ -38,7 +39,7 @@
 </thead>
 <tbody>@forelse($documents as $d)<tr>
 <td>
-<a href="{{ route('records.documents.show',$d) }}">{{ $d->number }}</a>
+@if(auth()->user()?->hasPermission('documents.view'))<a href="{{ route('records.documents.show',$d) }}">{{ $d->number }}</a>@endif
 <br>{{ $d->title }}</td>
 <td>{{ $d->category }}<br>{{ $d->parent_reference ?? 'Organization record' }}</td>
 <td>{{ $d->versions->count() }}</td>

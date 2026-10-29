@@ -1,0 +1,8 @@
+{
+  "name": "foundation-management-ui",
+  "private": true,
+  "description": "Blade frontend; public assets require no build step",
+  "scripts": {
+    "check:ui": "node scripts/ui-browser-check.cjs"
+  }
+}

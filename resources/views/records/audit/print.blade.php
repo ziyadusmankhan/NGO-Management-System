@@ -4,55 +4,8 @@
 <head>
     <meta charset="utf-8">
     <title>Audit Trail report</title>
-    <style>
-        body {
-            font: 12px Arial, sans-serif;
-            color: #183f34;
-            margin: 25px
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 18px
-        }
-
-        th,
-        td {
-            padding: 8px;
-            border: 1px solid #dce4df;
-            text-align: left;
-            vertical-align: top
-        }
-
-        pre {
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            font-size: 10px
-        }
-
-        article {
-            border-bottom: 2px solid #184435;
-            padding: 12px 0;
-            break-inside: avoid
-        }
-
-        small {
-            color: #586d63
-        }
-
-        @media print {
-            button {
-                display: none
-            }
-
-            @page {
-                size: A4 landscape;
-                margin: 12mm
-            }
-        }
-    </style>
-</head>
+    <link rel="stylesheet" href="{{ asset('css/views/records-audit-print-1.css') }}">
+<link rel="stylesheet" href="{{ asset('css/foundation-print.css') }}"></head>
 
 <body><button onclick="window.print()">Print / Save as PDF</button>
     <h1>Audit Trail</h1>

@@ -2,7 +2,7 @@
 @section('title', 'Business Categories')
 @push('styles') @include('business.partials.style') @endpush
 @section('content')
-<div class="qard-page"><div class="business-hero"><div><h1>Business categories</h1><p class="qmuted">Maintain your own categories. Deactivation keeps existing case history.</p></div><a class="qbtn secondary" href="{{ route('business.applications.index') }}">Back to businesses</a></div>
+<div class="qard-page"><div class="business-hero"><div><h1>Business categories</h1><p class="qmuted">Maintain your own categories. Deactivation keeps existing case history.</p></div>@if(auth()->user()?->hasPermission('business.view'))<a class="qbtn secondary" href="{{ route('business.applications.index') }}">Back to businesses</a>@endif</div>
 @include('qard.partials.feedback')
 <form class="qcard" method="post" action="{{ route('business.categories.store') }}">@csrf<h2>Add category</h2><div class="qgrid"><x-business-field name="name" label="Category name" maxlength="100" /><div><label>Status<select name="active"><option value="1">Active</option><option value="0">Inactive</option></select></label></div></div><div class="qactions"><button class="qbtn">Add category</button></div></form>
 @forelse($categories as $category)

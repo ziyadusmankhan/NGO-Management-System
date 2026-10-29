@@ -3,82 +3,7 @@
 @section('title', 'Edit Beneficiary')
 
 @push('styles')
-<style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:22px;
-    }
-
-    .page-header h1 {
-        margin:0;
-        font-size:25px;
-        font-weight:700;
-    }
-
-    .page-header p {
-        margin:6px 0 0;
-        color:var(--muted);
-    }
-
-    .ui-btn {
-        display:inline-flex;
-        align-items:center;
-        gap:7px;
-        height:40px;
-        padding:0 14px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        background:#fff;
-        color:#596760;
-        text-decoration:none;
-        font-weight:650;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-    }
-
-    .card-head {
-        padding:18px 20px;
-        border-bottom:1px solid var(--border);
-    }
-
-    .card-head strong {
-        font-size:16px;
-    }
-
-    .card-head span {
-        display:block;
-        margin-top:4px;
-        color:var(--muted);
-        font-size:14px;
-    }
-
-    .card-body {
-        padding:22px;
-    }
-
-    .section-title {
-        font-size:15px;
-        font-weight:700;
-        color:var(--primary);
-        padding-bottom:9px;
-        border-bottom:1px solid #edf1ef;
-        margin-bottom:2px;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/welfare-beneficiaries-edit-1.css') }}">
 @endpush
 
 @section('content')
@@ -90,14 +15,14 @@
     </div>
 
     <div class="d-flex gap-2">
-        <a href="{{ route('welfare.beneficiaries.show', $beneficiary) }}" class="ui-btn">
+        @if(auth()->user()?->hasPermission('welfare.view'))<a href="{{ route('welfare.beneficiaries.show', $beneficiary) }}" class="ui-btn">
             <i class="bi bi-eye"></i>
             View
-        </a>
+        </a>@endif
 
-        <a href="{{ route('welfare.beneficiaries.index') }}" class="ui-btn">
+        @if(auth()->user()?->hasPermission('welfare.view'))<a href="{{ route('welfare.beneficiaries.index') }}" class="ui-btn">
             Back
-        </a>
+        </a>@endif
     </div>
 </div>
 
@@ -128,9 +53,9 @@
             @include('welfare.beneficiaries.partials.form', ['beneficiary' => $beneficiary])
 
             <div class="d-flex justify-content-end gap-2 mt-4 pt-4 border-top">
-                <a href="{{ route('welfare.beneficiaries.show', $beneficiary) }}" class="ui-btn">
+                @if(auth()->user()?->hasPermission('welfare.view'))<a href="{{ route('welfare.beneficiaries.show', $beneficiary) }}" class="ui-btn">
                     Cancel
-                </a>
+                </a>@endif
 
                 <button type="submit" class="ui-btn primary">
                     <i class="bi bi-check2"></i>

@@ -1,0 +1,92 @@
+.audit-page {
+        max-width: 1400px;
+        margin: auto
+    }
+
+    .audit-page h1 {
+        font-size: 26px
+    }
+
+    .audit-card {
+        background: white;
+        border: 1px solid #dce6e0;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 16px 0
+    }
+
+    .audit-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px
+    }
+
+    .audit-page label {
+        display: block;
+        font-size: 13px;
+        color: #43594f
+    }
+
+    .audit-page input,
+    .audit-page select {
+        display: block;
+        width: 100%;
+        padding: 9px;
+        border: 1px solid #dce6e0;
+        border-radius: 7px;
+        margin: 5px 0
+    }
+
+    .audit-btn {
+        display: inline-block;
+        background: #173f35;
+        color: white;
+        border: 0;
+        border-radius: 7px;
+        padding: 10px 16px;
+        text-decoration: none;
+        margin: 8px 8px 0 0
+    }
+
+    .audit-table {
+        overflow: auto
+    }
+
+    .audit-page table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px
+    }
+
+    .audit-page td,
+    .audit-page th {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e1e8e4;
+        vertical-align: top
+    }
+
+    .audit-page small {
+        display: block;
+        color: #64786e
+    }
+
+    .audit-page pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 12px
+    }
+
+    .audit-tag {
+        background: #edf5f1;
+        border-radius: 5px;
+        padding: 4px 7px
+    }
+
+    .audit-muted {
+        color: #64786e
+    }
+
+    .audit-error {
+        color: #a33838
+    }

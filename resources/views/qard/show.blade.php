@@ -8,10 +8,13 @@ $can = fn($slug) => auth()->user()->hasPermission('qard.'.$slug);
 @endphp
 <div class="qard-page"><h1>{{ $loan->number }} · {{ $loan->beneficiary?->full_name }}</h1>
 <p class="qmuted">Created by {{ $loan->creator?->name }} · Revision {{ $loan->revision }} · <span class="qbadge">{{ str($loan->status)->headline() }}</span></p>
-<div class="qactions"><a class="qbtn secondary" href="{{ route('qard.index') }}">Back to Qard</a>
-@if(in_array($loan->status,['draft','rejected']) && $can('manage'))<a class="qbtn" href="{{ route('qard.edit',$loan) }}">Edit draft</a>@endif
-@if(in_array($loan->status,['approved','signed','active','repaid']))<a class="qbtn secondary" href="{{ route('qard.agreement',$loan) }}">Print agreement</a>@endif
-@if($loan->status==='active' && $can('repay'))<a class="qbtn" href="{{ route('qard.repayment',$loan) }}">Record repayment</a>@endif</div>
+<div class="qactions">@if(auth()->user()?->hasPermission('qard.view'))<a class="qbtn secondary" href="{{ route('qard.index') }}">Back to Qard</a>@endif
+@if(in_array($loan->status,['draft','rejected']) && $can('manage'))@if(auth()->user()?->hasPermission('qard.view') && auth()->user()?->hasPermission('qard.manage'))<a class="qbtn" href="{{ route('qard.edit',$loan) }}">Edit draft</a>@endif
+@endif
+@if(in_array($loan->status,['approved','signed','active','repaid']))@if(auth()->user()?->hasPermission('qard.view'))<a class="qbtn secondary" href="{{ route('qard.agreement',$loan) }}">Print agreement</a>@endif
+@endif
+@if($loan->status==='active' && $can('repay'))@if(auth()->user()?->hasPermission('qard.view') && auth()->user()?->hasPermission('qard.repay'))<a class="qbtn" href="{{ route('qard.repayment',$loan) }}">Record repayment</a>@endif
+@endif</div>
 @include('qard.partials.feedback')
 @if($loan->reminder && !$loan->reminder->resolved_at)<div class="qalert">{{ $loan->reminder->message }}</div>@endif
 <div class="qcard"><div class="qgrid">
@@ -55,7 +58,7 @@ $can = fn($slug) => auth()->user()->hasPermission('qard.'.$slug);
 @forelse($loan->movements as $movement)<tr><td>{{ ucfirst($movement->kind) }} #{{ $movement->id }}<small>{{ $movement->payment_date->format('d M Y') }}</small></td><td>PKR {{ $money($movement->amount) }}</td><td>{{ str($movement->payment_method)->headline() }}<small>{{ $movement->reference }} {{ $movement->receipt }}</small></td><td>{{ $movement->transaction?->transaction_number ?? 'Missing — contact finance administrator' }}</td><td>{{ ucfirst($movement->status) }}
 @if($movement->status==='posted' && $can('void'))<details><summary>Void movement</summary><form method="post" action="{{ route('qard.void',[$loan,$movement]) }}">@csrf<label for="void_reason_{{ $movement->id }}">Correction reason</label><input id="void_reason_{{ $movement->id }}" name="reason" required maxlength="2000"><div class="qactions"><button class="qbtn danger">Void this movement</button></div></form></details>
 @else<small>{{ $movement->void_reason }}</small>@endif</td></tr>@empty<tr><td colspan="5">No money has moved.</td></tr>@endforelse</tbody></table></div>
-<div class="qcard"><h2>Private documents</h2>@forelse($loan->documents as $document)<p><a href="{{ route('qard.documents.show',[$loan,$document]) }}">{{ ucfirst($document->kind) }} · revision {{ $document->revision }} · {{ $document->original_name }}</a></p>@empty<p>No evidence uploaded yet.</p>@endforelse</div>
+<div class="qcard"><h2>Private documents</h2>@forelse($loan->documents as $document)<p>@if(auth()->user()?->hasPermission('qard.view'))<a href="{{ route('qard.documents.show',[$loan,$document]) }}">{{ ucfirst($document->kind) }} · revision {{ $document->revision }} · {{ $document->original_name }}</a>@endif</p>@empty<p>No evidence uploaded yet.</p>@endforelse</div>
 <div class="qcard"><h2>Reviews and decisions</h2>@forelse($loan->reviews as $review)<p><strong>{{ str($review->stage)->headline() }}: {{ ucfirst($review->decision) }}</strong> · revision {{ $review->revision }} · {{ $review->actor?->name }} · {{ $review->created_at->timezone('Asia/Karachi')->format('d M Y H:i') }}</p><p class="qnote">{{ $review->notes }}</p>@empty<p>No reviews yet.</p>@endforelse</div>
 <div class="qcard"><h2>Borrower follow-ups</h2>@foreach($loan->followups as $followup)<p class="qnote">{{ $followup->notes }}</p><p class="qmuted">{{ $followup->actor?->name }} · {{ $followup->created_at->timezone('Asia/Karachi')->format('d M Y H:i') }} · Next: {{ $followup->next_followup_date?->format('d M Y') ?? 'None scheduled' }}</p>@endforeach
 @if(in_array($loan->status,['active','repaid']) && $can('followups'))<form method="post" action="{{ route('qard.followup',$loan) }}">@csrf<label for="followup_notes">Contact notes</label><textarea id="followup_notes" name="notes" required maxlength="5000"></textarea><label for="next_followup_date">Next follow-up date (optional)</label><input id="next_followup_date" name="next_followup_date" type="date" min="{{ now('Asia/Karachi')->toDateString() }}"><div class="qactions"><button class="qbtn">Save follow-up</button></div></form>@endif</div>
