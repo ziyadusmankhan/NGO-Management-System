@@ -72,7 +72,7 @@ class BusinessWorkflowService
             foreach ($files as $kind => $file) {
                 if ($file) {
                     app(UploadValidator::class)->inspect($file);
-                    $path = $file->store('business', 'private');
+                    $path = $file->storeAs('business', Str::uuid().'.'.strtolower($file->getClientOriginalExtension()), 'private');
                     if (! $path) {
                         throw new \RuntimeException('The private evidence file could not be stored.');
                     }

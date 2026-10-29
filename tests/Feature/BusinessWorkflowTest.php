@@ -75,6 +75,19 @@ class BusinessWorkflowTest extends TestCase
         $this->actingAs($payer)->postJson(route('business.applications.repay', $a), $this->businessPayment($a, 'repayment', '1.00'))->assertUnprocessable();
     }
 
+    public function test_records_report_counts_actual_business_starts(): void
+    {
+        $officer = $this->businessActor();
+        $application = $this->fundedBusiness($officer);
+        $monitor = app(\App\Domain\Business\Services\BusinessMonitoringService::class);
+        $monitor->record($application, 'start', $this->versioned($application, ['started_on' => now()->toDateString(), 'evidence' => $this->evidence()]), $officer);
+        $builder = app(\App\Domain\Reports\Services\ReportBuilder::class);
+        $this->assertSame(1, collect($builder->build('business', [])['metrics'])->firstWhere('label', 'Businesses started')['value']);
+        $monitor->record($application, 'monitor', $this->versioned($application, ['review_date' => now()->toDateString(), 'condition' => 'paused', 'findings' => 'Temporarily paused', 'actions' => 'Arrange a follow-up visit', 'final_report' => false, 'next_review_date' => now()->addWeek()->toDateString()]), $officer);
+        $this->draftBusiness($officer);
+        $this->assertSame(1, collect($builder->build('business', [])['metrics'])->firstWhere('label', 'Businesses started')['value']);
+    }
+
     public function test_creator_and_previous_decision_maker_cannot_approve_or_pay(): void
     {
         $actor = $this->businessActor();

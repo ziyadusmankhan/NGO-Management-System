@@ -104,7 +104,7 @@ class ReportBuilder
         $cases = $this->dates(BusinessApplication::withTrashed(), 'created_at', $f);
         $moves = $this->dates(BusinessMovement::where('status', 'posted'), 'payment_date', $f);
 
-        return ['metrics' => [$this->metric('Cases created', (clone $cases)->count()), $this->metric('Businesses started', (clone $cases)->where('operating_status', 'started')->count()), $this->metric('Funding released', Money::sum((clone $moves)->where('kind', 'disbursement')), 'money'), $this->metric('Principal recovered', Money::sum((clone $moves)->where('kind', 'repayment')), 'money')], 'rows' => $this->statuses(clone $cases)];
+        return ['metrics' => [$this->metric('Cases created', (clone $cases)->count()), $this->metric('Businesses started', (clone $cases)->whereNotNull('started_on')->count()), $this->metric('Funding released', Money::sum((clone $moves)->where('kind', 'disbursement')), 'money'), $this->metric('Principal recovered', Money::sum((clone $moves)->where('kind', 'repayment')), 'money')], 'rows' => $this->statuses(clone $cases)];
     }
 
     private function projects(array $f): array

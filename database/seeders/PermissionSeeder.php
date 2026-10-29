@@ -93,6 +93,10 @@ class PermissionSeeder extends Seeder
             ],
 
             // Welfare
+            ['name' => 'Verify Beneficiaries', 'slug' => 'welfare.beneficiaries.verify', 'module' => 'welfare'],
+            ['name' => 'Approve Beneficiaries', 'slug' => 'welfare.beneficiaries.approve', 'module' => 'welfare'],
+            ['name' => 'View Welfare Assistance', 'slug' => 'welfare.assistance.view', 'module' => 'welfare'],
+            ['name' => 'Approve Welfare Assistance', 'slug' => 'welfare.assistance.approve', 'module' => 'welfare'],
             [
                 'name' => 'View Welfare',
                 'slug' => 'welfare.view',

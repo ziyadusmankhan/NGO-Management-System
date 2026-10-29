@@ -11,6 +11,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
+            WelfareApplicationWorkflowPermissionsSeeder::class,
+            WelfareApplicationAgreementPermissionsSeeder::class,
             ImplementationCommitteeRoleSeeder::class,
             WelfareReviewRoleSeeder::class,
             QardRoleSeeder::class,

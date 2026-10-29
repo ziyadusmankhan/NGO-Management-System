@@ -16,7 +16,7 @@ Route::get('/dashboard', [
 
 Route::get('/settings', function () {
     return view('settings.index');
-})->name('settings.index');
+})->middleware('auth')->name('settings.index');
 
 use App\Http\Controllers\Welfare\BeneficiaryController;
 use App\Http\Controllers\Welfare\BeneficiaryVerificationController;
@@ -348,7 +348,11 @@ Route::resource(
     'edit',
     'update',
     'destroy',
-]);
+])->middleware('auth')
+    ->middlewareFor(['index', 'show'], 'permission:members.view')
+    ->middlewareFor(['create', 'store'], 'permission:members.create')
+    ->middlewareFor(['edit', 'update'], 'permission:members.update')
+    ->middlewareFor('destroy', 'permission:members.delete');
 
 use App\Http\Controllers\Committees\CommitteeController;
 
@@ -362,7 +366,10 @@ Route::resource(
     'show',
     'edit',
     'update',
-]);
+])->middleware('auth')
+    ->middlewareFor(['index', 'show'], 'permission:committees.view')
+    ->middlewareFor(['create', 'store'], 'permission:committees.create')
+    ->middlewareFor(['edit', 'update'], 'permission:committees.update');
 
 Route::delete('/committees/{committee}', [CommitteeController::class, 'destroy'])
     ->middleware(['auth', 'permission:committees.delete'])
@@ -371,17 +378,17 @@ Route::delete('/committees/{committee}', [CommitteeController::class, 'destroy']
 Route::post(
     '/committees/{committee}/members',
     [CommitteeController::class, 'assignMember']
-)->name('committees.members.assign');
+)->middleware(['auth', 'permission:committees.members.manage'])->name('committees.members.assign');
 
 Route::delete(
     '/committees/{committee}/members/{member}',
     [CommitteeController::class, 'removeMember']
-)->name('committees.members.remove');
+)->middleware(['auth', 'permission:committees.members.manage'])->name('committees.members.remove');
 
 Route::put(
     '/committees/{committee}/members/{member}',
     [CommitteeController::class, 'updateMember']
-)->name('committees.members.update');
+)->middleware(['auth', 'permission:committees.members.manage'])->name('committees.members.update');
 
 use App\Http\Controllers\Users\UserController;
 
@@ -436,7 +443,7 @@ Route::middleware([
 
 use App\Http\Controllers\Users\RoleController;
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'permission:roles.manage'])->group(function () {
 
     // Registered before '/users/{user}' below so that the
     // wildcard route does not swallow it (same class of bug
