@@ -16,9 +16,8 @@ class UserController
 {
     public function index(): View
     {
-        $users = User::query()
-            ->with(['roles', 'member.committees'])
-            ->latest('id')
+        $directory = app(\App\Domain\Organization\Services\DirectoryQuery::class);
+        $users = $directory->query('users', $directory->filters(request(), 'users'))
             ->paginate(15)
             ->withQueryString();
 

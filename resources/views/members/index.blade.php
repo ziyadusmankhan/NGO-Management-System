@@ -8,6 +8,7 @@
 
 
 @section('content')
+@if($errors->any()) @include('shared.action-feedback') @endif
 
 <div class="members-header">
 
@@ -23,14 +24,7 @@
 
     <div class="header-actions">
 
-        <button
-            type="button"
-            class="btn-secondary-custom"
-            onclick="alert('Member export will be connected later.')"
-        >
-            <i class="bi bi-download"></i>
-            Export
-        </button>
+        @include('shared.directory-export', ['exportRoute'=>'members.export'])
 
         @if(auth()->user()?->hasPermission('members.create'))<a
             href="{{ route('members.create') }}"

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Members;
 use App\Domain\Audit\Services\AuditedMemberships;
 use App\Domain\Committees\Models\Committee;
 use App\Domain\Members\Models\Member;
-use App\Domain\Security\Services\FieldEncryption;
+use App\Domain\Organization\Services\DirectoryQuery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Members\StoreMemberRequest;
 use Illuminate\Http\RedirectResponse;
@@ -16,42 +16,8 @@ class MemberController extends Controller
 {
     public function index(): View
     {
-        $query = Member::query()
-            ->with([
-                'committees' => function ($query) {
-                    $query->wherePivot('status', 'active');
-                },
-            ]);
-
-        if (request()->filled('search')) {
-            $search = request('search');
-            $nameTokens = preg_split('/\s+/u', trim($search), -1, PREG_SPLIT_NO_EMPTY);
-
-            $query->where(function ($q) use ($search, $nameTokens) {
-                $q->where('member_number', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('phone_lookup', app(FieldEncryption::class)->lookup('phone', $search) ?? 'no-match')
-                    ->orWhere('cnic_lookup', app(FieldEncryption::class)->lookup('cnic', $search) ?? 'no-match');
-                if (count($nameTokens) > 1) {
-                    $q->orWhere(function ($names) use ($nameTokens) {
-                        foreach ($nameTokens as $token) {
-                            $names->where(fn ($part) => $part->where('first_name', 'like', '%'.$token.'%')->orWhere('last_name', 'like', '%'.$token.'%'));
-                        }
-                    });
-                }
-            });
-        }
-
-        if (request()->filled('status')) {
-            $query->where(
-                'status',
-                request('status')
-            );
-        }
-
-        $members = $query
-            ->latest('id')
+        $directory = app(DirectoryQuery::class);
+        $members = $directory->query('members', $directory->filters(request(), 'members'))
             ->paginate(15)
             ->withQueryString();
 
