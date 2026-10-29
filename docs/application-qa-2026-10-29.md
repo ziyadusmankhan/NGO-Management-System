@@ -1,6 +1,8 @@
 # Application QA — 29 October 2026
 
-## Result
+The findings below describe the original review before repairs. The issues have since been fixed and realistic-data testing completed; see [the follow-up results and testing guide](realistic-qa-testing.md).
+
+## Original review result (before fixes)
 
 The existing automated suites passed. Additional negative authorization checks failed, and browser data entry identified two Member-module defects. There are four confirmed issues; the application is not ready to be described as defect-free. This was a test/report task; the product defects below have not been changed.
 
