@@ -41,6 +41,14 @@ Manual acceptance: compare two different roles; open every sidebar module; exerc
 
 ## Limits and follow-up
 
+### Theme and fund graph update
+
+The header theme button beside Notifications switches between light and dark, saves the browser preference and synchronizes other tabs. The preference also applies to login and Account Security; print output stays light. Metric cards have a soft shimmer, buttons and icons have short hover transitions, text links animate their underline, and the account menu uses a keyboard-accessible details dropdown. Reduced-motion preferences disable movement. Effects were inspired by the requested Prismic CSS hover examples (https://prismic.io/blog/css-hover-effects), adapted to the existing forest-green palette.
+
+Fund Overview now uses a dependency-free SVG bar graph of current ledger balances with a zero baseline, negative balance support, fund links and exact PKR values in its legend. Geometry alone uses fractional arithmetic; displayed currency still uses the existing Money helper. This graph does not represent commitments or time trends.
+
+Verification: 18 focused tests / 196 assertions and 2 render tests / 189 assertions passed. The dashboard passed all five viewport sizes with no overflow, missing labels, tiny text or JavaScript errors. Browser checks verified theme persistence, switching back to light, account dropdown, graph presence and mobile drawer behavior.
+
 Verification receipt (29 October 2026): all 135 Blade templates parse. The initial broad browser pass exercised 63 synthetic pages at five widths (315 checks). Follow-up checks corrected missing accessible names, small text, the Members script error and project overflow; the final project run passed all five widths with no overflow, unlabeled controls, small text or JavaScript errors. Mobile drawer open/Escape-close checks passed. The focused final PHP run passed 16 tests with 340 assertions after fixing the empty-fund dashboard calculation. The final full application suite passed **373 tests with 3,074 assertions**, in 221.54 seconds.
 
 Automated render/viewport coverage does not replace manually checking every conditional approval/payment form with populated records. Those templates inherit the shared styles and remain covered by the existing backend tests where available. No claim of complete WCAG certification or every screen-reader/browser combination is made.

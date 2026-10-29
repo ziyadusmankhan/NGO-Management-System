@@ -15,10 +15,7 @@
 @can('finance.view')
 <x-ui.panel title="Fund Overview" :href="route('finance.funds.index')" link="View funds">
 <p class="qmuted">Current ledger balances. Commitments are shown separately in each fund.</p>
-@php($maximum = max(1, $fundOverview->map(fn($fund) => max(0,$money::minor($fund['balance'])))->max() ?? 0))
-@forelse($fundOverview as $fund)
-<div class="ui-list-row"><div style="flex:1;min-width:0">@if(auth()->user()?->hasPermission('finance.view'))<a href="{{ route('finance.funds.show',$fund['id']) }}"><strong>{{ $fund['name'] }}</strong></a>@endif<small>{{ str($fund['type'])->headline() }}</small><div class="ui-balance-bar" aria-hidden="true"><span style="width:{{ max(0,$money::minor($fund['balance']))/$maximum*100 }}%"></span></div></div><strong class="ui-money">PKR {{ $money::format($fund['balance']) }}</strong></div>
-@empty<x-ui.empty message="No active funds found."/>@endforelse
+<x-ui.fund-chart :funds="$fundOverview"/>
 </x-ui.panel>
 @endcan
 @can('projects.view')

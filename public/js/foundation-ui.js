@@ -1,6 +1,12 @@
 /* Progressive enhancement only. The server owns permissions, validation and posting. */
 (() => {
  'use strict';
+ const themeToggle=document.getElementById('themeToggle');
+ const syncTheme=()=>{const dark=document.documentElement.dataset.theme==='dark';if(themeToggle){themeToggle.setAttribute('aria-pressed',String(dark));themeToggle.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');themeToggle.title=themeToggle.getAttribute('aria-label');}};
+ themeToggle?.addEventListener('click',()=>{const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;try{localStorage.setItem('foundation-theme',theme);}catch(_){}syncTheme();});
+ addEventListener('storage',event=>{if(event.key==='foundation-theme'){document.documentElement.dataset.theme=event.newValue==='dark'?'dark':'light';syncTheme();}});syncTheme();
+ document.addEventListener('click',event=>document.querySelectorAll('.account-dropdown[open]').forEach(menu=>{if(!menu.contains(event.target))menu.open=false;}));
+ document.addEventListener('keydown',event=>{if(event.key==='Escape')document.querySelectorAll('.account-dropdown[open]').forEach(menu=>{menu.open=false;menu.querySelector('summary').focus();});});
  const sidebar = document.getElementById('sidebar');
  const toggle = document.getElementById('mobileMenuBtn');
  const backdrop = document.querySelector('.sidebar-backdrop');

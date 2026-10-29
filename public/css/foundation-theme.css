@@ -1,0 +1,43 @@
+:root[data-theme=dark]{color-scheme:dark;--primary:#91d4b6;--primary-light:#abdcc7;--primary-soft:#203c32;--bg:#101915;--surface:#18251f;--text:#e6efe9;--muted:#adbbb2;--border:#34473c;--shadow:0 1px 3px #0002}
+[data-theme=dark] body{background:var(--bg);color:var(--text)}
+[data-theme=dark] :is(.sidebar,.topbar,.ui-metric,.dashboard-card,.sidebar-logout,.topbar-action,.mobile-menu-btn,.account-dropdown-menu){background:var(--surface);color:var(--text);border-color:var(--border)}
+[data-theme=dark] :is(.sidebar-user,.global-search input,.nav-item:hover){background:#203128;color:var(--text)}
+[data-theme=dark] :is(.nav-item,.nav-section,.nav-group>summary,.profile-info span,.sidebar-user-info span,.sidebar-brand-text span){color:var(--muted)}
+[data-theme=dark] .nav-item.active{background:var(--primary-soft);color:var(--primary)}
+[data-theme=dark] .page-content :is(.card,.panel,.main-card,.side-card,.summary-card,.stat-card,.qcard,.audit-card,.section-card,.form-card,.table-card,.content-card,.users-card,.members-card,.fund-card,.expense-card,.donation-card,.card-header-custom,.card-head,.panel-header,.section-header,.card-header){background:var(--surface);color:var(--text);border-color:var(--border)}
+[data-theme=dark] .page-content :is(input:not([type=checkbox]):not([type=radio]),select,textarea){background:#132019;color:var(--text);border-color:#60796a}
+[data-theme=dark] .page-content :is(input,select,textarea):is(:disabled,[readonly]){background:#26372e;color:var(--muted)}
+[data-theme=dark] .page-content :is(h1,h2,h3,h4,label,.form-label,.field-label,table){color:var(--text)}
+[data-theme=dark] .page-content th{background:#203128;color:#c4d4ca;border-color:var(--border)}
+[data-theme=dark] .page-content td{border-color:var(--border)}
+[data-theme=dark] .page-content :is(.meta,.hint,.help-text,.form-text,.summary-meta,.transaction-sub,.info-row,.label,.role-info span,.permission-description,.member-meta,.user-meta){color:var(--muted)}
+[data-theme=dark] .page-content :is(.info-item,.financial-box,.role-item.active,.stat-icon,.input-group-text,.settings-nav,.settings-nav-item.active){background:#203128!important;color:#d5e8dd!important;border-color:var(--border)}
+[data-theme=dark] .page-content tbody tr:hover{background:#203128}
+[data-theme=dark] .page-content [style*="background:"]{background-color:var(--surface)!important;color:var(--text)}
+[data-theme=dark] .page-content :is(.btn-primary,.primary-btn,.qbtn,.audit-btn,.btn-primary-custom,.users-btn.primary,.btn-ui.primary){background:#31765b;color:white}
+[data-theme=dark] .page-content :is(.btn-secondary,.secondary-btn,.btn-outline,.btn-light,.qbtn.secondary,.btn-ui,.users-btn,.btn-secondary-custom){background:#22362b;color:#d5e8dd;border-color:#60796a}
+[data-theme=dark] .page-content :is(.btn-danger,.danger-btn,.qbtn.danger){background:#a73542;color:white}
+[data-theme=dark] .page-content :is(.badge,.status-badge,.qbadge,.audit-tag){background:#283a30;color:#d1e0d7;border-color:#4a6354}
+[data-theme=dark] .page-content [data-tone=success]{background:#203f2e!important;color:#a0dfb6!important;border-color:#39634a!important}
+[data-theme=dark] .page-content [data-tone=warning]{background:#44371e!important;color:#f3d18d!important;border-color:#6c5730!important}
+[data-theme=dark] .page-content [data-tone=danger]{background:#48252c!important;color:#ffb7bf!important;border-color:#73414a!important}
+[data-theme=dark] .page-content [data-tone=info]{background:#20394e!important;color:#aaccf0!important;border-color:#3b5d7e!important}
+[data-theme=dark] .page-content :is(.text-danger,.invalid-feedback,.audit-error,.ui-negative){color:#ffb7bf!important}
+[data-theme=dark] .ui-positive{color:#a0dfb6}
+[data-theme=dark] .page-content :is(.alert-success,.qsuccess,.success){background:#203f2e;color:#a0dfb6}
+[data-theme=dark] .page-content :is(.alert-danger,.qerror,.error){background:#48252c;color:#ffb7bf}
+[data-theme=dark] .page-content nav[role=navigation] a{background:var(--surface);color:var(--text)}
+[data-theme=dark] .login-panel,[data-theme=dark] body>main{background:#18251f;color:#e6efe9;border-color:#34473c}
+[data-theme=dark] :is(.login-header p,.login-bottom,.security-note,.form-label){color:#bdcfc3}
+[data-theme=dark] :is(.form-control,body>main input){background:#132019;color:#e6efe9;border-color:#60796a}
+[data-theme=dark] .security-note{background:#203128;border-color:#34473c}
+.theme-toggle .theme-sun{display:none}[data-theme=dark] .theme-toggle .theme-sun{display:inline}[data-theme=dark] .theme-toggle .theme-moon{display:none}
+.account-dropdown{position:relative}.account-dropdown>summary{cursor:pointer;list-style:none}.account-dropdown>summary::-webkit-details-marker{display:none}.account-dropdown-menu{position:absolute;right:0;top:calc(100% + 12px);min-width:210px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px #0002;z-index:950;animation:menu-enter .16s ease-out}.account-dropdown-menu a,.account-dropdown-menu button{display:block;width:100%;padding:10px 12px;text-align:left;color:var(--text);background:none;border:0;border-radius:6px;font-size:13px}.account-dropdown-menu :is(a,button):hover{background:var(--primary-soft);text-decoration:none}
+@keyframes menu-enter{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.fund-graph{overflow-x:auto;max-width:100%;border-radius:8px}.fund-graph svg{display:block;width:100%;min-width:480px;height:260px}.fund-graph text{fill:var(--muted);font:11px var(--font)}.fund-graph .graph-grid{stroke:var(--border);stroke-dasharray:3 4}.fund-graph .graph-bar{fill:#2f7461}.fund-graph .graph-bar-negative{fill:#b43b43}.fund-graph a:hover .graph-bar{fill:#529b7b}.fund-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:16px}.fund-legend a{display:flex;gap:8px;align-items:baseline;font-size:12px}.fund-legend strong{margin-left:auto;font-variant-numeric:tabular-nums}.fund-legend .fund-index{color:var(--muted)}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+ .ui-metric{position:relative;overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s}.ui-metric::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 20%,#8dd8ba20 45%,#d7bf8c25 55%,transparent 80%);transform:translateX(-100%);transition:transform .45s}.ui-metric:hover{transform:translateY(-3px);border-color:#72a58d;box-shadow:0 6px 18px #173f3512}.ui-metric:hover::before{transform:translateX(100%)}
+ :is(.btn,.qbtn,.audit-btn,.btn-ui,.users-btn,.btn-primary-custom,.btn-secondary-custom,.topbar-action){transition:transform .16s,border-radius .2s,box-shadow .2s}.page-content :is(.btn,.qbtn,.audit-btn,.btn-ui,.users-btn):hover{border-radius:13px 7px 13px 7px;transform:translateY(-1px);box-shadow:0 3px 8px #173f351c}.topbar-action:hover i,.nav-item:hover i{transform:translateY(-1px) rotate(-6deg)}.topbar-action i,.nav-item i{transition:transform .18s}.page-content a:not([class]),.view-all{background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-repeat:no-repeat;background-position:0 100%;transition:background-size .18s}.page-content a:not([class]):hover,.view-all:hover{background-size:100% 1px;text-decoration:none}
+}
+@media(prefers-reduced-motion:reduce){.account-dropdown-menu{animation:none}}
+@media print{html[data-theme=dark]{color-scheme:light;--bg:#fff;--surface:#fff;--text:#1d2b26;--muted:#586b62;--border:#dee6e1;--primary:#173f35}[data-theme=dark] .page-content :is(.card,.qcard,.audit-card,th,td){background:white!important;color:#1d2b26!important}.fund-graph{overflow:visible}.fund-graph svg{min-width:0}}

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{{ asset('js/theme-init.js') }}"></script>
 
     <title>
         @yield('title', 'Dashboard') — Foundation Management System
@@ -22,6 +23,7 @@
 
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('css/foundation-ui.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/foundation-theme.css') }}?v=1">
 </head>
 
 <body>
@@ -418,7 +420,8 @@
             </a>
 
 
-            <a href="{{ route('security.index') }}" class="profile-menu" aria-label="Account security for {{ $accountName }}">
+            <button type="button" class="topbar-action theme-toggle" id="themeToggle" aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme"><i class="bi bi-moon theme-moon" aria-hidden="true"></i><i class="bi bi-sun theme-sun" aria-hidden="true"></i></button>
+            <details class="account-dropdown"><summary class="profile-menu" aria-label="Account menu for {{ $accountName }}">
 
                 <div class="profile-avatar">
                     {{ $accountInitials }}
@@ -436,7 +439,7 @@
 
                 </div>
 
-            </a>
+            </summary><div class="account-dropdown-menu"><a href="{{ route('security.index') }}">Account Security</a><form method="post" action="{{ route('logout') }}">@csrf<button type="submit">Log out</button></form></div></details>
 
         </header>
 

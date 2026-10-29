@@ -42,8 +42,25 @@ const { chromium } = require('playwright');
  const drawerOpen=await page.locator('#sidebar').evaluate(e=>e.classList.contains('open')&&!e.inert);
  await page.keyboard.press('Escape');
  const drawerClosed=await page.locator('#sidebar').evaluate(e=>!e.classList.contains('open')&&e.inert);
- const report={results,errors:[...new Set(errors)],drawerOpen,drawerClosed};
+ const themeToggle=page.getByRole('button',{name:'Switch to dark theme'});
+ let themeChecks=null;
+ if(await themeToggle.count()) {
+  await themeToggle.click();
+  await page.reload({waitUntil:'networkidle'});
+  const persisted=await page.locator('html').getAttribute('data-theme')==='dark';
+  const background=await page.locator('body').evaluate(e=>getComputedStyle(e).backgroundColor);
+  await page.screenshot({path:path.join(root,'tmp/ui-dashboard-dark-390.png'),fullPage:true});
+  await page.setViewportSize({width:1440,height:1000});
+  await page.screenshot({path:path.join(root,'tmp/ui-dashboard-dark-1440.png'),fullPage:true});
+  await page.locator('.account-dropdown summary').click();
+  const dropdown=await page.locator('.account-dropdown').getAttribute('open')!==null;
+  await page.keyboard.press('Escape');
+  await page.getByRole('button',{name:'Switch to light theme'}).click();
+  themeChecks={persisted,background,dropdown,returnedToLight:await page.locator('html').getAttribute('data-theme')==='light',fundGraph:await page.locator('.fund-graph svg').count()===1};
+  if(!Object.values(themeChecks).every(Boolean)) throw new Error('Theme interaction check failed');
+ }
+ const report={results,errors:[...new Set(errors)],drawerOpen,drawerClosed,themeChecks};
  fs.writeFileSync(path.join(root,'tmp/ui-browser-results.json'),JSON.stringify(report,null,2));
- console.log(JSON.stringify({pages:results.length/5,checks:results.length,overflows:results.filter(r=>r.overflow),tinyText:results.filter(r=>r.tiny),unlabeled:results.filter(r=>r.unlabeled),errors:report.errors,drawerOpen,drawerClosed},null,2));
+ console.log(JSON.stringify({pages:results.length/5,checks:results.length,overflows:results.filter(r=>r.overflow),tinyText:results.filter(r=>r.tiny),unlabeled:results.filter(r=>r.unlabeled),errors:report.errors,drawerOpen,drawerClosed,themeChecks},null,2));
  await browser.close();
 })().catch(e=>{console.error(e);process.exitCode=1});

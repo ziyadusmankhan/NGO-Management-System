@@ -19,7 +19,7 @@
     >
 
     <link rel="stylesheet" href="{{ asset('css/views/auth-login-1.css') }}">
-<link rel="stylesheet" href="{{ asset('css/foundation-auth.css') }}"></head>
+<link rel="stylesheet" href="{{ asset('css/foundation-auth.css') }}"><script src="{{ asset('js/theme-init.js') }}"></script><link rel="stylesheet" href="{{ asset('css/foundation-theme.css') }}"></head>
 
 <body>
 
