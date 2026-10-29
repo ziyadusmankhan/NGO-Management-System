@@ -1,0 +1,46 @@
+body {
+            font: 12px Arial, sans-serif;
+            color:var(--legacy-text-183f34, #183f34);
+            margin: 25px
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 18px
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border:1px solid var(--legacy-border-dce4df, #dce4df);
+            text-align: left;
+            vertical-align: top
+        }
+
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            font-size: 10px
+        }
+
+        article {
+            border-bottom:2px solid var(--legacy-border-184435, #184435);
+            padding: 12px 0;
+            break-inside: avoid
+        }
+
+        small {
+            color:var(--legacy-text-586d63, #586d63)
+        }
+
+        @media print {
+            button {
+                display: none
+            }
+
+            @page {
+                size: A4 landscape;
+                margin: 12mm
+            }
+        }

@@ -3,8 +3,8 @@
 @push('styles')@include('operations.procurement.style')@endpush
 @section('content')
     <div class="qard-page procurement-page">
-        <h1>Suppliers & procurement rules</h1>@include('qard.partials.feedback')<a
-            href="{{ route('operations.procurement.index') }}">Back to Procurement</a>
+        <h1>Suppliers & procurement rules</h1>@include('qard.partials.feedback')@if(auth()->user()?->hasPermission('procurement.view'))<a
+            href="{{ route('operations.procurement.index') }}">Back to Procurement</a>@endif
         @if(auth()->user()->hasPermission('procurement.policy'))
             <form class="qcard" method="post" action="{{ route('operations.procurement.policy') }}">@csrf<h2>Quotation policy
                 </h2><label>Required distinct suppliers (1–10)<input type="number" name="quote_count" min="1" max="10"

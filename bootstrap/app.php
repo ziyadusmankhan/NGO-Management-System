@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CaptureAuditRequest;
 use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\EnforceSessionSecurity;
 use App\Http\Middleware\EnsureActiveUser;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -35,9 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         // Trust VS Code tunnel proxy headers for HTTPS & redirects
-        $middleware->trustProxies(at: '*');
+        $middleware->trustProxies(at: array_values(array_filter(array_map('trim', explode(',', (string) env('TRUSTED_PROXIES', ''))), fn ($proxy) => $proxy !== '*')));
 
         $middleware->appendToGroup('web', CaptureAuditRequest::class);
+        $middleware->appendToGroup('web', EnforceSessionSecurity::class);
 
         $middleware->appendToGroup(
             'web',

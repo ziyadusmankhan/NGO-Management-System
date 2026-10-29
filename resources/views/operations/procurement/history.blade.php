@@ -45,7 +45,7 @@
 </div>
 <details class="qcard">
     <summary>Private evidence</summary>@foreach($purchase->documents as $doc)
-        <p><a href="{{ route('operations.procurement.documents', [$purchase, $doc]) }}">{{ $doc->original_name }}</a> ·
+        <p>@if(auth()->user()?->hasPermission('procurement.view'))<a href="{{ route('operations.procurement.documents', [$purchase, $doc]) }}">{{ $doc->original_name }}</a>@endif ·
             {{ str($doc->kind)->headline() }} · Revision {{ $doc->revision }} · Record {{ $doc->record_id ?? '—' }}</p>
     @endforeach
 </details>

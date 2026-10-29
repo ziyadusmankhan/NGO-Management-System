@@ -2,22 +2,35 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Domain\Finance\Support\Money;
+use App\Domain\Audit\Models\AuditEvent;
+use App\Domain\Audit\Services\AuditQuery;
+use App\Domain\Business\Services\BusinessReportService;
+use App\Domain\Committees\Models\Committee;
 use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
-use App\Domain\Users\Models\User;
 use App\Domain\Members\Models\Member;
-use App\Domain\Committees\Models\Committee;
+use App\Domain\Operations\Models\Task;
+use App\Domain\Projects\Models\Project;
+use App\Domain\Qard\Models\QardLoan;
+use App\Domain\Qard\Models\QardMovement;
+use App\Domain\Qard\Models\QardReminder;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistancePayment;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistanceReminder;
+use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(
-        FundBalanceService $balanceService
+        FundBalanceService $balanceService,
+        AuditQuery $auditQuery
     ): View {
         /*
          * ==========================================
@@ -32,7 +45,6 @@ class DashboardController extends Controller
             ->count();
 
         $totalCommittees = Committee::query()->count();
-
 
         /*
          * ==========================================
@@ -52,7 +64,6 @@ class DashboardController extends Controller
             ->where('direction', 'debit')
             ->where('status', 'posted');
 
-
         /*
          * Donations this month
          */
@@ -62,7 +73,6 @@ class DashboardController extends Controller
                 now()->startOfMonth()->toDateString(),
                 now()->endOfMonth()->toDateString(),
             ]));
-
 
         /*
          * Donation count this month
@@ -74,7 +84,6 @@ class DashboardController extends Controller
                 now()->endOfMonth()->toDateString(),
             ])
             ->count();
-
 
         /*
          * Overall fund balances
@@ -92,9 +101,7 @@ class DashboardController extends Controller
             }
         );
 
-
         $totalFundBalance = Money::total($fundBalances);
-
 
         /*
          * Restricted / unrestricted fund balances
@@ -118,7 +125,6 @@ class DashboardController extends Controller
             }
         }
 
-
         /*
          * Total posted expenses
          */
@@ -127,7 +133,6 @@ class DashboardController extends Controller
 
         $totalExpenses = Money::sum((clone $postedDebits)
             ->where('type', 'expense'));
-
 
         /*
          * ==========================================
@@ -146,7 +151,6 @@ class DashboardController extends Controller
             }
         );
 
-
         /*
          * ==========================================
          * PROJECTS
@@ -159,7 +163,7 @@ class DashboardController extends Controller
 
         $projectStatusCounts = [];
         if (auth()->user()->hasPermission('projects.view')) {
-            $projectStatusCounts = \App\Domain\Projects\Models\Project::withTrashed()->selectRaw('status, COUNT(*) as aggregate')->groupBy('status')->pluck('aggregate','status')->all();
+            $projectStatusCounts = Project::withTrashed()->selectRaw('status, COUNT(*) as aggregate')->groupBy('status')->pluck('aggregate', 'status')->all();
         }
         $activeProjects = $projectStatusCounts['in_progress'] ?? 0;
 
@@ -180,7 +184,6 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-
         /*
          * ==========================================
          * PENDING EXPENSES
@@ -190,7 +193,6 @@ class DashboardController extends Controller
         $pendingExpenses = Expense::query()
             ->where('status', 'pending')
             ->count();
-
 
         /*
          * ==========================================
@@ -202,7 +204,6 @@ class DashboardController extends Controller
             ->where('status', 'pending')
             ->count();
 
-
         /*
          * ==========================================
          * VIEW
@@ -210,7 +211,44 @@ class DashboardController extends Controller
          */
 
         $businessSummary = auth()->user()->hasPermission('business.view')
-            ? app(\App\Domain\Business\Services\BusinessReportService::class)->report([])['totals'] : null;
+            ? app(BusinessReportService::class)->report([])['totals'] : null;
+
+        $upcomingTasks = collect();
+        if (auth()->user()->hasPermission('tasks.view') && Schema::hasTable('operation_tasks')) {
+            $upcomingTasks = Task::with('assignee')
+                ->whereNotIn('status', ['completed', 'cancelled'])
+                ->whereDate('due_on', '<=', today('Asia/Karachi')->addDays(14))
+                ->orderBy('due_on')->orderByRaw("CASE priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 ELSE 3 END")
+                ->limit(7)->get();
+        }
+
+        $welfareSummary = null;
+        if (auth()->user()->hasPermission('welfare.assistance.view')) {
+            $welfareSummary = [
+                'open' => WelfareAssistance::whereNotIn('status', ['closed', 'cancelled', 'rejected'])->count(),
+                'review_due' => WelfareAssistanceReminder::whereNull('resolved_at')->count(),
+                'paid' => Money::sum(WelfareAssistancePayment::where('status', 'posted')),
+                'students' => Beneficiary::where('category', 'student')->count(),
+            ];
+        }
+
+        $qardSummary = null;
+        if (auth()->user()->hasPermission('qard.view')) {
+            $disbursed = Money::sum(QardMovement::where('status', 'posted')->where('kind', 'disbursement'));
+            $repaid = Money::sum(QardMovement::where('status', 'posted')->where('kind', 'repayment'));
+            $qardSummary = [
+                'active' => QardLoan::where('status', 'active')->count(),
+                'outstanding' => Money::decimal(max(0, Money::minor($disbursed) - Money::minor($repaid))),
+                'followups' => QardReminder::whereNull('resolved_at')->count(),
+            ];
+        }
+
+        $recentActivity = $auditQuery->ordered(AuditEvent::where('historical', false)->where('outcome', 'success'))
+            ->limit(80)->get()->filter(fn ($event) => $auditQuery->visibleTo($event, auth()->user()))->take(8)
+            ->map(fn ($event) => [
+                'event' => $event,
+                'url' => $auditQuery->sourceLink($event, auth()->user()),
+            ])->values();
 
         return view(
             'dashboard.index',
@@ -231,7 +269,8 @@ class DashboardController extends Controller
                 'projectStatusCounts',
                 'recentTransactions',
                 'pendingExpenses',
-                'pendingDonations'
+                'pendingDonations',
+                'upcomingTasks', 'welfareSummary', 'qardSummary', 'recentActivity'
             )
         );
     }

@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             ProjectRoleSeeder::class,
             ProcurementRoleSeeder::class,
             AuditRoleSeeder::class,
+            DocumentSecurityRoleSeeder::class,
+            OperationsReportingRoleSeeder::class,
         ]);
     }
 }

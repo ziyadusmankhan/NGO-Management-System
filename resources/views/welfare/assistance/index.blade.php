@@ -3,185 +3,7 @@
 @section('title', 'Welfare Assistance')
 
 @push('styles')
-<style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:22px;
-    }
-
-    .page-header h1 {
-        margin:0;
-        font-size:25px;
-        font-weight:700;
-    }
-
-    .page-header p {
-        margin:6px 0 0;
-        color:var(--muted);
-    }
-
-    .ui-btn {
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        height:40px;
-        padding:0 14px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        background:#fff;
-        color:#596760;
-        text-decoration:none;
-        font-weight:650;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .stats {
-        display:grid;
-        grid-template-columns:repeat(4,minmax(0,1fr));
-        gap:15px;
-        margin-bottom:18px;
-    }
-
-    .stat {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        padding:18px;
-    }
-
-    .stat-label {
-        color:var(--muted);
-        font-size:14px;
-    }
-
-    .stat-value {
-        margin-top:7px;
-        font-size:26px;
-        font-weight:700;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-        margin-bottom:18px;
-    }
-
-    .toolbar {
-        padding:17px 18px;
-        border-bottom:1px solid var(--border);
-    }
-
-    .filters {
-        display:grid;
-        grid-template-columns:2fr 1fr 1fr 1fr auto;
-        gap:10px;
-    }
-
-    .table th {
-        font-size:12px;
-        text-transform:uppercase;
-        letter-spacing:.4px;
-        color:#718078;
-        white-space:nowrap;
-    }
-
-    .table td {
-        vertical-align:middle;
-    }
-
-    .assistance-number {
-        font-weight:700;
-    }
-
-    .sub {
-        color:var(--muted);
-        font-size:12px;
-        margin-top:2px;
-    }
-
-    .badge-soft {
-        display:inline-flex;
-        padding:5px 9px;
-        border-radius:999px;
-        font-size:12px;
-        font-weight:650;
-    }
-
-    .pending {
-        background:#fff7df;
-        color:#87671d;
-    }
-
-    .approved {
-        background:#eaf6ef;
-        color:#28704a;
-    }
-
-    .rejected {
-        background:#fbeceb;
-        color:#9a4037;
-    }
-
-    .neutral {
-        background:#eef1ef;
-        color:#68736e;
-    }
-
-    .action {
-        width:35px;
-        height:35px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        border:1px solid var(--border);
-        border-radius:8px;
-        background:#fff;
-        color:#5d6963;
-        text-decoration:none;
-    }
-
-    .empty {
-        text-align:center;
-        padding:55px 20px;
-        color:var(--muted);
-    }
-
-    @media(max-width:1100px) {
-        .stats {
-            grid-template-columns:repeat(2,1fr);
-        }
-
-        .filters {
-            grid-template-columns:1fr 1fr;
-        }
-    }
-
-    @media(max-width:700px) {
-        .page-header {
-            flex-direction:column;
-        }
-
-        .stats {
-            grid-template-columns:1fr;
-        }
-
-        .filters {
-            grid-template-columns:1fr;
-        }
-    }
-    .badge-soft.closed { background:#eef0ef; color:#59635d; }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/welfare-assistance-index-1.css') }}">
 @endpush
 
 @section('content')
@@ -192,18 +14,18 @@
         <h1>Welfare Assistance</h1>
         <p>Manage welfare assistance requests, approvals and review dates.</p>
         @can('welfare.reviews.view')
-        <a href="{{ route('welfare.assistance.reviews.index') }}">Review and follow-up queue</a>
+        @if(auth()->user()?->hasPermission('welfare.assistance.view') && auth()->user()?->hasPermission('welfare.reviews.view'))<a href="{{ route('welfare.assistance.reviews.index') }}">Review and follow-up queue</a>@endif
         @endcan
     </div>
 
     @can('welfare.assistance.manage')
-        <a
+        @if(auth()->user()?->hasPermission('welfare.assistance.view') && auth()->user()?->hasPermission('welfare.assistance.manage'))<a
             href="{{ route('welfare.assistance.create') }}"
             class="ui-btn primary"
         >
             <i class="bi bi-plus-lg"></i>
             New Assistance
-        </a>
+        </a>@endif
     @endcan
 
 </div>
@@ -286,12 +108,12 @@
                         Filter
                     </button>
 
-                    <a
+                    @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
                         href="{{ route('welfare.assistance.index') }}"
                         class="ui-btn"
                     >
                         Reset
-                    </a>
+                    </a>@endif
                 </div>
 
             </div>
@@ -384,13 +206,13 @@
                             </td>
 
                             <td>
-                                <a
+                                @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
                                     href="{{ route('welfare.assistance.show', $assistance) }}"
                                     class="action"
                                     title="View"
                                 >
                                     <i class="bi bi-eye"></i>
-                                </a>
+                                </a>@endif
                             </td>
 
                         </tr>

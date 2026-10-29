@@ -3,441 +3,16 @@
 @section('title', 'Verification Details')
 
 @push('styles')
-<style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:22px;
-    }
-
-    .identity {
-        display:flex;
-        align-items:center;
-        gap:14px;
-    }
-
-    .icon-box {
-        width:62px;
-        height:62px;
-        border-radius:17px;
-        background:var(--primary-soft);
-        color:var(--primary);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size: 22px;
-    }
-
-    .title {
-        font-size: 23px;
-        font-weight:700;
-        letter-spacing:-.4px;
-    }
-
-    .meta {
-        margin-top:4px;
-        color: #6e7773;
-        font-size: 16px;
-    }
-
-    .actions {
-        display:flex;
-        gap:8px;
-        flex-wrap:wrap;
-    }
-
-    .ui-btn {
-        height:39px;
-        padding:0 12px;
-        border-radius:9px;
-        display:inline-flex;
-        align-items:center;
-        gap:7px;
-        border:1px solid var(--border);
-        background:#fff;
-        color:#65726c;
-        font-size: 16px;
-        font-weight:650;
-        cursor:pointer;
-        text-decoration:none;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .ui-btn.complete {
-        background:#edf7f0;
-        border-color: #6a746d;
-        color:#397955;
-    }
-
-    .layout {
-        display:grid;
-        grid-template-columns:minmax(0,1fr) 300px;
-        gap:18px;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-        margin-bottom:18px;
-    }
-
-    .card-head {
-        padding:16px 19px;
-        border-bottom:1px solid #eef1ef;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:15px;
-    }
-
-    .card-head strong {
-        font-size: 16px;
-    }
-
-    .card-head span {
-        display:block;
-        margin-top:4px;
-        color: #6c7470;
-        font-size: 16px;
-    }
-
-    .card-body {
-        padding:18px 19px;
-    }
-
-    .status {
-        display:inline-flex;
-        align-items:center;
-        gap:5px;
-        padding:5px 8px;
-        border-radius:20px;
-        background:#eef3f8;
-        color:#55758d;
-        font-size: 16px;
-        font-weight:650;
-        text-transform:capitalize;
-    }
-
-    .status::before {
-        content:"";
-        width:5px;
-        height:5px;
-        border-radius:50%;
-        background:#6d8ea5;
-    }
-
-    .grid {
-        display:grid;
-        grid-template-columns:repeat(3,minmax(0,1fr));
-        gap:10px;
-    }
-
-    .info-box {
-        padding:13px;
-        background:#fafcfb;
-        border:1px solid #edf1ee;
-        border-radius:10px;
-    }
-
-    .info-box label {
-        display:block;
-        color: #6d7571;
-        font-size: 16px;
-        text-transform:uppercase;
-        letter-spacing:.5px;
-    }
-
-    .info-box strong {
-        display:block;
-        margin-top:5px;
-        font-size: 16px;
-    }
-
-    .applicant-box {
-        display:flex;
-        align-items:center;
-        gap:11px;
-    }
-
-    .avatar {
-        width:40px;
-        height:40px;
-        border-radius:11px;
-        background:var(--primary-soft);
-        color:var(--primary);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size: 16px;
-        font-weight:700;
-    }
-
-    .applicant-name {
-        font-size: 16px;
-        font-weight:650;
-    }
-
-    .applicant-meta {
-        margin-top:3px;
-        color: #6c7470;
-        font-size: 16px;
-    }
-
-    .field-grid {
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:17px;
-    }
-
-    .field label {
-        display:block;
-        margin-bottom:6px;
-        color: #6d7571;
-        font-size: 16px;
-        text-transform:uppercase;
-        letter-spacing:.5px;
-    }
-
-    .field strong {
-        display:block;
-        color:#46534c;
-        font-size: 16px;
-    }
-
-    .field-text {
-        color:#69766f;
-        font-size: 16px;
-        line-height:1.7;
-    }
-
-    .finding {
-        padding:12px;
-        border:1px solid #edf1ee;
-        border-radius:10px;
-        background:#fafcfb;
-        color:#65726c;
-        font-size: 16px;
-        line-height:1.6;
-    }
-
-    .finding + .finding {
-        margin-top:9px;
-    }
-
-    .finding strong {
-        display:block;
-        color:#46534c;
-        font-size: 16px;
-        margin-bottom:4px;
-    }
-
-    .evidence-grid {
-        display:grid;
-        grid-template-columns:repeat(3,minmax(0,1fr));
-        gap:10px;
-    }
-
-    .evidence {
-        min-height:95px;
-        border:1px solid #edf1ee;
-        border-radius:10px;
-        background:#fafcfb;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        color: #6e7772;
-    }
-
-    .evidence i {
-        font-size: 22px;
-        color:var(--primary);
-        margin-bottom:7px;
-    }
-
-    .evidence span {
-        font-size: 16px;
-    }
-
-    .timeline-item {
-        display:flex;
-        gap:11px;
-        padding-bottom:18px;
-        position:relative;
-    }
-
-    .timeline-item:last-child {
-        padding-bottom:0;
-    }
-
-    .timeline-dot {
-        width:9px;
-        height:9px;
-        margin-top:4px;
-        border-radius:50%;
-        background:var(--primary);
-        flex-shrink:0;
-        position:relative;
-    }
-
-    .timeline-item:not(:last-child) .timeline-dot::after {
-        content:"";
-        position:absolute;
-        width:1px;
-        height:29px;
-        left:4px;
-        top:9px;
-        background:#dae3df;
-    }
-
-    .timeline-title {
-        font-size: 16px;
-        font-weight:650;
-    }
-
-    .timeline-meta {
-        margin-top:3px;
-        color: #6c7470;
-        font-size: 16px;
-    }
-
-    .side-number {
-        font-size: 27px;
-        font-weight:700;
-        color:var(--primary);
-        text-align:center;
-    }
-
-    .side-label {
-        text-align:center;
-        margin-top:3px;
-        color: #6e7772;
-        font-size: 16px;
-    }
-
-    .side-row {
-        display:flex;
-        justify-content:space-between;
-        gap:10px;
-        padding:9px 0;
-        border-bottom:1px solid #f0f3f1;
-        font-size: 16px;
-    }
-
-    .side-row:last-child {
-        border-bottom:none;
-    }
-
-    .side-row span:first-child {
-        color: #6d7571;
-    }
-
-    .side-row span:last-child {
-        color:#4a5750;
-        font-weight:650;
-        text-align:right;
-    }
-
-    .note {
-        display:flex;
-        gap:9px;
-        padding:12px;
-        border-radius:10px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
-    }
-
-    .note i {
-        color:var(--primary);
-        font-size: 17px;
-    }
-
-    .note p {
-        margin:0;
-        color: #6b766f;
-        font-size: 16px;
-        line-height:1.6;
-    }
-
-    @media(max-width:900px) {
-        .layout {
-            grid-template-columns:1fr;
-        }
-    }
-
-    @media(max-width:700px) {
-        .page-header {
-            flex-direction:column;
-        }
-
-        .actions {
-            width:100%;
-        }
-
-        .actions .ui-btn {
-            flex:1;
-            justify-content:center;
-        }
-
-        .grid,
-        .field-grid,
-        .evidence-grid {
-            grid-template-columns:1fr;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/welfare-verification-show-1.css') }}">
 @endpush
 
 
 @push('styles')
-<style>
-    .flash{padding:12px 14px;border-radius:10px;margin-bottom:16px;font-size:14px}
-    .flash.ok{background:#e8f5ee;color:#1e6b45}
-    .flash.err{background:#fdecec;color:#a33}
-    .vform label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
-    .vform textarea,.vform select{width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 11px;font:inherit;background:#fff}
-    .vform .check{display:flex;align-items:center;gap:8px;font-weight:400;margin:8px 0}
-    .vform .err-text{color:#a33;font-size:12px;margin-top:4px}
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/welfare-verification-show-2.css') }}">
 @endpush
 
 @push('styles')
-<style>
-    .dropzone{display:block;border:2px dashed #cdd8d2;border-radius:12px;background:#fafcfb;padding:22px 16px;text-align:center;cursor:pointer;transition:.15s;color:#6d7571}
-    .dropzone:hover,.dropzone.drag{border-color:var(--primary);background:var(--primary-soft)}
-    .dropzone i{font-size:28px;color:var(--primary);display:block;margin-bottom:6px}
-    .dropzone strong{display:block;color:#46534c;font-size:15px}
-    .dropzone small{display:block;margin-top:4px;font-size:13px}
-    .dropzone input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-    .file-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
-    .file-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #edf1ee;border-radius:10px;background:#fff}
-    .file-item .thumb{width:42px;height:42px;border-radius:8px;object-fit:cover;background:#eef3f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:20px}
-    .file-item .fname{flex:1;min-width:0;font-size:14px;color:#46534c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .file-item .fsize{font-size:12px;color:#6d7571}
-    .file-item button{border:0;background:none;color:#a33;cursor:pointer;font-size:18px;padding:4px}
-    .upload-errors{margin-top:10px;padding:10px 12px;border-radius:10px;background:#fdecec;color:#a33;font-size:13px;display:none}
-    .upload-errors.show{display:block}
-    .upload-errors div+div{margin-top:3px}
-    .upload-summary{margin-top:8px;font-size:12px;color:#6d7571}
-    .ev-card{position:relative;min-height:120px;padding:8px;text-decoration:none;gap:6px;overflow:hidden}
-    .ev-card img{width:100%;height:88px;object-fit:cover;border-radius:7px;background:#eef3f0}
-    .ev-card .ev-icon{height:88px;display:flex;align-items:center;justify-content:center}
-    .ev-card .ev-icon i{font-size:34px;margin:0}
-    .ev-card .ev-name{display:block;width:100%;font-size:12px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#46534c}
-    .ev-card .ev-meta{font-size:11px;color:#6d7571}
-    .ev-dl{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:7px;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:#55625b;font-size:13px}
-    .ui-btn[disabled]{opacity:.65;cursor:not-allowed}
-    .banner{padding:12px 14px;border-radius:10px;margin-bottom:16px;font-size:14px;background:#eef5fb;color:#2f5f85}
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/welfare-verification-show-3.css') }}">
 @endpush
 
 @section('content')
@@ -493,9 +68,9 @@
     </div>
 
     <div class="actions">
-        <a href="{{ route('welfare.verification.index') }}" class="ui-btn">
+        @if(auth()->user()?->hasPermission('welfare.view'))<a href="{{ route('welfare.verification.index') }}" class="ui-btn">
             <i class="bi bi-arrow-left"></i> Back
-        </a>
+        </a>@endif
 
         @if ($workflow === 'assigned' && $isOfficer)
             <form method="POST" action="{{ route('welfare.verification.start', $verification) }}"
@@ -577,9 +152,9 @@
                     </div>
 
                     @if ($beneficiary)
-                        <a href="{{ route('welfare.beneficiaries.show', $beneficiary) }}" class="ui-btn">
+                        @if(auth()->user()?->hasPermission('welfare.view'))<a href="{{ route('welfare.beneficiaries.show', $beneficiary) }}" class="ui-btn">
                             View Beneficiary
-                        </a>
+                        </a>@endif
                     @endif
                 </div>
             </div>
@@ -656,7 +231,7 @@
             <div class="card-body">
                 <div class="evidence-grid">
                     @foreach ($evidenceFiles as $file)
-                        <a class="evidence ev-card"
+                        @if(auth()->user()?->hasPermission('welfare.view'))<a class="evidence ev-card"
                            href="{{ route('welfare.verification.evidence', [$verification, $file]) }}"
                            target="_blank" rel="noopener"
                            title="{{ $file->original_name }}">
@@ -671,7 +246,7 @@
                             <span class="ev-dl"
                                   onclick="event.preventDefault();event.stopPropagation();window.location='{{ route('welfare.verification.evidence', [$verification, $file, 'download' => 1]) }}'"
                                   title="Download"><i class="bi bi-download"></i></span>
-                        </a>
+                        </a>@endif
                     @endforeach
                 </div>
             </div>
@@ -730,7 +305,7 @@
 
                     <label for="evidenceInput">
                         Evidence photos / documents
-                        <span id="evidenceRequired" style="color:#a33;{{ $needsEvidence ? '' : 'display:none' }}">* required for approval</span>
+                        <span id="evidenceRequired" style="color:var(--legacy-text-a33, #a33);{{ $needsEvidence ? '' : 'display:none' }}">* required for approval</span>
                     </label>
 
                     <label class="dropzone" id="dropzone" for="evidenceInput">
@@ -823,7 +398,7 @@
                 <div class="side-number">{{ $progress }}%</div>
                 <div class="side-label">Verification Complete</div>
 
-                <div style="height:1px;background:#eef1ef;margin:16px 0;"></div>
+                <div style="height:1px;background:var(--legacy-surface-eef1ef, #eef1ef);margin:16px 0;"></div>
 
                 <div class="side-row">
                     <span>Status</span>

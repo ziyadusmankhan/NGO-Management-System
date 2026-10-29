@@ -4,6 +4,7 @@ namespace App\Domain\Welfare\Beneficiaries\Models;
 
 use App\Domain\Audit\Concerns\RecordsAudit;
 use App\Domain\Finance\Support\ReadsDecimalMoney;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use App\Domain\Welfare\Verification\Models\BeneficiaryVerification;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Beneficiary extends Model
 {
+    use EncryptsSensitive;
     use ReadsDecimalMoney;
     use RecordsAudit;
 

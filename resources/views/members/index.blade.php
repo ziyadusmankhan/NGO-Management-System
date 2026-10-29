@@ -3,496 +3,7 @@
 @section('title', 'Members')
 
 @push('styles')
-<style>
-    /* =========================================
-       PAGE HEADER
-    ========================================= */
-
-    .members-header {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 20px;
-        margin-bottom: 24px;
-    }
-
-    .members-header h1 {
-        margin: 0;
-        font-size: 25px;
-        font-weight: 700;
-        letter-spacing: -.5px;
-    }
-
-    .members-header p {
-        margin: 7px 0 0;
-        color: var(--muted);
-        font-size: 16px;
-    }
-
-    .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-    }
-
-    .btn-secondary-custom,
-    .btn-primary-custom {
-        height: 40px;
-        padding: 0 15px;
-
-        border-radius: 10px;
-
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-
-        font-size: 16px;
-        font-weight: 650;
-
-        cursor: pointer;
-        transition: all .18s ease;
-    }
-
-    .btn-secondary-custom {
-        background: #fff;
-        color: #53615b;
-        border: 1px solid var(--border);
-    }
-
-    .btn-secondary-custom:hover {
-        border-color: #6f7571;
-        background: #fafcfb;
-        color: var(--primary);
-    }
-
-    .btn-primary-custom {
-        background: var(--primary);
-        color: #fff;
-        border: 1px solid var(--primary);
-        box-shadow: 0 6px 16px rgba(23,63,53,.12);
-    }
-
-    .btn-primary-custom:hover {
-        background: var(--primary-light);
-        transform: translateY(-1px);
-    }
-
-
-    /* =========================================
-       SUMMARY CARDS
-    ========================================= */
-
-    .member-summary-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
-        margin-bottom: 18px;
-    }
-
-    .member-summary-card {
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 13px;
-        padding: 15px 16px;
-    }
-
-    .summary-label {
-        color: var(--muted);
-        font-size: 16px;
-    }
-
-    .summary-value {
-        margin-top: 6px;
-        font-size: 21px;
-        font-weight: 700;
-    }
-
-    .summary-meta {
-        margin-top: 5px;
-        color: #6f7672;
-        font-size: 16px;
-    }
-
-
-    /* =========================================
-       FILTER BAR
-    ========================================= */
-
-    .members-card {
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        overflow: hidden;
-    }
-
-    .filter-bar {
-        padding: 16px 18px;
-        border-bottom: 1px solid #eef1ef;
-
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .member-search {
-        position: relative;
-        flex: 1;
-        min-width: 220px;
-        max-width: 380px;
-    }
-
-    .member-search i {
-        position: absolute;
-        left: 13px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6f7672;
-        font-size: 17px;
-    }
-
-    .member-search input {
-        width: 100%;
-        height: 40px;
-        border: 1px solid var(--border);
-        border-radius: 9px;
-        padding: 0 13px 0 36px;
-        outline: none;
-        font-size: 16px;
-        background: #fafcfa;
-    }
-
-    .member-search input:focus {
-        background: #fff;
-        border-color: #6e7772;
-        box-shadow: 0 0 0 3px rgba(23,63,53,.06);
-    }
-
-    .filter-select {
-        height: 40px;
-        min-width: 145px;
-        padding: 0 34px 0 12px;
-        border: 1px solid var(--border);
-        border-radius: 9px;
-        background: #fff;
-        color: #637069;
-        font-size: 16px;
-        outline: none;
-        cursor: pointer;
-    }
-
-    .filter-select:focus {
-        border-color: #6e7772;
-    }
-
-    .filter-spacer {
-        flex: 1;
-    }
-
-
-    /* =========================================
-       TABLE
-    ========================================= */
-
-    .table-container {
-        overflow-x: auto;
-    }
-
-    .members-table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 900px;
-    }
-
-    .members-table th {
-        padding: 11px 18px;
-        background: #fafcfb;
-        border-bottom: 1px solid #eef1ef;
-
-        color: #6e7773;
-        font-size: 16px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .65px;
-        text-align: left;
-        white-space: nowrap;
-    }
-
-    .members-table td {
-        padding: 13px 18px;
-        border-bottom: 1px solid #f0f3f1;
-        vertical-align: middle;
-        font-size: 16px;
-    }
-
-    .members-table tbody tr {
-        transition: background .15s ease;
-    }
-
-    .members-table tbody tr:hover {
-        background: #fbfcfb;
-    }
-
-    .members-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .member-profile {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .member-avatar {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        background: var(--primary-soft);
-        color: var(--primary);
-
-        font-size: 16px;
-        font-weight: 700;
-
-        flex-shrink: 0;
-    }
-
-    .member-name {
-        font-weight: 650;
-        color: var(--text);
-        font-size: 16px;
-    }
-
-    .member-id {
-        margin-top: 3px;
-        color: #6f7672;
-        font-size: 16px;
-    }
-
-    .member-contact {
-        color: #68756f;
-        line-height: 1.6;
-    }
-
-    .member-location {
-        color: #68756f;
-    }
-
-    .committee-name {
-        font-size: 16px;
-        font-weight: 600;
-    }
-
-    .position-name {
-        margin-top: 3px;
-        color: #6f7672;
-        font-size: 16px;
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-
-        padding: 5px 8px;
-        border-radius: 30px;
-
-        font-size: 16px;
-        font-weight: 650;
-    }
-
-    .status-badge::before {
-        content: "";
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-    }
-
-    .status-active {
-        background: #edf7f0;
-        color: #397955;
-    }
-
-    .status-active::before {
-        background: #4c9a6c;
-    }
-
-    .status-inactive {
-        background: #f1f3f2;
-        color: #6a766f;
-    }
-
-    .status-inactive::before {
-        background: #9aa49f;
-    }
-
-    .status-suspended {
-        background: #fff4ed;
-        color: #9d674b;
-    }
-
-    .status-suspended::before {
-        background: #c98561;
-    }
-
-    .status-resigned {
-        background: #f3f1f7;
-        color: #786d8f;
-    }
-
-    .status-resigned::before {
-        background: #9586a8;
-    }
-
-    .member-action {
-        width: 31px;
-        height: 31px;
-
-        border: 1px solid var(--border);
-        background: #fff;
-        border-radius: 8px;
-
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-
-        color: #6b7670;
-
-        cursor: pointer;
-        transition: all .15s ease;
-    }
-
-    .member-action:hover {
-        color: var(--primary);
-        background: #f7faf8;
-        border-color: #707673;
-    }
-
-
-    /* =========================================
-       TABLE FOOTER
-    ========================================= */
-
-    .table-footer {
-        padding: 14px 18px;
-
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 15px;
-
-        border-top: 1px solid #eef1ef;
-    }
-
-    .results-count {
-        color: #6e7772;
-        font-size: 16px;
-    }
-
-    .pagination {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .page-btn {
-        min-width: 29px;
-        height: 29px;
-
-        padding: 0 7px;
-
-        border: 1px solid var(--border);
-        background: #fff;
-
-        border-radius: 7px;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        font-size: 16px;
-        color: #6c7872;
-
-        cursor: pointer;
-    }
-
-    .page-btn:hover {
-        background: #f7faf8;
-        border-color: #6f7571;
-    }
-
-    .page-btn.active {
-        background: var(--primary);
-        color: #fff;
-        border-color: var(--primary);
-    }
-
-
-    /* =========================================
-       RESPONSIVE
-    ========================================= */
-
-    @media (max-width: 1050px) {
-
-        .member-summary-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-    }
-
-    @media (max-width: 700px) {
-
-        .members-header {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .header-actions {
-            width: 100%;
-        }
-
-        .header-actions button {
-            flex: 1;
-        }
-
-        .filter-spacer {
-            display: none;
-        }
-
-        .member-search {
-            max-width: none;
-            width: 100%;
-        }
-
-        .filter-select {
-            flex: 1;
-        }
-
-        .table-footer {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-    }
-
-    @media (max-width: 480px) {
-
-        .member-summary-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .filter-select {
-            width: 100%;
-            flex: none;
-        }
-
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/members-index-1.css') }}">
 @endpush
 
 
@@ -521,13 +32,13 @@
             Export
         </button>
 
-        <a
+        @if(auth()->user()?->hasPermission('members.create'))<a
             href="{{ route('members.create') }}"
             class="btn-primary-custom"
         >
             <i class="bi bi-plus-lg"></i>
             Add Member
-        </a>
+        </a>@endif
 
     </div>
 
@@ -541,9 +52,9 @@
             margin-bottom:18px;
             padding:13px 15px;
             border-radius:10px;
-            background:#edf7f0;
-            border:1px solid #d8e9dd;
-            color:#397955;
+            background:var(--legacy-surface-edf7f0, #edf7f0);
+            border:1px solid var(--legacy-border-d8e9dd, #d8e9dd);
+            color:var(--legacy-text-397955, #397955);
             font-size:14px;
         "
     >
@@ -643,7 +154,7 @@
                 align-items:center;
                 gap:10px;
                 flex-wrap:wrap;
-                border-bottom:1px solid #eef1ef;
+                border-bottom:1px solid var(--legacy-border-eef1ef, #eef1ef);
             "
         >
 
@@ -852,7 +363,7 @@
                                         <div style="
                                             height:1px;
                                             margin:5px 0;
-                                            background:#eef1ef;
+                                            background:var(--legacy-surface-eef1ef, #eef1ef);
                                         "></div>
                                     @endif
 
@@ -896,7 +407,7 @@
 
                         <td>
 
-                            <a
+                            @if(auth()->user()?->hasPermission('members.view'))<a
                                 href="{{ route(
                                     'members.show',
                                     ['member' => $member->id]
@@ -905,7 +416,7 @@
                                 title="View member"
                             >
                                 <i class="bi bi-eye"></i>
-                            </a>
+                            </a>@endif
 
                         </td>
 
@@ -920,7 +431,7 @@
                             style="
                                 padding:45px;
                                 text-align:center;
-                                color:#89948f;
+                                color:var(--legacy-text-89948f, #89948f);
                             "
                         >
 
@@ -937,13 +448,13 @@
 
                             <div style="margin-top:12px;">
 
-                                <a
+                                @if(auth()->user()?->hasPermission('members.create'))<a
                                     href="{{ route('members.create') }}"
                                     class="btn-primary-custom"
                                 >
                                     <i class="bi bi-plus-lg"></i>
                                     Add First Member
-                                </a>
+                                </a>@endif
 
                             </div>
 
@@ -1045,13 +556,13 @@
     }
 
 
-    searchInput.addEventListener(
+    searchInput?.addEventListener(
         'input',
         filterMembers
     );
 
 
-    statusFilter.addEventListener(
+    statusFilter?.addEventListener(
         'change',
         filterMembers
     );

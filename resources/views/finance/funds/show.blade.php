@@ -3,48 +3,7 @@
 @section('title', 'Fund Details')
 
 @push('styles')
-<style>
-    .page-header { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:22px; }
-    .identity { display:flex; align-items:center; gap:14px; }
-    .icon-box { width:62px; height:62px; border-radius:17px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
-    .title { font-size:23px; font-weight:700; letter-spacing:-.4px; }
-    .meta { margin-top:4px; color:#6e7773; font-size:15px; }
-    .actions { display:flex; gap:8px; flex-wrap:wrap; }
-    .ui-btn { height:39px; padding:0 12px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid var(--border); background:#fff; color:#65726c; font-size:15px; font-weight:650; text-decoration:none; cursor:pointer; }
-    .ui-btn.primary { background:var(--primary); border-color:var(--primary); color:#fff; }
-    .card { background:#fff; border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:18px; }
-    .card-head { padding:16px 19px; border-bottom:1px solid #eef1ef; display:flex; justify-content:space-between; align-items:center; gap:15px; }
-    .card-head strong { font-size:16px; }
-    .card-head span { display:block; margin-top:4px; color:#6c7470; font-size:14px; }
-    .card-body { padding:18px 19px; }
-    .status, .restricted { padding:5px 8px; border-radius:20px; font-size:13px; font-weight:650; white-space:nowrap; }
-    .status { background:#edf7f0; color:#397955; }
-    .restricted { background:#f1eef7; color:#77668c; }
-    .summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
-    .summary-box { padding:13px; background:#fafcfb; border:1px solid #edf1ee; border-radius:10px; }
-    .summary-box.highlight { background:var(--primary-soft); border-color:#6f7673; }
-    .summary-box label { display:block; color:#6d7571; font-size:13px; text-transform:uppercase; letter-spacing:.5px; }
-    .summary-box strong { display:block; margin-top:5px; font-size:16px; overflow-wrap:anywhere; }
-    .summary-box.highlight strong { color:var(--primary); }
-    .table-wrap { overflow-x:auto; }
-    .transaction-table { width:100%; min-width:850px; border-collapse:collapse; }
-    .transaction-table th { padding:10px 12px; background:#fafcfb; border-bottom:1px solid #eef1ef; color:#6c7470; font-size:13px; text-transform:uppercase; letter-spacing:.5px; text-align:left; white-space:nowrap; }
-    .transaction-table td { padding:12px; border-bottom:1px solid #f0f3f1; font-size:14px; vertical-align:middle; }
-    .transaction-table tr:last-child td { border-bottom:none; }
-    @media(max-width:900px) {
-        .page-header { flex-direction:column; }
-        .summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-    }
-    @media(max-width:450px) {
-        .summary-grid { grid-template-columns:1fr; }
-        .card-head { align-items:flex-start; flex-direction:column; }
-    }
-    @media print {
-        .actions { display:none; }
-        .table-wrap { overflow:visible; }
-        .transaction-table { min-width:0; }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/finance-funds-show-1.css') }}">
 @endpush
 
 
@@ -63,10 +22,10 @@
         </div>
     </div>
     <div class="actions">
-        <a href="{{ route('finance.funds.index') }}" class="ui-btn">Back</a>
+        @if(auth()->user()?->hasPermission('finance.view'))<a href="{{ route('finance.funds.index') }}" class="ui-btn">Back</a>@endif
         <button type="button" class="ui-btn" onclick="window.print()">Print</button>
         @if(! $fund->trashed() && auth()->user()->hasPermission('finance.funds.manage'))
-            <a href="{{ route('finance.funds.edit', $fund) }}" class="ui-btn primary">Edit Fund</a>
+            @if(auth()->user()?->hasPermission('finance.view') && auth()->user()?->hasPermission('finance.funds.manage'))<a href="{{ route('finance.funds.edit', $fund) }}" class="ui-btn primary">Edit Fund</a>@endif
             <form method="POST" action="{{ route('finance.funds.destroy', $fund) }}" onsubmit="return confirm('Archive this fund? Its financial history will be retained.');">
                 @csrf
                 @method('DELETE')
@@ -130,23 +89,25 @@
                     <tr>
                         <td>
                             @if($assistance instanceof \App\Domain\Procurement\Models\Procurement)
-                                @if(auth()->user()->hasPermission('procurement.view'))<a href="{{ route('operations.procurement.show',$assistance) }}">{{ $assistance->number }}</a>@else {{ $assistance->number }} @endif
+                                @if(auth()->user()->hasPermission('procurement.view'))@if(auth()->user()?->hasPermission('procurement.view'))<a href="{{ route('operations.procurement.show',$assistance) }}">{{ $assistance->number }}</a>@endif
+@else {{ $assistance->number }} @endif
                             @elseif($assistance instanceof \App\Domain\Projects\Models\Project)
-                                @can('projects.view')<a href="{{ route('projects.show',$assistance) }}">{{ $assistance->number }}</a>@else {{ $assistance->number }} @endcan
+                                @can('projects.view')@if(auth()->user()?->hasPermission('projects.view'))<a href="{{ route('projects.show',$assistance) }}">{{ $assistance->number }}</a>@endif
+@else {{ $assistance->number }} @endcan
                             @elseif($assistance instanceof \App\Domain\Business\Models\BusinessApplication)
                                 @if(auth()->user()->hasPermission('business.view'))
-                                    <a href="{{ route('business.applications.show', $assistance) }}">{{ $assistance->number }}</a>
+                                    @if(auth()->user()?->hasPermission('business.view'))<a href="{{ route('business.applications.show', $assistance) }}">{{ $assistance->number }}</a>@endif
                                 @else
                                     {{ $assistance->number }}
                                 @endif
                             @elseif($assistance instanceof \App\Domain\Qard\Models\QardLoan)
                                 @if(auth()->user()->hasPermission('qard.view'))
-                                    <a href="{{ route('qard.show', $assistance) }}">{{ $assistance->number }}</a>
+                                    @if(auth()->user()?->hasPermission('qard.view'))<a href="{{ route('qard.show', $assistance) }}">{{ $assistance->number }}</a>@endif
                                 @else
                                     {{ $assistance->number }}
                                 @endif
                             @elseif(auth()->user()->hasPermission('welfare.assistance.view'))
-                                <a href="{{ route('welfare.assistance.show', $assistance) }}">{{ $assistance->assistance_number }}</a>
+                                @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a href="{{ route('welfare.assistance.show', $assistance) }}">{{ $assistance->assistance_number }}</a>@endif
                             @else
                                 {{ $assistance->assistance_number }}
                             @endif
@@ -180,7 +141,7 @@
                     <tr>
                         <td>{{ $transaction->transaction_date->format('d M Y') }}</td>
                         <td>
-                            <a href="{{ route('finance.transactions.show', $transaction) }}">{{ $transaction->transaction_number }}</a>
+                            @if(auth()->user()?->hasPermission('finance.view'))<a href="{{ route('finance.transactions.show', $transaction) }}">{{ $transaction->transaction_number }}</a>@endif
                             <div>
                                 @if($transaction->source_url)
                                     <a href="{{ $transaction->source_url }}">{{ $transaction->source_label }}</a>

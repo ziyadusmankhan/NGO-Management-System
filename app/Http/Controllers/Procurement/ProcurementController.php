@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Procurement;
 
 use App\Domain\Business\Models\BusinessApplication;
 use App\Domain\Committees\Models\Committee;
+use App\Domain\Documents\Services\DocumentService;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Support\Money;
 use App\Domain\Procurement\Models\Procurement;
@@ -116,7 +117,7 @@ class ProcurementController
         $this->w->authorize(request()->user(), 'view', $procurement);
         abort_unless($document->procurement_id === $procurement->id && Storage::disk('private')->exists($document->path), 404);
 
-        return Storage::disk('private')->download($document->path, $document->original_name, ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
+        return app(DocumentService::class)->sourceDownload(auth()->user(), 'procurement:'.$document->id);
     }
 
     public function order(Procurement $procurement)
@@ -201,9 +202,9 @@ class ProcurementController
             return response()->streamDownload(function () use ($book) {
                 (new Xlsx($book))->save('php://output');
                 $book->disconnectWorksheets();
-            },'procurement.xlsx',['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+            }, 'procurement.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
         }
 
-        return view('operations.procurement.reports',compact('rows','filters','totals') + $this->options());
+        return view('operations.procurement.reports', compact('rows', 'filters', 'totals') + $this->options());
     }
 }

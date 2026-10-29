@@ -5,6 +5,7 @@ namespace App\Domain\Business\Services;
 use App\Domain\Business\Models\BusinessApplication;
 use App\Domain\Business\Models\BusinessCategory;
 use App\Domain\Committees\Models\Committee;
+use App\Domain\Documents\Services\UploadValidator;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundPurposeService;
 use App\Domain\Finance\Support\Money;
@@ -70,6 +71,7 @@ class BusinessWorkflowService
         try {
             foreach ($files as $kind => $file) {
                 if ($file) {
+                    app(UploadValidator::class)->inspect($file);
                     $path = $file->store('business', 'private');
                     if (! $path) {
                         throw new \RuntimeException('The private evidence file could not be stored.');

@@ -16,6 +16,7 @@ class QardRules
             }
         }];
         $file = ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'extensions:pdf,jpg,jpeg,png', 'max:10240'];
+
         return match ($action) {
             'store', 'update' => [
                 'beneficiary_id' => ['required', 'integer', 'exists:beneficiaries,id'],
@@ -35,6 +36,7 @@ class QardRules
                 'borrower_name' => ['required', 'string', 'max:255'],
                 'foundation_name' => ['required', 'string', 'max:255'],
                 'borrower_file' => $file, 'foundation_file' => $file,
+                'witnesses' => ['required', 'array', 'size:2'], 'witnesses.*' => ['required', 'string', 'max:255', 'distinct:ignore_case'],
             ],
             'disburse', 'repay' => [
                 'amount' => $money, 'idempotency_key' => ['required', 'uuid'],
@@ -52,6 +54,10 @@ class QardRules
 
     public static function validate(string $action, array $data): array
     {
+        if ($action === 'sign' && isset($data['witnesses']) && is_array($data['witnesses'])) {
+            $data['witnesses'] = array_map(fn ($v) => is_string($v) ? preg_replace('/\s+/u', ' ', trim($v)) : $v, $data['witnesses']);
+        }
+
         return Validator::make($data, self::rules($action))->validate();
     }
 }

@@ -1,0 +1,2 @@
+@extends('auth.security-layout')
+@section('content')<h1>Verify your sign-in</h1><p>Enter the six-digit code from your authenticator app, or one unused recovery code.</p><form method="post" action="{{ route('security.verify') }}">@csrf<label>Authenticator or recovery code<input name="code" autocomplete="one-time-code" required autofocus maxlength="100"></label><button>Verify and sign in</button></form><p><a href="{{ route('login') }}">Start again</a></p>@endsection

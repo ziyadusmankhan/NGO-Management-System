@@ -3,8 +3,8 @@
 @push('styles')@include('operations.procurement.style')@endpush
 @section('content')
     <div class="qard-page procurement-page">
-        <p class="no-print">Use Ctrl+P → Landscape → Print or Save as PDF. <a
-                href="{{ route('operations.procurement.show', $purchase) }}">Back</a></p>
+        <p class="no-print">Use Ctrl+P → Landscape → Print or Save as PDF. @if(auth()->user()?->hasPermission('procurement.view'))<a
+                href="{{ route('operations.procurement.show', $purchase) }}">Back</a>@endif</p>
         <h1>Purchase order PO-{{ $purchase->number }}</h1>
         <p>Approved revision {{ $revision->revision }} · Issued
             {{ $revision->issued_at->timezone('Asia/Karachi')->format('d M Y') }} · Current status

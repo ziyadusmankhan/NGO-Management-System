@@ -65,8 +65,8 @@
                 label="Why fewer quotations or a higher-priced supplier is necessary (if applicable)"
                 :value="old('exception_reason', $revision?->exception_reason)" :required="false" /><label>Specifications
                 / supporting document<input type="file" name="evidence" accept=".pdf,.jpg,.jpeg,.png"></label></div>
-        <div class="qactions"><button class="qbtn">Save draft</button><a
-                href="{{ route('operations.procurement.index') }}">Cancel</a></div>
+        <div class="qactions"><button class="qbtn">Save draft</button>@if(auth()->user()?->hasPermission('procurement.view'))<a
+                href="{{ route('operations.procurement.index') }}">Cancel</a>@endif</div>
     </form>@endif
 </div>
 @endsection

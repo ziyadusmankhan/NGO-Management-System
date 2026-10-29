@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Members;
 use App\Domain\Audit\Services\AuditedMemberships;
 use App\Domain\Committees\Models\Committee;
 use App\Domain\Members\Models\Member;
+use App\Domain\Security\Services\FieldEncryption;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Members\StoreMemberRequest;
 use Illuminate\Http\RedirectResponse;
@@ -29,8 +30,8 @@ class MemberController extends Controller
                 $q->where('member_number', 'like', "%{$search}%")
                     ->orWhere('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('phone_lookup', app(FieldEncryption::class)->lookup('phone', $search) ?? 'no-match')
+                    ->orWhere('cnic_lookup', app(FieldEncryption::class)->lookup('cnic', $search) ?? 'no-match');
             });
         }
 

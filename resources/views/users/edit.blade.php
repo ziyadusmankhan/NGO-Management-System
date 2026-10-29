@@ -3,310 +3,13 @@
 @section('title', 'Edit User')
 
 @push('styles')
-<style>
-    .page-head {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:24px;
-    }
-
-    .page-head h1 {
-        margin:0;
-        font-size:25px;
-        font-weight:700;
-        letter-spacing:-.5px;
-    }
-
-    .page-head p {
-        margin:7px 0 0;
-        color:var(--muted);
-        font-size:12px;
-    }
-
-    .actions {
-        display:flex;
-        gap:8px;
-    }
-
-    .btn-ui {
-        height:40px;
-        padding:0 14px;
-        border-radius:10px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        font-size:11px;
-        font-weight:650;
-        text-decoration:none;
-        cursor:pointer;
-    }
-
-    .btn-ui.secondary {
-        background:#fff;
-        border:1px solid var(--border);
-        color:#637069;
-    }
-
-    .btn-ui.primary {
-        background:var(--primary);
-        border:1px solid var(--primary);
-        color:#fff;
-    }
-
-    .layout {
-        display:grid;
-        grid-template-columns:minmax(0,1fr) 300px;
-        gap:18px;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-        margin-bottom:18px;
-    }
-
-    .card-head {
-        padding:17px 20px;
-        border-bottom:1px solid #eef1ef;
-    }
-
-    .card-head strong {
-        font-size:12px;
-    }
-
-    .card-head span {
-        display:block;
-        margin-top:4px;
-        color:#929d97;
-        font-size:9px;
-    }
-
-    .card-body {
-        padding:20px;
-    }
-
-    .grid {
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:17px;
-    }
-
-    .group.full {
-        grid-column:1/-1;
-    }
-
-    .label {
-        display:block;
-        margin-bottom:7px;
-        color:#36433d;
-        font-size:10px;
-        font-weight:650;
-    }
-
-    .required {
-        color:#b35b4b;
-    }
-
-    .control,
-    .select {
-        width:100%;
-        height:42px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        padding:0 12px;
-        background:#fff;
-        color:var(--text);
-        font-size:10px;
-        outline:none;
-    }
-
-    .control:focus,
-    .select:focus {
-        border-color:#6b7670;
-        box-shadow:0 0 0 3px rgba(23,63,53,.055);
-    }
-
-    .help {
-        margin-top:5px;
-        color:#6d7571;
-        font-size:9px;
-        line-height:1.5;
-    }
-
-    .error {
-        margin-top:5px;
-        color:#a85f58;
-        font-size:8px;
-    }
-
-    .role-grid {
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:9px;
-    }
-
-    .role-option {
-        position:relative;
-    }
-
-    .role-option input {
-        position:absolute;
-        opacity:0;
-        pointer-events:none;
-    }
-
-    .role-option label {
-        min-height:58px;
-        padding:10px;
-        border:1px solid var(--border);
-        border-radius:10px;
-        display:flex;
-        flex-direction:column;
-        justify-content:center;
-        cursor:pointer;
-        transition:.15s;
-    }
-
-    .role-option label strong {
-        font-size:10px;
-    }
-
-    .role-option label span {
-        margin-top:4px;
-        color:#6c7470;
-        font-size:8px;
-        line-height:1.4;
-    }
-
-    .role-option input:checked + label {
-        background:var(--primary-soft);
-        border-color:#6b7570;
-        color:var(--primary);
-    }
-
-    .preview {
-        background:linear-gradient(145deg,#f8faf9,#f2f6f4);
-        border:1px solid var(--border);
-        border-radius:14px;
-        padding:20px;
-        margin-bottom:18px;
-    }
-
-    .preview-label {
-        color:#6d7672;
-        font-size:8px;
-        text-transform:uppercase;
-        letter-spacing:.8px;
-    }
-
-    .avatar {
-        width:64px;
-        height:64px;
-        margin:15px 0 11px;
-        border-radius:18px;
-        background:var(--primary);
-        color:#fff;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:18px;
-        font-weight:700;
-    }
-
-    .preview-name {
-        font-size:13px;
-        font-weight:700;
-    }
-
-    .preview-email {
-        margin-top:4px;
-        color:#6c7570;
-        font-size:9px;
-    }
-
-    .preview-divider {
-        height:1px;
-        background:#dde5e1;
-        margin:16px 0;
-    }
-
-    .preview-row {
-        display:flex;
-        justify-content:space-between;
-        gap:12px;
-        padding:7px 0;
-        font-size:9px;
-    }
-
-    .preview-row span:first-child {
-        color:#6e7672;
-    }
-
-    .preview-row span:last-child {
-        font-weight:650;
-        color:#4a5750;
-        text-align:right;
-    }
-
-    .notice {
-        display:flex;
-        gap:9px;
-        padding:12px;
-        border-radius:10px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
-    }
-
-    .notice i {
-        color:var(--primary);
-        font-size:14px;
-    }
-
-    .notice p {
-        margin:0;
-        color:#6b766f;
-        font-size:8px;
-        line-height:1.6;
-    }
-
-    @media(max-width:900px) {
-        .layout {
-            grid-template-columns:1fr;
-        }
-    }
-
-    @media(max-width:650px) {
-        .page-head {
-            flex-direction:column;
-        }
-
-        .actions {
-            width:100%;
-        }
-
-        .actions .btn-ui {
-            flex:1;
-        }
-
-        .grid,
-        .role-grid {
-            grid-template-columns:1fr;
-        }
-
-        .group.full {
-            grid-column:auto;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/users-edit-1.css') }}">
 @endpush
 
 
 @section('content')
+<div class="alert alert-light">Before changing account access, <a href="{{ route('security.confirm') }}">confirm your password</a>. Confirmation lasts 15 minutes.</div>
+
 
 @php
     $userRoleIds = old('roles', $user->roles->pluck('id')->all());
@@ -327,13 +30,13 @@
 
     <div class="actions">
 
-        <a
+        @if(auth()->user()?->hasPermission('users.view'))<a
             href="{{ route('users.show', $user) }}"
             class="btn-ui secondary"
         >
             <i class="bi bi-arrow-left"></i>
             Back
-        </a>
+        </a>@endif
 
         <button
             type="submit"
@@ -356,7 +59,7 @@
         <div class="card-body">
 
             <div style="
-                color:#a85f58;
+                color:var(--legacy-text-a85f58, #a85f58);
                 font-size:10px;
                 font-weight:650;
                 margin-bottom:8px;
@@ -367,7 +70,7 @@
             <ul style="
                 margin:0;
                 padding-left:18px;
-                color:#a85f58;
+                color:var(--legacy-text-a85f58, #a85f58);
                 font-size:8px;
             ">
 
@@ -484,14 +187,14 @@
                             </label>
 
                             <input
-                                name="password"
+                                name="unused_password" disabled
                                 type="password"
                                 class="control"
-                                placeholder="Leave blank to keep current password"
+                                placeholder="Use Password recovery on account details"
                             >
 
                             <div class="help">
-                                Only fill this in if you want to change the password.
+                                Use the Password recovery action on the account details page.
                             </div>
 
                             @error('password')
@@ -512,7 +215,7 @@
                             </label>
 
                             <input
-                                name="password_confirmation"
+                                name="unused_password_confirmation" disabled
                                 type="password"
                                 class="control"
                                 placeholder="Confirm new password"
@@ -621,7 +324,7 @@
                                 grid-column:1/-1;
                                 padding:20px;
                                 text-align:center;
-                                color:#89948f;
+                                color:var(--legacy-text-89948f, #89948f);
                                 font-size:9px;
                             ">
 

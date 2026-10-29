@@ -2,13 +2,14 @@
 
 namespace App\Domain\Qard\Services;
 
+use App\Domain\Documents\Services\UploadValidator;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundPurposeService;
 use App\Domain\Finance\Support\Money;
+use App\Domain\Finance\Support\PrincipalSchedule;
 use App\Domain\Qard\Models\QardLoan;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
-use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -31,6 +32,7 @@ class QardWorkflowService
         if (DB::connection()->getDriverName() === 'sqlite') {
             DB::table('qard_loans')->where('id', $loan->id)->update(['id' => DB::raw('id')]);
         }
+
         return QardLoan::whereKey($loan->id)->lockForUpdate()->firstOrFail();
     }
 
@@ -55,6 +57,7 @@ class QardWorkflowService
     {
         $this->authorize($actor, 'manage');
         $data = QardRules::validate($loan ? 'update' : 'store', $data);
+
         return DB::transaction(function () use ($loan, $data, $actor) {
             $before = [];
             if ($loan) {
@@ -62,7 +65,7 @@ class QardWorkflowService
                 if (! in_array($loan->status, ['draft', 'rejected'])) {
                     $this->fail('status', 'Only drafts and rejected applications may be edited. Use Request revision before changing approved terms.');
                 }
-                $before = $loan->getAttributes();
+                $before = $loan->attributesToArray();
                 $loan->fill($data);
             } else {
                 $loan = new QardLoan($data + ['created_by' => $actor->id, 'number' => 'QRD-'.Str::ulid(), 'status' => 'draft', 'revision' => 1]);
@@ -73,7 +76,8 @@ class QardWorkflowService
             $this->eligible($loan);
             $loan->save();
             $loan->update(['number' => sprintf('QRD-%05d', $loan->id)]);
-            $this->event($loan, $actor, $before ? 'application_updated' : 'application_created', $before, $loan->getAttributes());
+            $this->event($loan, $actor, $before ? 'application_updated' : 'application_created', $before, $loan->attributesToArray());
+
             return $loan;
         }, 5);
     }
@@ -91,7 +95,9 @@ class QardWorkflowService
                 $this->fail('first_due_date', 'Choose a future first due date before submitting.');
             }
             $before = $loan->only(['status', 'revision']);
-            if ($loan->status === 'rejected') { $loan->revision++; }
+            if ($loan->status === 'rejected') {
+                $loan->revision++;
+            }
             $loan->status = 'submitted';
             $loan->save();
             $this->event($loan, $actor, 'submitted', $before, $loan->only(['status', 'revision']));
@@ -105,13 +111,19 @@ class QardWorkflowService
         $stored = [];
         try {
             foreach ($files as $kind => $file) {
+                app(UploadValidator::class)->inspect($file);
                 $path = $file->store('qard/'.$loan->id, 'private');
-                if (! $path) { throw new \RuntimeException('Could not store private evidence.'); }
+                if (! $path) {
+                    throw new \RuntimeException('Could not store private evidence.');
+                }
                 $stored[$kind] = ['path' => $path, 'original_name' => $file->getClientOriginalName()];
             }
+
             return $callback($stored);
         } catch (\Throwable $e) {
-            foreach ($stored as $document) { Storage::disk('private')->delete($document['path']); }
+            foreach ($stored as $document) {
+                Storage::disk('private')->delete($document['path']);
+            }
             throw $e;
         }
     }
@@ -123,7 +135,9 @@ class QardWorkflowService
         $this->withFiles($loan, ['verification' => $data['evidence']], function ($files) use ($loan, $data, $actor) {
             DB::transaction(function () use ($loan, $data, $actor, $files) {
                 $loan = $this->lock($loan);
-                if ($loan->status !== 'submitted') { $this->fail('status', 'Field verification requires a submitted application.'); }
+                if ($loan->status !== 'submitted') {
+                    $this->fail('status', 'Field verification requires a submitted application.');
+                }
                 $loan->reviews()->create(['revision' => $loan->revision, 'stage' => 'verification', 'decision' => 'verified', 'notes' => $data['notes'], 'actor_id' => $actor->id]);
                 $loan->documents()->create($files['verification'] + ['revision' => $loan->revision, 'kind' => 'verification', 'actor_id' => $actor->id]);
                 $loan->update(['status' => 'implementation']);
@@ -140,7 +154,9 @@ class QardWorkflowService
         $data = QardRules::validate('decide', $data);
         DB::transaction(function () use ($loan, $stage, $data, $actor) {
             $loan = $this->lock($loan);
-            if ($loan->status !== $stage) { $this->fail('status', 'This decision is not available at the current stage.'); }
+            if ($loan->status !== $stage) {
+                $this->fail('status', 'This decision is not available at the current stage.');
+            }
             if ((int) $loan->created_by === (int) $actor->id || $loan->reviews()->where('revision', $loan->revision)
                 ->whereIn('stage', ['implementation', 'secretary', 'committee'])->where('actor_id', $actor->id)->exists()) {
                 $this->fail('actor', 'The creator cannot decide this application. Each approval stage requires a different person.');
@@ -155,7 +171,9 @@ class QardWorkflowService
             $loan->reviews()->create(['revision' => $loan->revision, 'stage' => $stage, 'actor_id' => $actor->id] + $data);
             $loan->update(['status' => $next]);
             if ($next === 'approved') {
-                foreach ($this->schedule($loan) as $row) { $loan->installments()->create($row + ['revision' => $loan->revision]); }
+                foreach ($this->schedule($loan) as $row) {
+                    $loan->installments()->create($row + ['revision' => $loan->revision]);
+                }
             }
             $this->event($loan, $actor, $stage.'_'.$data['decision'], ['status' => $stage], ['status' => $next, 'notes' => $data['notes']]);
         }, 5);
@@ -163,7 +181,7 @@ class QardWorkflowService
 
     public function schedule(QardLoan $loan): array
     {
-        return app(\App\Domain\Finance\Support\PrincipalSchedule::class)->make($loan->principal, (int) $loan->installment_count, $loan->frequency, $loan->first_due_date->toDateString());
+        return app(PrincipalSchedule::class)->make($loan->principal, (int) $loan->installment_count, $loan->frequency, $loan->first_due_date->toDateString());
     }
 
     public function sign(QardLoan $loan, array $data, User $actor): void
@@ -173,9 +191,11 @@ class QardWorkflowService
         $this->withFiles($loan, ['borrower' => $data['borrower_file'], 'foundation' => $data['foundation_file']], function ($files) use ($loan, $data, $actor) {
             DB::transaction(function () use ($loan, $data, $actor, $files) {
                 $loan = $this->lock($loan);
-                if ($loan->status !== 'approved') { $this->fail('status', 'Only an approved loan can have its agreement signed.'); }
+                if ($loan->status !== 'approved') {
+                    $this->fail('status', 'Only an approved loan can have its agreement signed.');
+                }
                 $loan->agreements()->create(['revision' => $loan->revision, 'terms' => $loan->only(['principal', 'fund_id', 'purpose', 'frequency', 'installment_count', 'first_due_date']) + ['schedule' => $this->schedule($loan)],
-                    'borrower_name' => $data['borrower_name'], 'foundation_name' => $data['foundation_name'], 'signed_at' => now(), 'actor_id' => $actor->id]);
+                    'witnesses' => $data['witnesses'], 'legacy_witnesses' => false, 'borrower_name' => $data['borrower_name'], 'foundation_name' => $data['foundation_name'], 'signed_at' => now(), 'actor_id' => $actor->id]);
                 foreach ($files as $kind => $file) {
                     $loan->documents()->create($file + ['revision' => $loan->revision, 'kind' => $kind, 'actor_id' => $actor->id]);
                 }
@@ -206,7 +226,9 @@ class QardWorkflowService
         $data = QardRules::validate('followup', $data);
         DB::transaction(function () use ($loan, $data, $actor) {
             $loan = $this->lock($loan);
-            if (! in_array($loan->status, ['active', 'repaid'])) { $this->fail('status', 'Follow-ups are available after disbursement.'); }
+            if (! in_array($loan->status, ['active', 'repaid'])) {
+                $this->fail('status', 'Follow-ups are available after disbursement.');
+            }
             $loan->followups()->create($data + ['actor_id' => $actor->id]);
             $this->event($loan, $actor, 'followup_recorded', [], $data);
             app(QardMonitoringService::class)->refreshLocked($loan);

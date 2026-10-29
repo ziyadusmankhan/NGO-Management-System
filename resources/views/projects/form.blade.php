@@ -2,7 +2,7 @@
 @section('title',$project?'Edit project revision':'New project')
 @push('styles')@include('projects.style')@endpush
 @section('content')
-<div class="qard-page project-page"><div class="business-hero"><div><h1>{{ $project?'Edit '.$project->number.' · revision '.$project->revision:'New project proposal' }}</h1><p class="qmuted">Save a draft, check the budget, then submit for independent review.</p></div><a class="qbtn secondary" href="{{ $project?route('projects.show',$project):route('projects.index') }}">Back</a></div>
+<div class="qard-page project-page"><div class="business-hero"><div><h1>{{ $project?'Edit '.$project->number.' · revision '.$project->revision:'New project proposal' }}</h1><p class="qmuted">Save a draft, check the budget, then submit for independent review.</p></div>@if(auth()->user()?->hasPermission('projects.view'))<a class="qbtn secondary" href="{{ $project?route('projects.show',$project):route('projects.index') }}">Back</a>@endif</div>
 @include('qard.partials.feedback')
 <form class="qcard" method="post" enctype="multipart/form-data" action="{{ $project?route('projects.update',$project):route('projects.store') }}">@csrf @if($project)@method('PUT')<input type="hidden" name="version" value="{{ $project->version }}">@endif
 <h2>Project proposal</h2><div class="qgrid">

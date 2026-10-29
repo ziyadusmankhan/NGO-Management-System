@@ -12,11 +12,14 @@
         {{ $purchase->fund->name }} · {{ ucfirst($purchase->status) }} · Revision {{ $purchase->revision }}:
         {{ str($revision->stage)->headline() }}</p>
     @include('qard.partials.feedback')
-    <div class="qactions"><a class="qbtn secondary"
-            href="{{ route('operations.procurement.index') }}">Back</a>@if($revision->stage === 'draft' && $can('manage') && !$purchase->trashed())<a
+    <div class="qactions">@if(auth()->user()?->hasPermission('procurement.view'))<a class="qbtn secondary"
+            href="{{ route('operations.procurement.index') }}">Back</a>@endif
+@if($revision->stage === 'draft' && $can('manage') && !$purchase->trashed())@if(auth()->user()?->hasPermission('procurement.view'))<a
             class="qbtn" href="{{ route('operations.procurement.edit', $purchase) }}">Edit draft</a>@endif
-        @if($approved?->issued_at)<a class="qbtn secondary"
-        href="{{ route('operations.procurement.order', $purchase) }}">Print purchase order</a>@endif</div>
+@endif
+        @if($approved?->issued_at)@if(auth()->user()?->hasPermission('procurement.view'))<a class="qbtn secondary"
+        href="{{ route('operations.procurement.order', $purchase) }}">Print purchase order</a>@endif
+@endif</div>
     @if($purchase->frozen)
         <p class="notice">Payments and delivery processing are paused while the amendment is unresolved. The previous
     approved budget remains reserved.</p>@endif

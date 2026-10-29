@@ -132,7 +132,8 @@ class AuditCapture
             'actor_id' => $m->{$c['actor']}, 'historical' => $historical, 'occurred_at' => $m->{$c['time']},
             'subject_type' => $parent ? get_class($parent) : get_class($m), 'subject_id' => $parent?->id ?? $m->id, 'subject_reference' => $this->reference($parent ?? $m),
             'source_key' => $m->getTable().':'.$m->id, 'before' => $before, 'after' => $after, 'context' => $context,
-            'reason' => $after['reason'] ?? $m->reason ?? null,
+            'reason' => ($after['reason'] ?? $m->reason ?? null) && in_array($c['module'], ['welfare', 'qard', 'business'], true)
+                ? 'Reason retained in the protected source record.' : ($after['reason'] ?? $m->reason ?? null),
         ]);
     }
 
@@ -146,7 +147,7 @@ class AuditCapture
             'actor_id' => auth()->id() ?? ($action === 'payment_voided' ? $source->voided_by : $t->recorded_by),
             'subject_type' => get_class($source), 'subject_id' => $source->id, 'subject_reference' => $this->reference($source),
             'after' => $t->only(['amount', 'fund_id', 'direction', 'status', 'transaction_date']),
-            'context' => ['ledger_entries' => [$t->only(['id', 'transaction_number', 'fund_id', 'amount', 'direction', 'status', 'source_type', 'source_id'])]], 'reason' => $source->void_reason,
+            'context' => ['ledger_entries' => [$t->only(['id', 'transaction_number', 'fund_id', 'amount', 'direction', 'status', 'source_type', 'source_id'])]], 'reason' => $source instanceof WelfareAssistancePayment && $source->void_reason ? 'Reason retained in the protected source record.' : $source->void_reason,
             'source_key' => $source instanceof WelfareAssistancePayment ? 'welfare_payments:'.$source->id.':'.$t->status : null,
         ]);
     }

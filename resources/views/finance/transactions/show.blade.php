@@ -3,259 +3,7 @@
 @section('title', 'Transaction Details')
 
 @push('styles')
-<style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:22px;
-    }
-
-    .identity {
-        display:flex;
-        align-items:center;
-        gap:14px;
-    }
-
-    .icon-box {
-        width:60px;
-        height:60px;
-        border-radius:16px;
-        background:var(--primary-soft);
-        color:var(--primary);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:22px;
-    }
-
-    .title {
-        font-size:24px;
-        font-weight:700;
-    }
-
-    .meta {
-        margin-top:5px;
-        color:#6e7773;
-        font-size:14px;
-    }
-
-    .actions {
-        display:flex;
-        gap:8px;
-    }
-
-    .ui-btn {
-        height:40px;
-        padding:0 14px;
-        border-radius:10px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        border:1px solid var(--border);
-        background:#fff;
-        color:#637069;
-        font-weight:650;
-        text-decoration:none;
-    }
-
-    .layout {
-        display:grid;
-        grid-template-columns:minmax(0,1fr) 300px;
-        gap:18px;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-        margin-bottom:18px;
-    }
-
-    .card-head {
-        padding:16px 19px;
-        border-bottom:1px solid #eef1ef;
-    }
-
-    .card-head strong {
-        font-size:16px;
-    }
-
-    .card-body {
-        padding:19px;
-    }
-
-    .summary-grid {
-        display:grid;
-        grid-template-columns:repeat(3,1fr);
-        gap:10px;
-    }
-
-    .summary-box {
-        padding:14px;
-        background:#fafcfb;
-        border:1px solid #edf1ee;
-        border-radius:10px;
-    }
-
-    .summary-box.highlight {
-        background:var(--primary-soft);
-    }
-
-    .summary-box label {
-        display:block;
-        color:#6d7571;
-        font-size:12px;
-        text-transform:uppercase;
-    }
-
-    .summary-box strong {
-        display:block;
-        margin-top:5px;
-        font-size:16px;
-    }
-
-    .credit {
-        color:#397955;
-    }
-
-    .debit {
-        color:#a85f58;
-    }
-
-    .info-grid {
-        display:grid;
-        grid-template-columns:repeat(2,1fr);
-        gap:18px;
-    }
-
-    .info label {
-        display:block;
-        margin-bottom:5px;
-        color:#6d7571;
-        font-size:12px;
-        text-transform:uppercase;
-    }
-
-    .info strong,
-    .info p {
-        color:#46534c;
-        font-size:15px;
-    }
-
-    .fund-box {
-        padding:15px;
-        background:#f7faf8;
-        border:1px solid #dce7e1;
-        border-radius:11px;
-    }
-
-    .fund-name {
-        font-size:17px;
-        font-weight:700;
-        color:var(--primary);
-    }
-
-    .fund-reference {
-        margin-top:3px;
-        color:#7a847f;
-        font-size:13px;
-    }
-
-    .side-number {
-        text-align:center;
-        font-size:29px;
-        font-weight:700;
-        color:var(--primary);
-    }
-
-    .side-label {
-        text-align:center;
-        margin-top:3px;
-        color:#6e7772;
-        font-size:14px;
-    }
-
-    .side-row {
-        display:flex;
-        justify-content:space-between;
-        gap:10px;
-        padding:9px 0;
-        border-bottom:1px solid #f0f3f1;
-        font-size:14px;
-    }
-
-    .side-row:last-child {
-        border-bottom:none;
-    }
-
-    .side-row span:first-child {
-        color:#6d7571;
-    }
-
-    .side-row span:last-child {
-        text-align:right;
-        font-weight:650;
-        color:#4a5750;
-    }
-
-    .source-link {
-        display:inline-flex;
-        align-items:center;
-        gap:7px;
-        margin-top:10px;
-        padding:8px 11px;
-        border-radius:8px;
-        background:#f7f9f8;
-        border:1px solid #e5ebe8;
-        color:var(--primary);
-        text-decoration:none;
-        font-size:13px;
-        font-weight:650;
-    }
-
-    @media(max-width:800px) {
-        .layout {
-            grid-template-columns:1fr;
-        }
-
-        .summary-grid,
-        .info-grid {
-            grid-template-columns:1fr;
-        }
-
-        .page-header {
-            flex-direction:column;
-        }
-    }
-
-    @media(max-width:480px) {
-        .identity {
-            align-items:flex-start;
-        }
-
-        .icon-box {
-            width:48px;
-            height:48px;
-            font-size:18px;
-        }
-
-        .title {
-            font-size:19px;
-        }
-
-        .actions {
-            width:100%;
-        }
-
-        .actions .ui-btn {
-            flex:1;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/finance-transactions-show-1.css') }}">
 @endpush
 
 @section('content')
@@ -316,13 +64,13 @@
 
     <div class="actions">
 
-        <a
+        @if(auth()->user()?->hasPermission('finance.view'))<a
             href="{{ route('finance.transactions.index') }}"
             class="ui-btn"
         >
             <i class="bi bi-arrow-left"></i>
             Back
-        </a>
+        </a>@endif
 
         <button
             type="button"
@@ -544,7 +292,7 @@
 
                         <div style="
                             margin-top:12px;
-                            color:#68756e;
+                            color:var(--legacy-text-68756e, #68756e);
                             font-size:13px;
                         ">
                             Opening Balance:
@@ -557,7 +305,7 @@
 
                 @else
 
-                    <div style="color:#89948f;">
+                    <div style="color:var(--legacy-text-89948f, #89948f);">
                         No fund is attached to this transaction.
                     </div>
 
@@ -586,7 +334,7 @@
 
                         <div style="
                             margin-top:5px;
-                            color:#6d7571;
+                            color:var(--legacy-text-6d7571, #6d7571);
                             font-size:13px;
                         ">
                             {{ $transaction->reference }}
@@ -608,7 +356,7 @@
 
                 @else
 
-                    <div style="color:#89948f;">
+                    <div style="color:var(--legacy-text-89948f, #89948f);">
                         Source record is unavailable.
                     </div>
 
@@ -641,7 +389,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

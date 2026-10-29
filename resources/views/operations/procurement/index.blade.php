@@ -7,13 +7,16 @@
     <p>Purchase requests, supplier quotations, accepted deliveries and authorized payments.</p>
     @include('qard.partials.feedback')
     <div class="qactions">
-        @if(auth()->user()->hasPermission('procurement.manage'))<a class="qbtn"
+        @if(auth()->user()->hasPermission('procurement.manage'))@if(auth()->user()?->hasPermission('procurement.view'))<a class="qbtn"
         href="{{ route('operations.procurement.create') }}">New purchase request</a>@endif
-        @if(auth()->user()->hasPermission('procurement.suppliers') || auth()->user()->hasPermission('procurement.policy'))<a
+@endif
+        @if(auth()->user()->hasPermission('procurement.suppliers') || auth()->user()->hasPermission('procurement.policy'))@if(auth()->user()?->hasPermission('procurement.view'))<a
             class="qbtn secondary" href="{{ route('operations.procurement.settings') }}">Suppliers & procurement
         rules</a>@endif
-        @if(auth()->user()->hasPermission('procurement.reports'))<a class="qbtn secondary"
+@endif
+        @if(auth()->user()->hasPermission('procurement.reports'))@if(auth()->user()?->hasPermission('procurement.view'))<a class="qbtn secondary"
         href="{{ route('operations.procurement.reports') }}">Reports & exports</a>@endif
+@endif
     </div>
     <form method="get" class="qcard qgrid"><label>Request number<input name="search"
                 value="{{ request('search') }}"></label><label>Status<select name="status">
@@ -36,8 +39,8 @@
             <tbody>
                 @forelse($purchases as $p)@php($r = $p->approved() ?? $p->proposal())
                 <tr>
-                    <td><a
-                            href="{{ route('operations.procurement.show', $p) }}">{{ $p->number }}</a><small>{{ $r->title }}</small>
+                    <td>@if(auth()->user()?->hasPermission('procurement.view'))<a
+                            href="{{ route('operations.procurement.show', $p) }}">{{ $p->number }}</a>@endif<small>{{ $r->title }}</small>
                     </td>
                     <td>{{ ucfirst($p->parent_type) }} {{ $p->parent_id ? '#' . $p->parent_id : '' }}</td>
                     <td>{{ $r->supplier_snapshot['name'] }}</td>

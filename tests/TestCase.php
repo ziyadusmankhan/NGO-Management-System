@@ -2,10 +2,30 @@
 
 namespace Tests;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Storage;
 
 abstract class TestCase extends BaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Every test uses isolated evidence, including fixtures that do not explicitly fake disks.
+        Storage::fake('private');
+        config(['filesystems.disks.local.root' => Storage::disk('private')->path('')]);
+        Storage::forgetDisk('local');
+    }
+
+    public function actingAs(Authenticatable $user, $guard = null)
+    {
+        $user->refresh();
+        parent::actingAs($user, $guard);
+        $this->withSession(['security.version' => (int) ($user->session_version ?? 1), 'security.started' => time(), 'security.seen' => time(), 'security.complete' => true, 'security.confirmed' => time()]);
+
+        return $this;
+    }
+
     public function createApplication()
     {
         $app = parent::createApplication();

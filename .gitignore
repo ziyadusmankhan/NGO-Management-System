@@ -21,6 +21,7 @@
 /database/database.sqlite
 /database/*.sqlite-wal
 /database/*.sqlite-shm
+/database/*.sqlite.backup
 /tmp/
 /output/
 
@@ -29,3 +30,8 @@
 /.vscode/
 .DS_Store
 Thumbs.db
+
+# Private recovery rehearsals and runtime evidence
+/storage/app/phase11-restore-*/
+/storage/app/private/
+/storage/app/audit-health-failure.json

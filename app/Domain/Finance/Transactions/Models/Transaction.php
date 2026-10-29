@@ -3,15 +3,18 @@
 namespace App\Domain\Finance\Transactions\Models;
 
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Finance\Support\ReadsDecimalMoney;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transaction extends Model
 {
-    use HasFactory, SoftDeletes, \App\Domain\Finance\Support\ReadsDecimalMoney;
+    use EncryptsSensitive;
+    use HasFactory, ReadsDecimalMoney, SoftDeletes;
 
     protected $fillable = [
         'transaction_number',
@@ -28,6 +31,7 @@ class Transaction extends Model
         'recorded_by',
         'notes',
     ];
+
     public function source()
     {
         return $this->morphTo();

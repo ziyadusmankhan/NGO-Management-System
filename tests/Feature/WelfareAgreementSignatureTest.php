@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\Support\CreatesWelfareFixtures;
+use Tests\Support\ValidUpload;
 use Tests\TestCase;
 
 class WelfareAgreementSignatureTest extends TestCase
@@ -38,7 +39,7 @@ class WelfareAgreementSignatureTest extends TestCase
     {
         return [
             'signatory_name' => $name, 'confirmed' => '1',
-            'document' => UploadedFile::fake()->create('signed.pdf', 200, 'application/pdf'),
+            'document' => ValidUpload::pdf('signed.pdf', 200),
         ];
     }
 

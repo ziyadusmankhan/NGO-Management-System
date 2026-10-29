@@ -24,7 +24,7 @@ trait CreatesBusinessFixtures
 
     protected function evidence(string $name = 'evidence.pdf'): UploadedFile
     {
-        return UploadedFile::fake()->create($name, 20, 'application/pdf');
+        return ValidUpload::pdf($name, 20);
     }
 
     protected function businessData(User $actor, string $type = 'repayable'): array

@@ -3,198 +3,7 @@
 @section('title', 'Record Welfare Assistance Payment')
 
 @push('styles')
-<style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:22px;
-    }
-
-    .page-header h1 {
-        margin:0;
-        font-size:25px;
-        font-weight:700;
-    }
-
-    .page-header p {
-        margin:6px 0 0;
-        color:var(--muted);
-    }
-
-    .actions {
-        display:flex;
-        gap:8px;
-    }
-
-    .ui-btn {
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        min-height:40px;
-        padding:0 14px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        background:#fff;
-        color:#596760;
-        text-decoration:none;
-        font-weight:650;
-        cursor:pointer;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .layout {
-        display:grid;
-        grid-template-columns:minmax(0,1fr) 310px;
-        gap:18px;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-        margin-bottom:18px;
-    }
-
-    .card-head {
-        padding:17px 20px;
-        border-bottom:1px solid var(--border);
-    }
-
-    .card-head strong {
-        font-size:16px;
-    }
-
-    .card-head span {
-        display:block;
-        margin-top:4px;
-        color:var(--muted);
-        font-size:14px;
-    }
-
-    .card-body {
-        padding:20px;
-    }
-
-    .grid {
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:18px;
-    }
-
-    .full {
-        grid-column:1/-1;
-    }
-
-    .summary-grid {
-        display:grid;
-        grid-template-columns:repeat(3,minmax(0,1fr));
-        gap:10px;
-        margin-bottom:20px;
-    }
-
-    .summary-box {
-        padding:14px;
-        border:1px solid #e8eeeb;
-        border-radius:10px;
-        background:#fafcfb;
-    }
-
-    .summary-box label {
-        display:block;
-        color:#6d7571;
-        font-size:12px;
-        text-transform:uppercase;
-        letter-spacing:.4px;
-    }
-
-    .summary-box strong {
-        display:block;
-        margin-top:6px;
-        font-size:18px;
-    }
-
-    .notice {
-        display:flex;
-        gap:10px;
-        padding:13px;
-        border-radius:10px;
-        background:#f7f9f8;
-        border:1px solid #e4ebe7;
-        color:#66726c;
-        font-size:14px;
-        line-height:1.6;
-    }
-
-    .notice i {
-        color:var(--primary);
-        font-size:18px;
-    }
-
-    .side-number {
-        text-align:center;
-        font-size:28px;
-        font-weight:700;
-        color:var(--primary);
-    }
-
-    .side-label {
-        text-align:center;
-        color:var(--muted);
-        margin-top:4px;
-    }
-
-    .side-row {
-        display:flex;
-        justify-content:space-between;
-        gap:10px;
-        padding:10px 0;
-        border-bottom:1px solid #eef1ef;
-        font-size:14px;
-    }
-
-    .side-row:last-child {
-        border-bottom:none;
-    }
-
-    .side-row span:first-child {
-        color:#6d7571;
-    }
-
-    .side-row span:last-child {
-        font-weight:650;
-        text-align:right;
-    }
-
-    @media(max-width:900px) {
-        .layout {
-            grid-template-columns:1fr;
-        }
-    }
-
-    @media(max-width:650px) {
-        .page-header {
-            flex-direction:column;
-        }
-
-        .grid,
-        .summary-grid {
-            grid-template-columns:1fr;
-        }
-
-        .full {
-            grid-column:auto;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/welfare-assistance-payments-create-1.css') }}">
 @endpush
 
 @section('content')
@@ -211,13 +20,13 @@
     </div>
 
     <div class="actions">
-        <a
+        @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
             href="{{ route('welfare.assistance.show', $assistance) }}"
             class="ui-btn"
         >
             <i class="bi bi-arrow-left"></i>
             Back
-        </a>
+        </a>@endif
     </div>
 
 </div>
@@ -453,12 +262,12 @@
 
                     <div class="d-flex justify-content-end gap-2 mt-4 pt-4 border-top">
 
-                        <a
+                        @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a
                             href="{{ route('welfare.assistance.show', $assistance) }}"
                             class="ui-btn"
                         >
                             Cancel
-                        </a>
+                        </a>@endif
 
                         <button
                             type="submit"
@@ -496,7 +305,7 @@
 
                 <div style="
                     height:1px;
-                    background:#eef1ef;
+                    background:var(--legacy-surface-eef1ef, #eef1ef);
                     margin:16px 0;
                 "></div>
 

@@ -3,294 +3,7 @@
 @section('title', 'Transactions')
 
 @push('styles')
-<style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-end;
-        gap:20px;
-        margin-bottom:24px;
-    }
-
-    .page-header h1 {
-        margin:0;
-        font-size:25px;
-        font-weight:700;
-        letter-spacing:-.5px;
-    }
-
-    .page-header p {
-        margin:7px 0 0;
-        color:var(--muted);
-        font-size:16px;
-    }
-
-    .summary-grid {
-        display:grid;
-        grid-template-columns:repeat(4,minmax(0,1fr));
-        gap:12px;
-        margin-bottom:18px;
-    }
-
-    .summary-card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:13px;
-        padding:15px;
-    }
-
-    .summary-label {
-        color:var(--muted);
-        font-size:14px;
-    }
-
-    .summary-value {
-        margin-top:6px;
-        font-size:20px;
-        font-weight:700;
-    }
-
-    .summary-meta {
-        margin-top:4px;
-        color:#6d7572;
-        font-size:13px;
-    }
-
-    .main-card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-    }
-
-    .toolbar {
-        padding:15px 17px;
-        border-bottom:1px solid #eef1ef;
-        display:flex;
-        gap:9px;
-        flex-wrap:wrap;
-    }
-
-    .search {
-        position:relative;
-        flex:1;
-        min-width:230px;
-    }
-
-    .search i {
-        position:absolute;
-        left:13px;
-        top:50%;
-        transform:translateY(-50%);
-        color:#6f7672;
-    }
-
-    .search input {
-        width:100%;
-        height:40px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        padding:0 12px 0 36px;
-        background:#fafcfa;
-        outline:none;
-    }
-
-    .filter {
-        height:40px;
-        min-width:145px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        padding:0 12px;
-        background:#fff;
-        color:#68756f;
-        font-size:14px;
-        outline:none;
-    }
-
-    .ui-btn {
-        height:40px;
-        padding:0 14px;
-        border-radius:10px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        font-size:15px;
-        font-weight:650;
-        border:1px solid var(--border);
-        background:#fff;
-        color:#637069;
-        text-decoration:none;
-        cursor:pointer;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .table-wrap {
-        overflow-x:auto;
-    }
-
-    .transaction-table {
-        width:100%;
-        min-width:1100px;
-        border-collapse:collapse;
-    }
-
-    .transaction-table th {
-        padding:11px 16px;
-        background:#fafcfb;
-        border-bottom:1px solid #eef1ef;
-        color:#6c7470;
-        font-size:12px;
-        text-transform:uppercase;
-        letter-spacing:.55px;
-        text-align:left;
-        white-space:nowrap;
-    }
-
-    .transaction-table td {
-        padding:13px 16px;
-        border-bottom:1px solid #f0f3f1;
-        font-size:14px;
-        vertical-align:middle;
-    }
-
-    .transaction-table tbody tr:hover {
-        background:#fbfcfb;
-    }
-
-    .transaction-number {
-        font-weight:650;
-        color:#55635b;
-    }
-
-    .subtext {
-        margin-top:3px;
-        color:#89928e;
-        font-size:12px;
-    }
-
-    .fund-name {
-        font-weight:600;
-        color:#58655f;
-    }
-
-    .fund-reference {
-        margin-top:3px;
-        color:#89928e;
-        font-size:12px;
-    }
-
-    .type-badge,
-    .status-badge {
-        display:inline-flex;
-        align-items:center;
-        gap:5px;
-        padding:5px 8px;
-        border-radius:20px;
-        font-size:12px;
-        font-weight:650;
-        white-space:nowrap;
-    }
-
-    .type-badge.donation {
-        background:#edf7f0;
-        color:#397955;
-    }
-
-    .type-badge.expense {
-        background:#fff0ef;
-        color:#a85f58;
-    }
-
-    .type-badge.other {
-        background:#eef3f8;
-        color:#55758d;
-    }
-
-    .status-badge {
-        background:#edf7f0;
-        color:#397955;
-    }
-
-    .credit {
-        color:#397955;
-        font-weight:700;
-    }
-
-    .debit {
-        color:#a85f58;
-        font-weight:700;
-    }
-
-    .balance {
-        color:#4a5750;
-        font-weight:650;
-    }
-
-    .action {
-        width:30px;
-        height:30px;
-        border:1px solid var(--border);
-        background:#fff;
-        border-radius:8px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        color:#6c7771;
-        text-decoration:none;
-    }
-
-    .empty {
-        padding:50px;
-        text-align:center;
-        color:#89948f;
-    }
-
-    .table-footer {
-        padding:14px 18px;
-        border-top:1px solid #eef1ef;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:10px;
-    }
-
-    .result {
-        color:#6e7672;
-        font-size:13px;
-    }
-
-    @media(max-width:900px) {
-        .summary-grid {
-            grid-template-columns:repeat(2,1fr);
-        }
-    }
-
-    @media(max-width:650px) {
-        .summary-grid {
-            grid-template-columns:1fr;
-        }
-
-        .search {
-            min-width:100%;
-        }
-
-        .filter {
-            flex:1;
-            min-width:0;
-        }
-
-        .table-footer {
-            flex-direction:column;
-            align-items:flex-start;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/finance-transactions-index-1.css') }}">
 @endpush
 
 @section('content')
@@ -523,12 +236,12 @@
             'date_to'
         ]))
 
-            <a
+            @if(auth()->user()?->hasPermission('finance.view'))<a
                 href="{{ route('finance.transactions.index') }}"
                 class="ui-btn"
             >
                 Clear
-            </a>
+            </a>@endif
 
         @endif
 
@@ -692,13 +405,13 @@
 
                         <td>
 
-                            <a
+                            @if(auth()->user()?->hasPermission('finance.view'))<a
                                 href="{{ route('finance.transactions.show', $transaction) }}"
                                 class="action"
                                 title="View transaction"
                             >
                                 <i class="bi bi-receipt"></i>
-                            </a>
+                            </a>@endif
 
                         </td>
 
@@ -774,8 +487,8 @@
     display:flex;
     gap:10px;
     padding:14px 16px;
-    background:#f7f9f8;
-    border:1px solid #e5ebe8;
+    background:var(--legacy-surface-f7f9f8, #f7f9f8);
+    border:1px solid var(--legacy-border-e5ebe8, #e5ebe8);
     border-radius:13px;
 ">
 
@@ -792,7 +505,7 @@
 
         <p style="
             margin:4px 0 0;
-            color:#6b7670;
+            color:var(--legacy-text-6b7670, #6b7670);
             font-size:13px;
             line-height:1.6;
         ">

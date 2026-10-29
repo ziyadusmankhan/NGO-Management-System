@@ -2,10 +2,12 @@
 
 namespace App\Domain\Qard\Models;
 
+use App\Domain\Documents\Concerns\RegistersDocumentsAtomically;
 use Illuminate\Database\Eloquent\Model;
 
 class QardDocument extends Model
 {
-    protected $guarded = ['id'];
+    use RegistersDocumentsAtomically;
 
+    protected $guarded = ['id'];
 }

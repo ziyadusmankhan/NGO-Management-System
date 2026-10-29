@@ -12,4 +12,9 @@ class BusinessReminder extends Model
     {
         return ['resolved_at' => 'datetime'];
     }
+
+    public function application()
+    {
+        return $this->belongsTo(BusinessApplication::class, 'business_application_id')->withTrashed();
+    }
 }

@@ -3,213 +3,7 @@
 @section('title', 'Beneficiaries')
 
 @push('styles')
-<style>
-    .page-header {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:20px;
-        margin-bottom:22px;
-    }
-
-    .page-header h1 {
-        margin:0;
-        font-size:25px;
-        font-weight:700;
-    }
-
-    .page-header p {
-        margin:6px 0 0;
-        color:var(--muted);
-    }
-
-    .ui-btn {
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        gap:7px;
-        height:40px;
-        padding:0 14px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        background:#fff;
-        color:#596760;
-        text-decoration:none;
-        font-weight:650;
-        cursor:pointer;
-    }
-
-    .ui-btn.primary {
-        background:var(--primary);
-        border-color:var(--primary);
-        color:#fff;
-    }
-
-    .stats-grid {
-        display:grid;
-        grid-template-columns:repeat(4,minmax(0,1fr));
-        gap:15px;
-        margin-bottom:18px;
-    }
-
-    .stat-card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        padding:18px;
-    }
-
-    .stat-label {
-        color:var(--muted);
-        font-size:14px;
-    }
-
-    .stat-value {
-        margin-top:5px;
-        font-size:26px;
-        font-weight:700;
-    }
-
-    .stat-icon {
-        width:40px;
-        height:40px;
-        border-radius:10px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        background:var(--primary-soft);
-        color:var(--primary);
-        margin-bottom:14px;
-    }
-
-    .card {
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:14px;
-        overflow:hidden;
-        margin-bottom:18px;
-    }
-
-    .card-head {
-        padding:17px 20px;
-        border-bottom:1px solid var(--border);
-    }
-
-    .filter-grid {
-        display:grid;
-        grid-template-columns:2fr 1fr 1fr 1fr auto;
-        gap:10px;
-        align-items:end;
-    }
-
-    .form-label {
-        font-size:13px;
-        font-weight:650;
-        color:#435049;
-    }
-
-    .table th {
-        font-size:12px;
-        text-transform:uppercase;
-        letter-spacing:.4px;
-        color:#718078;
-        white-space:nowrap;
-    }
-
-    .table td {
-        vertical-align:middle;
-    }
-
-    .beneficiary-name {
-        font-weight:650;
-        color:var(--text);
-    }
-
-    .beneficiary-number {
-        color:var(--muted);
-        font-size:12px;
-        margin-top:2px;
-    }
-
-    .badge-soft {
-        display:inline-flex;
-        align-items:center;
-        padding:5px 9px;
-        border-radius:999px;
-        font-size:12px;
-        font-weight:650;
-    }
-
-    .badge-pending {
-        background:#fff7df;
-        color:#87671d;
-    }
-
-    .badge-verified,
-    .badge-approved {
-        background:#eaf6ef;
-        color:#28704a;
-    }
-
-    .badge-rejected {
-        background:#fbeceb;
-        color:#9a4037;
-    }
-
-    .badge-neutral {
-        background:#eef1ef;
-        color:#68736e;
-    }
-
-    .action-row {
-        display:flex;
-        gap:6px;
-        flex-wrap:wrap;
-    }
-
-    .icon-btn {
-        width:34px;
-        height:34px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        border:1px solid var(--border);
-        border-radius:8px;
-        background:#fff;
-        color:#5d6963;
-    }
-
-    .icon-btn:hover {
-        color:var(--primary);
-        background:var(--primary-soft);
-    }
-
-    .empty-state {
-        padding:55px 20px;
-        text-align:center;
-        color:var(--muted);
-    }
-
-    @media(max-width:1100px) {
-        .stats-grid {
-            grid-template-columns:repeat(2,minmax(0,1fr));
-        }
-
-        .filter-grid {
-            grid-template-columns:1fr 1fr;
-        }
-    }
-
-    @media(max-width:700px) {
-        .stats-grid {
-            grid-template-columns:1fr;
-        }
-
-        .filter-grid {
-            grid-template-columns:1fr;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/views/welfare-beneficiaries-index-1.css') }}">
 @endpush
 
 @section('content')
@@ -222,10 +16,10 @@
     </div>
 
     @can('welfare.beneficiaries.manage')
-        <a href="{{ route('welfare.beneficiaries.create') }}" class="ui-btn primary">
+        @if(auth()->user()?->hasPermission('welfare.view') && auth()->user()?->hasPermission('welfare.beneficiaries.manage'))<a href="{{ route('welfare.beneficiaries.create') }}" class="ui-btn primary">
             <i class="bi bi-person-plus"></i>
             Add Beneficiary
-        </a>
+        </a>@endif
     @endcan
 
 </div>
@@ -355,9 +149,9 @@
                         Filter
                     </button>
 
-                    <a href="{{ route('welfare.beneficiaries.index') }}" class="ui-btn">
+                    @if(auth()->user()?->hasPermission('welfare.view'))<a href="{{ route('welfare.beneficiaries.index') }}" class="ui-btn">
                         Reset
-                    </a>
+                    </a>@endif
                 </div>
 
             </div>
@@ -413,12 +207,12 @@
                         <tr>
 
                             <td>
-                                <a
+                                @if(auth()->user()?->hasPermission('welfare.view'))<a
                                     href="{{ route('welfare.beneficiaries.show', $beneficiary) }}"
                                     class="beneficiary-name"
                                 >
                                     {{ $beneficiary->full_name }}
-                                </a>
+                                </a>@endif
 
                                 <div class="beneficiary-number">
                                     {{ $beneficiary->beneficiary_number }}
@@ -451,22 +245,22 @@
                             <td>
                                 <div class="action-row justify-content-end">
 
-                                    <a
+                                    @if(auth()->user()?->hasPermission('welfare.view'))<a
                                         href="{{ route('welfare.beneficiaries.show', $beneficiary) }}"
                                         class="icon-btn"
                                         title="View"
                                     >
                                         <i class="bi bi-eye"></i>
-                                    </a>
+                                    </a>@endif
 
                                     @can('welfare.beneficiaries.manage')
-                                        <a
+                                        @if(auth()->user()?->hasPermission('welfare.view') && auth()->user()?->hasPermission('welfare.beneficiaries.manage'))<a
                                             href="{{ route('welfare.beneficiaries.edit', $beneficiary) }}"
                                             class="icon-btn"
                                             title="Edit"
                                         >
                                             <i class="bi bi-pencil"></i>
-                                        </a>
+                                        </a>@endif
                                     @endcan
 
                                     @can('welfare.beneficiaries.verify')
@@ -581,10 +375,10 @@
             </p>
 
             @can('welfare.beneficiaries.manage')
-                <a href="{{ route('welfare.beneficiaries.create') }}" class="ui-btn primary">
+                @if(auth()->user()?->hasPermission('welfare.view') && auth()->user()?->hasPermission('welfare.beneficiaries.manage'))<a href="{{ route('welfare.beneficiaries.create') }}" class="ui-btn primary">
                     <i class="bi bi-person-plus"></i>
                     Add First Beneficiary
-                </a>
+                </a>@endif
             @endcan
         </div>
 

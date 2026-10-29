@@ -4,6 +4,8 @@ namespace App\Domain\Business\Models;
 
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Support\Money;
+use App\Domain\Finance\Support\ReadsDecimalMoney;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +13,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BusinessApplication extends Model
 {
-    use \App\Domain\Finance\Support\ReadsDecimalMoney, SoftDeletes;
+    use EncryptsSensitive;
+    use ReadsDecimalMoney, SoftDeletes;
 
     protected $guarded = ['id'];
 

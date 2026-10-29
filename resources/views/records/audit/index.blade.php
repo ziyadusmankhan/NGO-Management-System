@@ -35,8 +35,8 @@
                         <option value="1" @selected(($filters['historical'] ?? '') === '1')>Imported history</option>
                         <option value="0" @selected(($filters['historical'] ?? '') === '0')>Captured since Phase 10</option>
                     </select></label>
-            </div><button class="audit-btn">Apply filters</button><a class="audit-btn"
-                href="{{ route('records.audit.index') }}">Reset filters</a>
+            </div><button class="audit-btn">Apply filters</button>@if(auth()->user()?->hasPermission('audit.view'))<a class="audit-btn"
+                href="{{ route('records.audit.index') }}">Reset filters</a>@endif
             @can('audit.export')<button class="audit-btn" formaction="{{ route('records.audit.export') }}" name="format"
                 value="print">Print / Save as PDF</button><button class="audit-btn"
             formaction="{{ route('records.audit.export') }}" name="format" value="xlsx">Download XLSX</button>@endcan
@@ -58,8 +58,9 @@
                 <tbody>
                     @forelse($events as $event)
                         <tr>
-                            <td><a
-                                    href="{{ route('records.audit.show', $event) }}">{{ $event->occurred_at?->timezone('Asia/Karachi')->format('d M Y H:i:s') ?? 'Time unavailable' }}</a>@if($event->historical)<small>Imported
+                            <td>@if(auth()->user()?->hasPermission('audit.view'))<a
+                                    href="{{ route('records.audit.show', $event) }}">{{ $event->occurred_at?->timezone('Asia/Karachi')->format('d M Y H:i:s') ?? 'Time unavailable' }}</a>@endif
+@if($event->historical)<small>Imported
                                     history</small>@endif</td>
                             <td>{{ $event->actor_name ?? ucfirst($event->actor_kind) }}</td>
                             <td>{{ ucfirst($event->module) }}<small>{{ str($event->action)->headline() }}</small></td>

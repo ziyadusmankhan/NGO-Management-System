@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Domain\Finance\Donations\Models\Donation;
 use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Reports\Services\FinanceReportService;
 use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Users\Models\Role;
-use App\Domain\Welfare\Assistance\Services\WelfareMonitoringService;
+use App\Domain\Welfare\Applications\Models\WelfareApplication;
+use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\WelfareReviewRoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -127,17 +127,27 @@ class PhaseFiveMoneyAndAccessTest extends TestCase
         $this->assertDatabaseCount('transactions', 0);
     }
 
-    public function test_unimplemented_sections_do_not_show_sample_business_records(): void
+    public function test_operations_and_records_pages_are_permission_protected_and_do_not_show_sample_records(): void
     {
         $this->actingAs($this->staff());
         foreach (['/operations/tasks', '/records/reports'] as $url) {
-            $this->get($url)->assertOk()->assertSee('No records to display.')->assertDontSee('Ahmed Khan')->assertDontSee('2.84M');
+            $this->get($url)->assertForbidden();
         }
+
+        $authorized = $this->staff(['tasks.view', 'reports.view']);
+        $this->actingAs($authorized)->get('/operations/tasks')->assertOk()
+            ->assertSee('No tasks match these filters.')
+            ->assertDontSee('Ahmed Khan')
+            ->assertDontSee('2.84M');
+        $this->get('/records/reports')->assertOk()
+            ->assertSee('No reports have been generated yet.')
+            ->assertDontSee('Ahmed Khan')
+            ->assertDontSee('2.84M');
     }
 
     public function test_empty_application_pages_render_for_a_single_administrator(): void
     {
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
         $admin = $this->staff([]);
         $admin->roles()->sync([Role::where('slug', 'administrator')->sole()->id]);
         $this->actingAs($admin);
@@ -169,13 +179,13 @@ class PhaseFiveMoneyAndAccessTest extends TestCase
             'purpose_details' => 'School tuition assistance for this term', 'priority' => 'normal', 'frequency' => 'one_time',
         ];
         $this->actingAs($actor)->postJson(route('welfare.applications.store'), $data)->assertRedirect();
-        $application = \App\Domain\Welfare\Applications\Models\WelfareApplication::latest('id')->first();
+        $application = WelfareApplication::latest('id')->first();
         $this->assertSame('489.75', $application->organization_contribution);
         $this->assertSame('10.25', $application->applicant_contribution);
         $data['requested_amount'] = '0.30';
         $data['applicant_contribution'] = '0.10';
         $this->postJson(route('welfare.applications.store'), $data)->assertRedirect();
-        $this->assertSame('0.20', \App\Domain\Welfare\Applications\Models\WelfareApplication::latest('id')->first()->organization_contribution);
+        $this->assertSame('0.20', WelfareApplication::latest('id')->first()->organization_contribution);
         $data['applicant_contribution'] = '0.105';
         $this->postJson(route('welfare.applications.store'), $data)->assertUnprocessable()->assertJsonValidationErrors('applicant_contribution');
     }

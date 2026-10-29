@@ -5,6 +5,7 @@
     </testsuites>
     <source><include><directory>app</directory></include></source>
     <php>
+        <env name="SECURITY_LOOKUP_KEY" value="dGVzdGluZy1vbmx5LWtleS0zMi1ieXRlcy1sb25nISE=" force="true"/>
         <env name="APP_ENV" value="testing" force="true"/>
         <env name="APP_URL" value="http://localhost" force="true"/>
         <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" force="true"/>

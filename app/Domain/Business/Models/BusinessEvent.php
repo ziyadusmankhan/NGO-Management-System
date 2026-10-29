@@ -3,11 +3,13 @@
 namespace App\Domain\Business\Models;
 
 use App\Domain\Audit\Concerns\RecordsAudit;
+use App\Domain\Security\Concerns\EncryptsSensitive;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class BusinessEvent extends Model
 {
+    use EncryptsSensitive;
     use RecordsAudit;
 
     protected $guarded = ['id'];

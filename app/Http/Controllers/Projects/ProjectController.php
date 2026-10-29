@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Projects;
 
 use App\Domain\Committees\Models\Committee;
+use App\Domain\Documents\Services\DocumentService;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Procurement\Services\ProcurementGuard;
 use App\Domain\Projects\Models\Project;
@@ -121,7 +122,7 @@ class ProjectController
         app(ProcurementGuard::class)->authorizeEvidence('project', $document->movement_id, request()->user());
         abort_unless(Storage::disk('private')->exists($document->path), 404);
 
-        return Storage::disk('private')->download($document->path, $document->original_name, ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
+        return app(DocumentService::class)->sourceDownload(auth()->user(), 'projects:'.$document->id);
     }
 
     public function categories()

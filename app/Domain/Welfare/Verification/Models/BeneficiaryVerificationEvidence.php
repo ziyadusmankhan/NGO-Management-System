@@ -2,12 +2,15 @@
 
 namespace App\Domain\Welfare\Verification\Models;
 
+use App\Domain\Documents\Concerns\RegistersDocumentsAtomically;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BeneficiaryVerificationEvidence extends Model
 {
+    use RegistersDocumentsAtomically;
+
     protected $table = 'beneficiary_verification_evidence';
 
     protected $fillable = [
@@ -50,9 +53,9 @@ class BeneficiaryVerificationEvidence extends Model
         $bytes = (int) $this->size;
 
         if ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 1) . ' MB';
+            return number_format($bytes / 1048576, 1).' MB';
         }
 
-        return max(1, (int) round($bytes / 1024)) . ' KB';
+        return max(1, (int) round($bytes / 1024)).' KB';
     }
 }

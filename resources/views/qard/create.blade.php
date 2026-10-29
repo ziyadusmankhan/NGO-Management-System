@@ -13,5 +13,5 @@
 <div><label for="installment_count">Number of installments</label><input id="installment_count" type="number" name="installment_count" min="1" max="600" value="{{ old('installment_count',$loan?->installment_count ?? 1) }}" required></div>
 <div><label for="first_due_date">First repayment due</label><input id="first_due_date" type="date" name="first_due_date" value="{{ old('first_due_date',$loan?->first_due_date?->toDateString()) }}" required><small>After expected signing and disbursement. Include any agreed grace period in this date.</small></div>
 </div><div style="margin-top:18px"><label for="purpose">Purpose and need</label><textarea id="purpose" name="purpose" maxlength="5000" required>{{ old('purpose',$loan?->purpose) }}</textarea></div>
-<div class="qactions"><button class="qbtn">Save draft</button><a class="qbtn secondary" href="{{ $loan ? route('qard.show',$loan) : route('qard.index') }}">Cancel</a></div></form></div>
+<div class="qactions"><button class="qbtn">Save draft</button>@if(auth()->user()?->hasPermission('qard.view'))<a class="qbtn secondary" href="{{ $loan ? route('qard.show',$loan) : route('qard.index') }}">Cancel</a>@endif</div></form></div>
 @endsection

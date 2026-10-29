@@ -12,6 +12,7 @@ use App\Domain\Procurement\Services\ProcurementPaymentService;
 use App\Domain\Projects\Services\ProjectWorkflowService;
 use App\Domain\Users\Models\Permission;
 use App\Domain\Users\Models\Role;
+use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use Database\Seeders\AuditRoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -167,6 +168,28 @@ class AuditTrailTest extends TestCase
         $import->run();
         $this->assertSame(1, AuditEvent::where('source_key', 'fund_changes:'.$source->id)->count());
         $this->assertNotNull($source->fresh());
+    }
+
+    public function test_source_key_capture_is_idempotent_inside_an_existing_transaction(): void
+    {
+        $recorder = app(AuditRecorder::class);
+        $first = null;
+        $second = null;
+
+        DB::transaction(function () use ($recorder, &$first, &$second): void {
+            $data = [
+                'source_key' => 'welfare_assistance_status_changes:1',
+                'subject_type' => WelfareAssistance::class,
+                'subject_id' => 1,
+                'subject_reference' => 'WFA-00001',
+                'after' => ['to_status' => 'pending'],
+            ];
+            $first = $recorder->record('welfare', 'status_pending', $data);
+            $second = $recorder->record('welfare', 'status_pending', $data);
+        });
+
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame(1, AuditEvent::where('source_key', 'welfare_assistance_status_changes:1')->count());
     }
 
     public function test_exports_use_fixed_snapshot_safe_strings_and_karachi_dates(): void

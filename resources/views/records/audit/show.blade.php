@@ -2,7 +2,7 @@
 @section('title', 'Audit event')
 @push('styles')@include('records.audit.style')@endpush
 @section('content')
-    <div class="audit-page"><a href="{{ route('records.audit.index') }}">Back to Audit Trail</a>
+    <div class="audit-page">@if(auth()->user()?->hasPermission('audit.view'))<a href="{{ route('records.audit.index') }}">Back to Audit Trail</a>@endif
         <h1>{{ str($event->action)->headline() }}</h1>
         <p>{{ $event->summary }}</p>
         <div class="audit-card audit-grid">

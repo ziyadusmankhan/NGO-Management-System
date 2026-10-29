@@ -25,8 +25,8 @@
                     </select></label>@endforeach</div>
             <div class="qactions"><button class="qbtn">Apply filters</button><button class="qbtn secondary" name="format"
                     value="xlsx">Download XLSX</button><button class="qbtn secondary" name="format"
-                    value="print">Print-friendly report</button><a
-                    href="{{ route('operations.procurement.index') }}">Back</a></div>
+                    value="print">Print-friendly report</button>@if(auth()->user()?->hasPermission('procurement.view'))<a
+                    href="{{ route('operations.procurement.index') }}">Back</a>@endif</div>
         </form>
         <p class="no-print">For PDF: Ctrl+P → Landscape → Save as PDF.</p>
         <p>Payments/refunds use the inclusive date range {{ $filters['from'] ?? 'beginning' }} through
