@@ -2,6 +2,8 @@
 @section('title','Projects')
 @push('styles')@include('projects.style')@endpush
 @section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'projects'])</div>
+
 <div class="qard-page project-page">
 <div class="business-hero"><div><h1>Community Projects</h1><p class="qmuted">Proposals, approved budgets, direct payments and implementation.</p></div><div class="qactions">
 @can('projects.manage')@if(auth()->user()?->hasPermission('projects.view') && auth()->user()?->hasPermission('projects.manage'))<a class="qbtn" href="{{ route('projects.create') }}">New project</a>@endif

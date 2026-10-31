@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title','Documents')
 @push('styles')@include('records.audit.style')@endpush
-@section('content')<div class="audit-page">
+@section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'documents'])</div>
+<div class="audit-page">
 <h1>Documents Library</h1>
 <p>Private evidence and organization records you are authorized to access.</p>@include('qard.partials.feedback')
 @can('documents.upload')@if(auth()->user()?->hasPermission('documents.view') && auth()->user()?->hasPermission('documents.upload'))<a class="audit-btn" href="{{ route('records.documents.create') }}">Upload document</a>@endif

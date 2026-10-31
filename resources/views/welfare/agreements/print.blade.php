@@ -7,7 +7,7 @@
     <title>{{ $agreement->agreement_number }} - Welfare Agreement</title>
 
     <link rel="stylesheet" href="{{ asset('css/views/welfare-agreements-print-1.css') }}">
-<link rel="stylesheet" href="{{ asset('css/foundation-print.css') }}"></head>
+<link rel="stylesheet" href="{{ asset('css/foundation-print.css') }}"><script defer src="{{ asset('js/foundation-print.js') }}?v=1"></script></head>
 
 <body>
 

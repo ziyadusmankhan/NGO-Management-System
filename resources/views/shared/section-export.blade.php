@@ -1,0 +1,3 @@
+@if(collect(\App\Domain\Organization\Services\SectionRegister::TYPES[$exportKind][1])->every(fn($permission)=>auth()->user()?->hasPermission($permission)))
+@include('shared.directory-export',['exportRoute'=>'sections.export','exportParameters'=>['kind'=>$exportKind]+($exportParameters??[]),'exportFilters'=>['search','status','support_type','priority','type','category','module','reference','action','outcome','historical','assigned_user_id','committee_id','uploader','actor_id','archived','overdue','reminders','from','to','fund_id','category_id','responsible_id','supplier_id','parent_type','parent_id']])
+@endif

@@ -25,7 +25,8 @@
     <link rel="stylesheet" href="{{ asset('css/foundation-ui.css') }}?v=1">
     <link rel="stylesheet" href="{{ asset('css/foundation-legacy-tokens.css') }}?v=2">
     <link rel="stylesheet" href="{{ asset('css/foundation-theme.css') }}?v=2">
-</head>
+    <link rel="stylesheet" media="print" href="{{ asset('css/foundation-print.css') }}?v=3">
+<script defer src="{{ asset('js/foundation-print.js') }}?v=1"></script></head>
 
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>

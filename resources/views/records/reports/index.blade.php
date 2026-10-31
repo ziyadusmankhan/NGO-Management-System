@@ -2,6 +2,8 @@
 @section('title','Reports')
 @push('styles')@include('records.audit.style')@endpush
 @section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'reports'])</div>
+
 <div class="audit-page"><h1>Records Reports</h1><p>Generate permission-safe snapshots from live organizational records.</p>@include('qard.partials.feedback')
 @can('reports.generate')<form class="audit-card" method="post" action="{{ route('records.reports.store') }}">@csrf<h3>Generate a report</h3><div class="audit-grid"><label>Report type<select name="type" required>@foreach($types as $key=>$type)<option value="{{ $key }}">{{ $type['title'] }}</option>@endforeach</select></label><label>From date<input type="date" name="from" value="{{ old('from',today('Asia/Karachi')->startOfMonth()->format('Y-m-d')) }}"></label><label>Through date<input type="date" name="to" value="{{ old('to',today('Asia/Karachi')->format('Y-m-d')) }}"></label></div><button class="audit-btn">Generate live report</button></form>@endcan
 <div class="audit-grid">@foreach($types as $key=>$type)<div class="audit-card"><h3>{{ $type['title'] }}</h3><p>{{ $type['description'] }}</p><small>Uses only records your role is authorized to report on.</small></div>@endforeach</div>

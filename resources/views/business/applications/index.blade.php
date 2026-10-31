@@ -2,6 +2,8 @@
 @section('title', 'Small Businesses')
 @push('styles') @include('business.partials.style') @endpush
 @section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'business'])</div>
+
 <div class="qard-page">
 <div class="business-hero"><div><h1>Small Businesses</h1><p class="qmuted">Applications, staged funding, business monitoring and principal recovery.</p></div><div class="qactions">
 @can('business.manage')@if(auth()->user()?->hasPermission('business.view') && auth()->user()?->hasPermission('business.manage'))<a class="qbtn" href="{{ route('business.applications.create') }}">New application</a>@endif

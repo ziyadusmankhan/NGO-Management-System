@@ -23,8 +23,8 @@
                             <option value="{{ $o->id }}" @selected(($filters[$key] ?? '') == $o->id)>{{ $o->name }}</option>
                         @endforeach
                     </select></label>@endforeach</div>
-            <div class="qactions"><button class="qbtn">Apply filters</button><button class="qbtn secondary" name="format"
-                    value="xlsx">Download XLSX</button><button class="qbtn secondary" name="format"
+            <div class="qactions"><button class="qbtn">Apply filters</button><button class="qbtn secondary" formaction="{{ route('sections.export',['kind'=>'procurement-report']) }}" name="format"
+                    value="xlsx">Download XLSX</button><button class="qbtn secondary" formaction="{{ route('sections.export',['kind'=>'procurement-report']) }}" name="format" value="pdf">Download A4 PDF</button><button class="qbtn secondary" name="format"
                     value="print">Print-friendly report</button>@if(auth()->user()?->hasPermission('procurement.view'))<a
                     href="{{ route('operations.procurement.index') }}">Back</a>@endif</div>
         </form>
