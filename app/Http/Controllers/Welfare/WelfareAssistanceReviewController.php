@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Welfare;
 
+use App\Domain\Organization\Services\FinanceWelfareQuery;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistanceReminder;
 use App\Domain\Welfare\Assistance\Services\WelfareMonitoringService;
@@ -16,31 +17,13 @@ class WelfareAssistanceReviewController extends Controller
     {
         $today = $monitoring->today();
         $base = WelfareAssistance::where('status', 'approved');
-        $filters = [
-            'overdue' => fn ($query) => $query->whereDate('next_review_date', '<', $today->toDateString()),
-            'today' => fn ($query) => $query->whereDate('next_review_date', $today->toDateString()),
-            'upcoming' => fn ($query) => $query->whereBetween('next_review_date', [$today->addDay()->toDateString(), $today->addDays(30)->toDateString()]),
-            'none' => fn ($query) => $query->whereNull('next_review_date'),
-            'follow_up' => fn ($query) => $query->whereHas('latestReview', fn ($review) => $review->where('outcome', 'follow_up_required')),
-            'closure' => fn ($query) => $query->whereHas('latestReview', fn ($review) => $review->where('outcome', 'no_longer_needed')),
-            'ended' => fn ($query) => $query->whereDate('end_date', '<', $today->toDateString()),
-        ];
+        $directory = app(FinanceWelfareQuery::class);
+        $filters = $directory->reviewFilters();
         $counts = [];
         foreach ($filters as $key => $filter) {
             $counts[$key] = $filter(clone $base)->count();
         }
-        $query = (clone $base)->with(['beneficiary', 'fund', 'latestReview.reviewedBy']);
-        if (isset($filters[request('filter')])) {
-            $filters[request('filter')]($query);
-        }
-        if (request()->filled('search')) {
-            $search = trim(request('search'));
-            $query->where(fn ($query) => $query->where('assistance_number', 'like', "%{$search}%")
-                ->orWhereHas('beneficiary', fn ($beneficiary) => $beneficiary->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('beneficiary_number', 'like', "%{$search}%")));
-        }
-        $assistances = $query->orderByRaw('CASE WHEN next_review_date IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('next_review_date')->orderBy('id')->paginate(15)->withQueryString();
+        $assistances = $directory->query('reviews', $directory->filters(request(), 'reviews'))->paginate(15)->withQueryString();
         // The queue above always reads current dates; reminders show the scheduler's retained work items.
         $reminders = WelfareAssistanceReminder::whereNull('resolved_at')
             ->whereHas('assistance', fn ($query) => $query->whereNull('deleted_at')->where('status', 'approved'))

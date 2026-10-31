@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Welfare;
 
-use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Funds\Models\Fund;
+use App\Domain\Finance\Support\Money;
+use App\Domain\Organization\Services\FinanceWelfareQuery;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Assistance\Models\WelfareAssistance;
 use App\Domain\Welfare\Assistance\Services\WelfareAssistanceService;
+use App\Domain\Welfare\Assistance\Services\WelfareMonitoringService;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Welfare\CloseWelfareAssistanceRequest;
 use App\Http\Requests\Welfare\StoreWelfareAssistanceRequest;
 use App\Http\Requests\Welfare\TransitionWelfareAssistanceRequest;
 use App\Http\Requests\Welfare\UpdateWelfareAssistanceRequest;
@@ -20,39 +23,9 @@ class WelfareAssistanceController extends Controller
 {
     public function index(): View
     {
-        $query = WelfareAssistance::query()
-            ->with([
-                'beneficiary',
-                'fund',
-                'approvedBy',
-            ])
-            ->latest('id');
-
-        if ($search = trim((string) request('search'))) {
-            $query->where(function ($q) use ($search) {
-                $q->where('assistance_number', 'like', "%{$search}%")
-                    ->orWhere('assistance_type', 'like', "%{$search}%")
-                    ->orWhereHas('beneficiary', function ($beneficiaryQuery) use ($search) {
-                        $beneficiaryQuery
-                            ->where('full_name', 'like', "%{$search}%")
-                            ->orWhere('beneficiary_number', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        if ($type = request('assistance_type')) {
-            $query->where('assistance_type', $type);
-        }
-
-        if ($status = request('status')) {
-            $query->where('status', $status);
-        }
-
-        if ($fundId = request('fund_id')) {
-            $query->where('fund_id', $fundId);
-        }
-
-        $assistances = $query->paginate(15)->withQueryString();
+        $directory = app(FinanceWelfareQuery::class);
+        $filters = $directory->filters(request(), 'assistance');
+        $assistances = $directory->query('assistance', $filters)->paginate(15)->withQueryString();
 
         $totalAssistance = WelfareAssistance::count();
 
@@ -174,8 +147,8 @@ class WelfareAssistanceController extends Controller
         return redirect()->route('welfare.assistance.show', $assistance)->with('success', 'Welfare assistance resubmitted for approval.');
     }
 
-    public function close(\App\Http\Requests\Welfare\CloseWelfareAssistanceRequest $request, WelfareAssistance $assistance,
-        \App\Domain\Welfare\Assistance\Services\WelfareMonitoringService $monitoring): RedirectResponse
+    public function close(CloseWelfareAssistanceRequest $request, WelfareAssistance $assistance,
+        WelfareMonitoringService $monitoring): RedirectResponse
     {
         $changed = $monitoring->close($assistance, $request->validated('reason'), $request->user());
 

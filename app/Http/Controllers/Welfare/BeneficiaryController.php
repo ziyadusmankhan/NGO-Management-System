@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Welfare;
 
 use App\Domain\Business\Models\BusinessApplication;
-use App\Domain\Security\Services\FieldEncryption;
+use App\Domain\Organization\Services\FinanceWelfareQuery;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
 use App\Domain\Welfare\Verification\Models\BeneficiaryVerification;
 use App\Http\Controllers\Controller;
@@ -16,66 +16,9 @@ class BeneficiaryController extends Controller
 {
     public function index(): View
     {
-        $query = Beneficiary::query()
-            ->with([
-                'verifiedBy',
-                'approvedBy',
-            ]);
-
-        if (request()->filled('search')) {
-            $search = trim(request('search'));
-
-            $query->where(function ($q) use ($search) {
-                $q->where(
-                    'beneficiary_number',
-                    'like',
-                    "%{$search}%"
-                )
-                    ->orWhere(
-                        'full_name',
-                        'like',
-                        "%{$search}%"
-                    )
-                    ->orWhere(
-                        'father_husband_name',
-                        'like',
-                        "%{$search}%"
-                    )
-                    ->orWhere('cnic_lookup', app(FieldEncryption::class)->lookup('cnic', $search) ?? 'no-match')
-                    ->orWhere('phone_lookup', app(FieldEncryption::class)->lookup('phone', $search) ?? 'no-match')
-                    ->orWhere(
-                        'location',
-                        'like',
-                        "%{$search}%"
-                    );
-            });
-        }
-
-        if (request()->filled('category')) {
-            $query->where(
-                'category',
-                request('category')
-            );
-        }
-
-        if (request()->filled('verification_status')) {
-            $query->where(
-                'verification_status',
-                request('verification_status')
-            );
-        }
-
-        if (request()->filled('approval_status')) {
-            $query->where(
-                'approval_status',
-                request('approval_status')
-            );
-        }
-
-        $beneficiaries = $query
-            ->latest('id')
-            ->paginate(15)
-            ->withQueryString();
+        $directory = app(FinanceWelfareQuery::class);
+        $filters = $directory->filters(request(), 'beneficiaries');
+        $beneficiaries = $directory->query('beneficiaries', $filters)->paginate(15)->withQueryString();
 
         $totalBeneficiaries = Beneficiary::query()->count();
 

@@ -9,7 +9,7 @@ use App\Domain\Finance\Funds\Services\FundPurposeService;
 use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Finance\Transactions\Services\TransactionService;
-use App\Domain\Procurement\Models\ProcurementMovement;
+use App\Domain\Organization\Services\FinanceWelfareQuery;
 use App\Domain\Projects\Models\ProjectMovement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\StoreExpenseRequest;
@@ -23,53 +23,9 @@ class ExpenseController extends Controller
 {
     public function index(): View
     {
-        $query = Expense::query()
-            ->with('fund');
-
-        if (request()->filled('search')) {
-
-            $search = trim(request('search'));
-
-            $query->where(function ($q) use ($search) {
-
-                $q->where('expense_number', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('payee_name', 'like', "%{$search}%")
-                    ->orWhere('transaction_reference', 'like', "%{$search}%")
-                    ->orWhere('receipt_number', 'like', "%{$search}%")
-                    ->orWhereHas('fund', function ($fundQuery) use ($search) {
-                        $fundQuery
-                            ->where('name', 'like', "%{$search}%")
-                            ->orWhere(
-                                'fund_reference',
-                                'like',
-                                "%{$search}%"
-                            );
-                    });
-            });
-        }
-
-        if (request()->filled('category')) {
-            $query->where('category', request('category'));
-        }
-
-        if (request()->filled('fund_id')) {
-            $query->where('fund_id', request('fund_id'));
-        }
-
-        if (request()->filled('status')) {
-            $query->where('status', request('status'));
-        }
-
-        $expenses = $query
-            ->with([
-                'fund',
-                'transaction',
-            ])
-            ->latest('expense_date')
-            ->latest('id')
-            ->paginate(15)
-            ->withQueryString();
+        $directory = app(FinanceWelfareQuery::class);
+        $filters = $directory->filters(request(), 'expenses');
+        $expenses = $directory->query('expenses', $filters)->paginate(15)->withQueryString();
 
         /*
         * Financial summaries come from posted debit transactions.
@@ -112,18 +68,8 @@ class ExpenseController extends Controller
             ));
 
         $projects = Money::decimal(Money::add(Money::minor($projects), Money::sumMinor((clone $postedDebits)->where('source_type', (new ProjectMovement)->getMorphClass()))));
-        $projectPayments = ProjectMovement::where('kind', 'payment')->with(['project', 'transaction'])
-            ->when(request('category') && request('category') !== 'project', fn ($q) => $q->whereRaw('1=0'))
-            ->when(request('fund_id'), fn ($q, $v) => $q->where('fund_id', $v))
-            ->when(request('status'), fn ($q, $v) => $q->where('status', $v === 'paid' ? 'posted' : $v))
-            ->when(request('search'), fn ($q, $v) => $q->where(fn ($q) => $q->where('payee', 'like', '%'.$v.'%')->orWhereHas('project', fn ($p) => $p->where('number', 'like', '%'.$v.'%')->orWhere('name', 'like', '%'.$v.'%'))))
-            ->latest('id')->paginate(15, ['*'], 'project_page')->withQueryString();
-        $procurementPayments = ProcurementMovement::whereNull('source_type')->where('kind', 'payment')->with(['procurement', 'transaction'])
-            ->when(request('category') && request('category') !== 'admin', fn ($q) => $q->whereRaw('1=0'))
-            ->when(request('fund_id'), fn ($q, $v) => $q->where('fund_id', $v))
-            ->when(request('status'), fn ($q, $v) => $q->where('status', $v === 'paid' ? 'posted' : $v))
-            ->when(request('search'), fn ($q, $v) => $q->whereHas('procurement', fn ($p) => $p->where('number', 'like', '%'.$v.'%')))
-            ->latest('id')->paginate(15, ['*'], 'procurement_page')->withQueryString();
+        $projectPayments = $directory->projectExpenses($filters)->paginate(15, ['*'], 'project_page')->withQueryString();
+        $procurementPayments = $directory->officeExpenses($filters)->paginate(15, ['*'], 'procurement_page')->withQueryString();
         $pending = Expense::query()
             ->where('status', 'pending')
             ->count();

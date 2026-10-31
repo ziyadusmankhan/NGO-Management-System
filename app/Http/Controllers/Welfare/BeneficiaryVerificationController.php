@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Welfare;
 
 use App\Domain\Documents\Services\DocumentService;
 use App\Domain\Documents\Services\UploadValidator;
+use App\Domain\Organization\Services\FinanceWelfareQuery;
 use App\Domain\Users\Models\User;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
@@ -36,88 +37,9 @@ class BeneficiaryVerificationController extends Controller
      */
     public function index(Request $request): View
     {
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', 'in:assigned,in_progress,completed,overdue'],
-            'priority' => ['nullable', 'in:high,normal'],
-            'visit_from' => ['nullable', 'date'],
-            'visit_to' => ['nullable', 'date', 'after_or_equal:visit_from'],
-            'sort' => ['nullable', 'in:newest,visit_asc,visit_desc'],
-        ]);
-
-        $query = BeneficiaryVerification::query()
-            ->whereNotNull('application_id')
-            ->with([
-                'beneficiary',
-                'application',
-                'assignedTo',
-                'verifiedBy',
-            ]);
-
-        /*
-         * Search.
-         */
-        $search = trim($filters['search'] ?? '');
-
-        if ($search !== '') {
-            $like = '%'.$search.'%';
-
-            $query->where(function ($q) use ($like) {
-                $q->where('verification_number', 'like', $like)
-                    ->orWhereHas('beneficiary', function ($b) use ($like) {
-                        $b->where('full_name', 'like', $like)
-                            ->orWhere('beneficiary_number', 'like', $like);
-                    })
-                    ->orWhereHas('application', function ($a) use ($like) {
-                        $a->where('application_number', 'like', $like);
-                    })
-                    ->orWhereHas('assignedTo', function ($u) use ($like) {
-                        $u->where('name', 'like', $like)
-                            ->orWhere('email', 'like', $like);
-                    });
-            });
-        }
-
-        /*
-         * Status filter. "overdue" is derived, not stored:
-         * still open and the visit date has passed.
-         */
-        $status = $filters['status'] ?? null;
-
-        if ($status === 'overdue') {
-            $query->whereIn('workflow_status', ['assigned', 'in_progress'])
-                ->whereDate('visit_date', '<', now()->toDateString());
-        } elseif ($status) {
-            $query->where('workflow_status', $status);
-        }
-
-        if (! empty($filters['priority'])) {
-            $query->where('priority', $filters['priority']);
-        }
-
-        /*
-         * Visit date range.
-         */
-        if (! empty($filters['visit_from'])) {
-            $query->whereDate('visit_date', '>=', $filters['visit_from']);
-        }
-
-        if (! empty($filters['visit_to'])) {
-            $query->whereDate('visit_date', '<=', $filters['visit_to']);
-        }
-
-        /*
-         * Sorting.
-         */
-        match ($filters['sort'] ?? 'newest') {
-            'visit_asc' => $query->orderByRaw('visit_date is null')->orderBy('visit_date')->orderByDesc('id'),
-            'visit_desc' => $query->orderByRaw('visit_date is null')->orderByDesc('visit_date')->orderByDesc('id'),
-            default => $query->latest('id'),
-        };
-
-        $verifications = $query
-            ->paginate(15)
-            ->withQueryString();
+        $directory = app(FinanceWelfareQuery::class);
+        $filters = $directory->filters(request(), 'verification');
+        $verifications = $directory->query('verification', $filters)->paginate(15)->withQueryString();
 
         /*
          * Queue statistics.

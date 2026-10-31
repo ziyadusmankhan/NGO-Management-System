@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+@if($errors->any()) @include('shared.action-feedback') @endif
 
 <div class="report-header">
 
@@ -21,6 +22,8 @@
     </div>
 
     <div class="report-actions">
+        @include('shared.finance-welfare-export', ['exportKind'=>'finance-reports'])
+
 
         <button
             type="button"
