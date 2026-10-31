@@ -8,6 +8,7 @@ use App\Domain\Documents\Services\DocumentService;
 use App\Domain\Documents\Services\UploadValidator;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Support\Money;
+use App\Domain\Organization\Services\FinanceWelfareQuery;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
 use App\Domain\Welfare\Applications\Models\WelfareApplicationReview;
 use App\Domain\Welfare\Beneficiaries\Models\Beneficiary;
@@ -28,88 +29,9 @@ class WelfareApplicationController extends Controller
      */
     public function index(): View
     {
-        $query = WelfareApplication::query()
-            ->with([
-                'beneficiary',
-                'fund',
-            ]);
-
-        /*
-         * Search
-         */
-        if (request()->filled('search')) {
-            $search = trim(request('search'));
-
-            $query->where(function ($q) use ($search) {
-                $q->where(
-                    'application_number',
-                    'like',
-                    "%{$search}%"
-                )
-                    ->orWhere(
-                        'request_type',
-                        'like',
-                        "%{$search}%"
-                    )
-                    ->orWhere(
-                        'purpose_details',
-                        'like',
-                        "%{$search}%"
-                    )
-                    ->orWhereHas(
-                        'beneficiary',
-                        function ($beneficiaryQuery) use ($search) {
-                            $beneficiaryQuery
-                                ->where(
-                                    'full_name',
-                                    'like',
-                                    "%{$search}%"
-                                )
-                                ->orWhere(
-                                    'beneficiary_number',
-                                    'like',
-                                    "%{$search}%"
-                                );
-                        }
-                    );
-            });
-        }
-
-        /*
-         * Stage filter
-         */
-        if (request()->filled('stage')) {
-            $query->where(
-                'status',
-                request('stage')
-            );
-        }
-
-        /*
-         * Category filter
-         */
-        if (request()->filled('category')) {
-            $query->where(
-                'category',
-                request('category')
-            );
-        }
-
-        /*
-         * Priority filter
-         */
-        if (request()->filled('priority')) {
-            $query->where(
-                'priority',
-                request('priority')
-            );
-        }
-
-        $applications = $query
-            ->latest('submitted_at')
-            ->latest('id')
-            ->paginate(15)
-            ->withQueryString();
+        $directory = app(FinanceWelfareQuery::class);
+        $filters = $directory->filters(request(), 'applications');
+        $applications = $directory->query('applications', $filters)->paginate(15)->withQueryString();
 
         /*
          * Dashboard statistics.

@@ -7,3 +7,4 @@
 .directory-export-options a{display:flex;gap:10px;align-items:center;padding:10px;border-radius:6px;color:var(--text);white-space:nowrap}
 .directory-export-options a:hover,.directory-export-options a:focus-visible{background:var(--primary-soft);color:var(--primary);text-decoration:none}
 .committee-toolbar,.users-card .toolbar{flex-wrap:wrap;gap:10px}
+@media(max-width:639px){.directory-export-options{left:0;right:auto;min-width:min(235px,calc(100vw - 32px))}}

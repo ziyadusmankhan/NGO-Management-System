@@ -2,83 +2,30 @@
 
 namespace App\Http\Controllers\Finance;
 
-use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Donations\Models\Donation;
-use App\Domain\Finance\Expenses\Models\Expense;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Finance\Transactions\Services\TransactionService;
-use App\Http\Controllers\Controller;
+use App\Domain\Organization\Services\FinanceWelfareQuery;
+use App\Domain\Projects\Services\ProjectDonationPolicy;
 use App\Http\Requests\Finance\StoreDonationRequest;
 use App\Http\Requests\Finance\UpdateDonationRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-
 
 class DonationController
 {
-    public function index(      
+    public function index(
         FundBalanceService $balanceService
     ): View {
-        $query = Donation::query()
-            ->with([
-                'fund',
-                'transaction',
-            ]);
-
-        if (request()->filled('search')) {
-            $search = trim(request('search'));
-
-            $query->where(function ($q) use ($search) {
-                $q->where(
-                    'donation_number',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'donor_name',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'fund_reference',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'purpose',
-                    'like',
-                    "%{$search}%"
-                );
-            });
-        }
-
-        if (request()->filled('fund')) {
-            $query->where('fund_id', request('fund'));
-        }
-
-        if (request()->filled('payment_method')) {
-            $query->where(
-                'payment_method',
-                request('payment_method')
-            );
-        }
-
-        if (request()->filled('status')) {
-            $query->where(
-                'status',
-                request('status')
-            );
-        }
-
-        $donations = $query
-            ->latest('donation_date')
-            ->latest('id')
-            ->paginate(15)
-            ->withQueryString();
+        $directory = app(FinanceWelfareQuery::class);
+        $filters = $directory->filters(request(), 'donations');
+        $donations = $directory->query('donations', $filters)->paginate(15)->withQueryString();
 
         /*
         * Financial summaries come from posted donation credits.
@@ -150,7 +97,6 @@ class DonationController
         );
     }
 
-
     public function create(): View
     {
         $funds = Fund::query()
@@ -164,12 +110,11 @@ class DonationController
         );
     }
 
-
     public function store(StoreDonationRequest $request): RedirectResponse
     {
         $validated = $request->validated();
         $donation = DB::transaction(function () use ($validated) {
-            app(\App\Domain\Projects\Services\ProjectDonationPolicy::class)->validate($validated);
+            app(ProjectDonationPolicy::class)->validate($validated);
             $donation = Donation::create(array_merge($validated, [
                 'donation_number' => 'DON-'.Str::ulid(),
                 'status' => 'received',
@@ -198,90 +143,89 @@ class DonationController
     }
 
     public function edit(
-            Donation $donation
-        ): View {
-            $funds = Fund::query()
-                ->where('status', 'active')
-                ->orderBy('name')
-                ->get();
+        Donation $donation
+    ): View {
+        $funds = Fund::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
 
-            return view(
-                'finance.donations.edit',
-                compact('donation', 'funds')
-            );
-        }
+        return view(
+            'finance.donations.edit',
+            compact('donation', 'funds')
+        );
+    }
 
+    public function update(
+        UpdateDonationRequest $request,
+        Donation $donation
+    ): RedirectResponse {
+        $validated = $request->validated();
 
-        public function update(
-            UpdateDonationRequest $request,
-            Donation $donation
-        ): RedirectResponse {
-            $validated = $request->validated();
+        DB::transaction(function () use ($validated, $donation) {
+            $donation = Donation::whereKey($donation->id)->lockForUpdate()->firstOrFail();
+            app(ProjectDonationPolicy::class)->validate($validated, $donation);
+            if (Fund::withTrashed()->find($donation->fund_id)?->project_id && ((int) ($validated['fund_id'] ?? 0) !== (int) $donation->fund_id || $validated['designation'] !== 'restricted' || $validated['purpose'] !== 'project')) {
+                throw ValidationException::withMessages(['fund_id' => 'Keep this donation restricted to its original dedicated project fund.']);
+            }
+            $donation->update([
+                'donor_type' => $validated['donor_type'],
+                'donor_name' => $validated['donor_name'],
+                'phone' => $validated['phone'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'amount' => $validated['amount'],
+                'donation_date' => $validated['donation_date'],
+                'payment_method' => $validated['payment_method'],
+                'transaction_reference' => $validated['transaction_reference'] ?? null,
+                'receipt_number' => $validated['receipt_number'] ?? null,
+                'designation' => $validated['designation'],
+                'purpose' => $validated['purpose'],
+                'fund_reference' => $validated['fund_reference'] ?? null,
+                'fund_id' => $validated['fund_id'] ?? null,
+                'purpose_notes' => $validated['purpose_notes'] ?? null,
+                'internal_notes' => $validated['internal_notes'] ?? null,
+                'status' => $validated['status'],
+            ]);
 
-            DB::transaction(function () use ($validated, $donation) {
-                $donation = Donation::whereKey($donation->id)->lockForUpdate()->firstOrFail();
-                app(\App\Domain\Projects\Services\ProjectDonationPolicy::class)->validate($validated,$donation);
-                if (\App\Domain\Finance\Funds\Models\Fund::withTrashed()->find($donation->fund_id)?->project_id && ((int)($validated['fund_id']??0)!==(int)$donation->fund_id || $validated['designation']!=='restricted' || $validated['purpose']!=='project')) { throw \Illuminate\Validation\ValidationException::withMessages(['fund_id'=>'Keep this donation restricted to its original dedicated project fund.']); }
-                $donation->update([
-                    'donor_type' => $validated['donor_type'],
-                    'donor_name' => $validated['donor_name'],
-                    'phone' => $validated['phone'] ?? null,
-                    'email' => $validated['email'] ?? null,
-                    'amount' => $validated['amount'],
-                    'donation_date' => $validated['donation_date'],
-                    'payment_method' => $validated['payment_method'],
-                    'transaction_reference' => $validated['transaction_reference'] ?? null,
-                    'receipt_number' => $validated['receipt_number'] ?? null,
-                    'designation' => $validated['designation'],
-                    'purpose' => $validated['purpose'],
-                    'fund_reference' => $validated['fund_reference'] ?? null,
-                    'fund_id' => $validated['fund_id'] ?? null,
-                    'purpose_notes' => $validated['purpose_notes'] ?? null,
-                    'internal_notes' => $validated['internal_notes'] ?? null,
-                    'status' => $validated['status'],
+            $eligible =
+                ! $donation->trashed()
+                && $donation->fund_id !== null
+                && in_array($donation->status, ['received', 'restricted'], true);
+
+            if ($eligible) {
+                app(TransactionService::class)->syncForSource($donation, [
+                    'fund_id' => $donation->fund_id,
+                    'type' => 'donation',
+                    'reference' => $donation->donation_number,
+                    'description' => 'Donation from '.$donation->donor_name,
+                    'amount' => $donation->amount,
+                    'direction' => 'credit',
+                    'transaction_date' => $donation->donation_date,
+                    'status' => 'posted',
+                    'recorded_by' => $donation->recorded_by,
                 ]);
-
-                $eligible =
-                    ! $donation->trashed()
-                    && $donation->fund_id !== null
-                    && in_array($donation->status, ['received', 'restricted'], true);
-
-                if ($eligible) {
-                    app(TransactionService::class)->syncForSource($donation, [
-                        'fund_id' => $donation->fund_id,
-                        'type' => 'donation',
-                        'reference' => $donation->donation_number,
-                        'description' => 'Donation from ' . $donation->donor_name,
-                        'amount' => $donation->amount,
-                        'direction' => 'credit',
-                        'transaction_date' => $donation->donation_date,
-                        'status' => 'posted',
-                        'recorded_by' => $donation->recorded_by,
-                    ]);
-                } else {
-                    app(TransactionService::class)->voidForSource($donation);
-                }
-            });
-
-            return redirect()
-                ->route('finance.donations.show', $donation)
-                ->with('success', 'Donation updated successfully.');
-        }
-
-
-        public function destroy(Donation $donation): RedirectResponse
-        {
-            DB::transaction(function () use ($donation) {
+            } else {
                 app(TransactionService::class)->voidForSource($donation);
+            }
+        });
 
-                $donation->delete();
-            });
+        return redirect()
+            ->route('finance.donations.show', $donation)
+            ->with('success', 'Donation updated successfully.');
+    }
 
-            return redirect()
-                ->route('finance.donations.index')
-                ->with('success', 'Donation deleted successfully.');
-        }
+    public function destroy(Donation $donation): RedirectResponse
+    {
+        DB::transaction(function () use ($donation) {
+            app(TransactionService::class)->voidForSource($donation);
 
+            $donation->delete();
+        });
+
+        return redirect()
+            ->route('finance.donations.index')
+            ->with('success', 'Donation deleted successfully.');
+    }
 
     public function show(
         Donation $donation,

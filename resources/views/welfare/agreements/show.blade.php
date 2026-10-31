@@ -3,6 +3,7 @@
 @section('title', 'Welfare Agreement')
 
 @section('content')
+@include('shared.finance-welfare-export', ['exportKind'=>'agreements','exportLabel'=>'Export agreement register','exportParameters'=>['application_id'=>$application->id]])
 <div style="max-width:900px;margin:0 auto;padding:24px 0;">
 
     @if ($errors->any())

@@ -8,12 +8,14 @@
 
 
 @section('content')
+@if($errors->any()) @include('shared.action-feedback') @endif
 @php
     $labels = ['overdue' => 'Overdue reviews', 'today' => 'Due today', 'upcoming' => 'Next 30 days', 'none' => 'No review date', 'follow_up' => 'Follow-up required', 'closure' => 'Awaiting closure', 'ended' => 'Period ended'];
 @endphp
 <div class="page-header">
     <div><h1>Assistance Reviews</h1><p>Review dates, follow-up actions and closure decisions · {{ $today->format('d M Y') }} ({{ config('welfare.timezone') }})</p></div>
     @if(auth()->user()?->hasPermission('welfare.assistance.view'))<a href="{{ route('welfare.assistance.index') }}" class="ui-btn">Welfare Assistance</a>@endif
+    @include('shared.finance-welfare-export', ['exportKind'=>'reviews'])
 </div>
 <div class="stats">
     @foreach($labels as $filter => $label)

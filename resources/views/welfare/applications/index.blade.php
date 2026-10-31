@@ -8,6 +8,7 @@
 
 
 @section('content')
+@if($errors->any()) @include('shared.action-feedback') @endif
 
 <div class="page-header">
 
@@ -21,10 +22,10 @@
 
     <div class="actions">
 
-        <button class="ui-btn">
-            <i class="bi bi-download"></i>
-            Export
-        </button>
+        @include('shared.finance-welfare-export', ['exportKind'=>'applications'])
+        @if(auth()->user()?->hasPermission('welfare.agreements.view'))
+        @include('shared.finance-welfare-export', ['exportKind'=>'agreements','exportLabel'=>'Agreement register','exportFilters'=>[]])
+        @endif
 
         @if(auth()->user()?->hasPermission('welfare.assistance.manage'))<a
             href="{{ route('welfare.applications.create') }}"

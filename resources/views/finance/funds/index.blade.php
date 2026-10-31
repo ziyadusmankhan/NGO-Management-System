@@ -8,6 +8,7 @@
 
 
 @section('content')
+@if($errors->any()) @include('shared.action-feedback') @endif
 
 <div class="page-header">
 
@@ -23,10 +24,7 @@
 
     <div class="actions">
 
-        <button class="ui-btn">
-            <i class="bi bi-download"></i>
-            Export
-        </button>
+        @include('shared.finance-welfare-export', ['exportKind'=>'funds'])
 
         @if(auth()->user()->hasPermission('finance.funds.manage'))
             @if(auth()->user()?->hasPermission('finance.view') && auth()->user()?->hasPermission('finance.funds.manage'))<a href="{{ route('finance.funds.create') }}">

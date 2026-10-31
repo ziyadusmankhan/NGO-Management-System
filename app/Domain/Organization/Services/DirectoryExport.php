@@ -40,7 +40,7 @@ class DirectoryExport
 
     public function xlsx(array $report): string
     {
-        $book = IOFactory::load(config('organization.export_template'));
+        $book = IOFactory::load($report['template'] ?? config('organization.export_template'));
         $book->getProperties()->setCreator(config('organization.name'))->setTitle($report['title'])->setSubject('Organization register export');
         $book->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
         foreach ($report['sections'] as $index => $section) {
@@ -98,6 +98,18 @@ class DirectoryExport
             $sheet->setCellValue('F6', '=COUNTIFS('.$statusColumn.$first.':'.$statusColumn.$last.',"Inactive")');
             $sheet->setCellValue('H6', '=MAX(0,B6-D6-F6)');
             $sheet->getStyle('B6:I7')->getNumberFormat()->setFormatCode('#,##0');
+            if (isset($report['metrics'])) {
+                foreach (['B', 'D', 'F', 'H'] as $index => $column) {
+                    $metric = $report['metrics'][$index];
+                    $this->text($sheet, $column.'5', $metric['label']);
+                    $sheet->getCell($column.'6')->setValueExplicit($metric['formula'] ?? $metric['value'], isset($metric['formula']) ? DataType::TYPE_FORMULA : DataType::TYPE_NUMERIC);
+                    $sheet->getStyle($column.'6')->getNumberFormat()->setFormatCode($metric['type'] === 'money' ? '#,##0.00;[Red](#,##0.00)' : '#,##0');
+                    $sheet->getStyle($column.'6')->getFont()->setSize($metric['type'] === 'money' ? 14 : 16);
+                }
+                $this->text($sheet, 'B14', $report['note']);
+                $sheet->getStyle('B14:I14')->getAlignment()->setWrapText(true);
+                $sheet->getRowDimension(14)->setRowHeight(48);
+            }
         } else {
             $sheet->mergeCells('B2:'.$lastColumn.'2');
             $this->text($sheet, 'B2', config('organization.name'));
@@ -130,6 +142,10 @@ class DirectoryExport
                 if ($value instanceof \DateTimeInterface) {
                     $sheet->setCellValueExplicit($cell, Date::dateTimeToExcel($value), DataType::TYPE_NUMERIC);
                     $sheet->getStyle($cell)->getNumberFormat()->setFormatCode($type === 'datetime' ? 'dd mmm yyyy hh:mm' : 'dd mmm yyyy');
+                } elseif ($type === 'money' && $value !== null) {
+                    $sheet->setCellValueExplicit($cell, $value, DataType::TYPE_NUMERIC);
+                    $sheet->getStyle($cell)->getNumberFormat()->setFormatCode('#,##0.00;[Red](#,##0.00)');
+                    $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 } elseif ($type === 'number' && $value !== null) {
                     $sheet->setCellValueExplicit($cell, (int) $value, DataType::TYPE_NUMERIC);
                     $sheet->getStyle($cell)->getNumberFormat()->setFormatCode('#,##0');

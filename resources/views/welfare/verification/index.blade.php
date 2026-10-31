@@ -60,6 +60,8 @@
     </div>
 
     <div class="actions">
+        @include('shared.finance-welfare-export', ['exportKind'=>'verification'])
+
 
         @if ($canAssign)
             @if(auth()->user()?->hasPermission('welfare.beneficiaries.verify'))<a href="{{ route('welfare.verification.create') }}" class="ui-btn primary">

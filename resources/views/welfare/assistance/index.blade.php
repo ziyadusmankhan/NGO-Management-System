@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+@if($errors->any()) @include('shared.action-feedback') @endif
 
 <div class="page-header">
 
@@ -28,6 +29,7 @@
         </a>@endif
     @endcan
 
+    @include('shared.finance-welfare-export', ['exportKind'=>'assistance'])
 </div>
 
 <div class="stats">

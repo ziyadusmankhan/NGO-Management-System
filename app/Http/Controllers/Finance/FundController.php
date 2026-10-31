@@ -9,6 +9,7 @@ use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundPurposeService;
 use App\Domain\Finance\Funds\Services\FundReportingService;
 use App\Domain\Finance\Funds\Services\FundService;
+use App\Domain\Organization\Services\FinanceWelfareQuery;
 use App\Domain\Procurement\Models\ProcurementMovement;
 use App\Domain\Projects\Models\ProjectMovement;
 use App\Domain\Qard\Models\QardMovement;
@@ -24,25 +25,9 @@ class FundController extends Controller
 {
     public function index(FundReportingService $reporting): View
     {
-        $query = Fund::query();
-        if (request()->filled('search')) {
-            $search = trim(request('search'));
-            $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")
-                ->orWhere('fund_reference', 'like', "%{$search}%")->orWhere('code', 'like', "%{$search}%")
-                ->orWhere('purpose', 'like', "%{$search}%"));
-        }
-        if (request('status') === 'archived') {
-            $query->onlyTrashed();
-        }
-        foreach (['type', 'status'] as $filter) {
-            if (request()->filled($filter)) {
-                if ($filter === 'status' && request('status') === 'archived') {
-                    continue;
-                }
-                $query->where($filter, request($filter));
-            }
-        }
-        $funds = $query->latest('id')->paginate(12)->withQueryString();
+        $directory = app(FinanceWelfareQuery::class);
+        $filters = $directory->filters(request(), 'funds');
+        $funds = $directory->query('funds', $filters)->paginate(12)->withQueryString();
         $funds->getCollection()->each(fn (Fund $fund) => $fund->financial_summary = $reporting->summary($fund));
         $active = Fund::where('status', 'active')->get();
         $active->each(fn (Fund $fund) => $fund->financial_summary = $reporting->summary($fund));

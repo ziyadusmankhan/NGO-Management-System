@@ -2,9 +2,9 @@
 
 namespace App\Domain\Finance\Reports\Services;
 
-use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Funds\Models\Fund;
 use App\Domain\Finance\Funds\Services\FundBalanceService;
+use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
 use Illuminate\Support\Collection;
 
@@ -12,8 +12,7 @@ class FinanceReportService
 {
     public function __construct(
         private FundBalanceService $balanceService
-    ) {
-    }
+    ) {}
 
     public function overview(
         ?int $fundId = null,
@@ -68,9 +67,10 @@ class FinanceReportService
         ];
     }
 
-    public function fundRows(): Collection
+    public function fundRows(?int $fundId = null): Collection
     {
         return Fund::query()
+            ->when($fundId, fn ($q) => $q->whereKey($fundId))
             ->where('status', 'active')
             ->orderBy('name')
             ->get()
@@ -81,14 +81,10 @@ class FinanceReportService
 
                 return [
                     'fund' => $fund,
-                    'opening_balance' =>
-                        $summary['opening_balance'],
-                    'credits' =>
-                        $summary['total_credits'],
-                    'debits' =>
-                        $summary['total_debits'],
-                    'balance' =>
-                        $summary['balance'],
+                    'opening_balance' => $summary['opening_balance'],
+                    'credits' => $summary['total_credits'],
+                    'debits' => $summary['total_debits'],
+                    'balance' => $summary['balance'],
                 ];
             });
     }

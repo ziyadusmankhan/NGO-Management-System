@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+@if($errors->any()) @include('shared.action-feedback') @endif
 
 <div class="page-header">
 
@@ -18,6 +19,7 @@
         </p>
     </div>
 
+    @include('shared.finance-welfare-export', ['exportKind'=>'transactions'])
 </div>
 
 

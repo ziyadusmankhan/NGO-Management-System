@@ -6,6 +6,7 @@ Route::redirect('/', '/login');
 
 require __DIR__.'/auth.php';
 require __DIR__.'/organization-exports.php';
+require __DIR__.'/finance-welfare-exports.php';
 
 use App\Http\Controllers\Dashboard\DashboardController;
 

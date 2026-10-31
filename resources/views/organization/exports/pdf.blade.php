@@ -15,10 +15,11 @@ thead{display:table-header-group}.section-title{page-break-before:always;page-br
 <h1>{{ $report['title'] }}</h1>
 <div class="context">{{ $report['scope'] }}<br>Prepared by {{ $report['prepared_by'] }}</div>
 <table class="totals"><tr>
-    @foreach(['Records'=>$report['count'],'Active'=>$report['active'],'Inactive'=>$report['inactive'],'Other statuses'=>$report['count']-$report['active']-$report['inactive']] as $label=>$value)
-    <td><div class="label">{{ $label }}</div><div class="value">{{ number_format($value) }}</div></td>
+    @foreach($report['metrics'] ?? collect(['Records'=>$report['count'],'Active'=>$report['active'],'Inactive'=>$report['inactive'],'Other statuses'=>$report['count']-$report['active']-$report['inactive']])->map(fn($value,$label)=>['label'=>$label,'value'=>$value,'type'=>'number']) as $metric)
+    <td><div class="label">{{ $metric['label'] }}</div><div class="value" style="font-size:{{ $metric['type']==='money'?'14':'18' }}pt">{{ $metric['type']==='money' ? \App\Domain\Finance\Support\Money::format($metric['value']) : number_format($metric['value']) }}</div></td>
     @endforeach
 </tr></table>
+@if(!empty($report['note']))<p class="muted">{{ $report['note'] }}</p>@endif
 @if($report['kind']==='roles')<p class="muted">Administrator has full application access. Other roles use their assigned permissions listed below.</p>@endif
 @foreach($report['sections'] as $section)
     @if(!$loop->first)<h2 class="section-title">{{ $section['title'] }} <span class="muted">({{ number_format(count($section['rows'])) }})</span></h2>@endif
@@ -27,7 +28,7 @@ thead{display:table-header-group}.section-title{page-break-before:always;page-br
         <thead><tr>@foreach($section['headers'] as $i=>$label)<th width="{{ round($section['widths'][$i]/array_sum($section['widths'])*100,2) }}%">{{ $label }}</th>@endforeach</tr></thead>
         <tbody>
         @forelse($chunk as $row)
-            <tr class="{{ $loop->index%2?'stripe':'' }}">@foreach($row as $i=>$value)<td>@if($value instanceof \DateTimeInterface){{ $value->format($section['types'][$i]==='datetime'?'d M Y H:i':'d M Y') }}@else{!! nl2br(e($value === null || $value === '' ? '-' : $value)) !!}@endif</td>@endforeach</tr>
+            <tr class="{{ $loop->index%2?'stripe':'' }}">@foreach($row as $i=>$value)<td @if($section['types'][$i]==='money') style="text-align:right;white-space:nowrap" @endif>@if($value instanceof \DateTimeInterface){{ $value->format($section['types'][$i]==='datetime'?'d M Y H:i':'d M Y') }}@elseif($section['types'][$i]==='money' && $value!==null){{ \App\Domain\Finance\Support\Money::format($value) }}@else{!! nl2br(e($value === null || $value === '' ? '-' : $value)) !!}@endif</td>@endforeach</tr>
         @empty<tr><td class="empty" colspan="{{ count($section['headers']) }}">No matching records.</td></tr>@endforelse
         </tbody>
     </table>
