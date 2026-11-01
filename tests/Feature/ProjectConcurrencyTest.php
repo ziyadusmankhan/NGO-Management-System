@@ -58,16 +58,7 @@ class ProjectConcurrencyTest extends TestCase
                 $jobs[0][1] = 'amend';
             }
             $release = $directory.'/release';
-            $php = [PHP_BINARY, '-n'];
-            foreach (['mbstring', 'pdo_sqlite', 'sqlite3', 'fileinfo', 'openssl'] as $extension) {
-                $path = ini_get('extension_dir').DIRECTORY_SEPARATOR.(PHP_OS_FAMILY === 'Windows' ? 'php_' : '').$extension.'.'.PHP_SHLIB_SUFFIX;
-                if (! is_file($path)) {
-                    $path = dirname(PHP_BINARY).DIRECTORY_SEPARATOR.$path;
-                }
-                if (is_file($path)) {
-                    array_push($php, '-d', 'extension='.$path);
-                }
-            }
+            $php = \Tests\Support\PhpWorker::command();
             foreach ($jobs as $i => [$id,$jobKind,$requestKey,$jobAmount]) {
                 $worker = new Process(array_merge($php, [base_path('tests/Support/project_worker.php'), $database, (string) $id, (string) $payer->id, $jobKind, $requestKey, $jobAmount, $directory.'/ready-'.$i, $release]), base_path(), ['APP_ENV' => 'testing']);
                 $worker->setTimeout(45)->start();
