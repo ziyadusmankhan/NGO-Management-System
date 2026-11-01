@@ -2,6 +2,8 @@
 @section('title','Meetings')
 @push('styles')@include('records.audit.style')@endpush
 @section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'meetings'])</div>
+
 <div class="audit-page"><div style="display:flex;justify-content:space-between;align-items:center"><div><h1>Meetings</h1><p>Schedules, attendance, minutes, decisions and action items.</p></div>@can('meetings.manage')@if(auth()->user()?->hasPermission('meetings.view') && auth()->user()?->hasPermission('meetings.manage'))<a class="audit-btn" href="{{ route('operations.meetings.create') }}">Schedule meeting</a>@endif
 @endcan</div>@include('qard.partials.feedback')
 <div class="audit-grid">@foreach(['total'=>'Total meetings','upcoming'=>'Upcoming','held'=>'Held','minutes_pending'=>'Minutes pending'] as $key=>$label)<div class="audit-card"><small>{{ $label }}</small><h2>{{ $counts[$key] }}</h2></div>@endforeach</div>

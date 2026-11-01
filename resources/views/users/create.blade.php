@@ -283,6 +283,10 @@
 
                     <div class="role-grid">
 
+                        @if (!auth()->user()->hasPermission('users.assign-roles'))
+                            <p>You can create the profile. An authorized role manager must assign access separately.</p>
+                        @endif
+
                         @forelse ($roles as $role)
 
                             <div class="role-option">
@@ -290,6 +294,7 @@
                                 <input
                                     type="radio"
                                     name="roles[]"
+                                    @disabled(!auth()->user()->hasPermission('users.assign-roles'))
                                     id="role{{ $role->id }}"
                                     value="{{ $role->id }}"
                                     @checked(

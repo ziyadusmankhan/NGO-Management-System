@@ -24,7 +24,7 @@ class DirectoryExport
         if (! is_dir($temp) && ! mkdir($temp, 0755, true) && ! is_dir($temp)) {
             throw new \RuntimeException('PDF temporary storage is unavailable.');
         }
-        $pdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4-L', 'tempDir' => $temp, 'default_font' => 'dejavusans', 'default_font_size' => 8.5,
+        $pdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'tempDir' => $temp, 'default_font' => 'dejavusans', 'default_font_size' => 11,
             'margin_left' => 12, 'margin_right' => 12, 'margin_top' => 35, 'margin_bottom' => 18, 'margin_header' => 9, 'margin_footer' => 8,
             'autoScriptToLang' => true, 'autoLangToFont' => true, 'shrink_tables_to_fit' => 1]);
         $pdf->SetTitle(config('organization.name').' - '.$report['title']);
@@ -142,9 +142,9 @@ class DirectoryExport
                 if ($value instanceof \DateTimeInterface) {
                     $sheet->setCellValueExplicit($cell, Date::dateTimeToExcel($value), DataType::TYPE_NUMERIC);
                     $sheet->getStyle($cell)->getNumberFormat()->setFormatCode($type === 'datetime' ? 'dd mmm yyyy hh:mm' : 'dd mmm yyyy');
-                } elseif ($type === 'money' && $value !== null) {
+                } elseif (in_array($type, ['money', 'metric', 'quantity']) && $value !== null && is_numeric($value)) {
                     $sheet->setCellValueExplicit($cell, $value, DataType::TYPE_NUMERIC);
-                    $sheet->getStyle($cell)->getNumberFormat()->setFormatCode('#,##0.00;[Red](#,##0.00)');
+                    $sheet->getStyle($cell)->getNumberFormat()->setFormatCode($type === 'quantity' ? '#,##0.000' : '#,##0.00;[Red](#,##0.00)');
                     $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 } elseif ($type === 'number' && $value !== null) {
                     $sheet->setCellValueExplicit($cell, (int) $value, DataType::TYPE_NUMERIC);

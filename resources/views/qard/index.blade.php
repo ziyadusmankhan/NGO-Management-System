@@ -2,6 +2,8 @@
 @section('title', 'Qard-e-Hasana')
 @push('styles') @include('qard.partials.style') @endpush
 @section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'qard'])</div>
+
 <div class="qard-page"><h1>Qard-e-Hasana</h1><p class="qmuted">Interest-free loans, principal recovery, and borrower follow-ups.</p>
 @include('qard.partials.feedback')
 @if(auth()->user()->hasPermission('qard.manage'))@if(auth()->user()?->hasPermission('qard.view') && auth()->user()?->hasPermission('qard.manage'))<a class="qbtn" href="{{ route('qard.create') }}">New application</a>@endif

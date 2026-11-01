@@ -45,6 +45,8 @@ This is a coverage map, not a claim that the entire client specification is comp
 
 ## Remaining roadmap
 
+Programs, Operations and Records now have Foundation-branded PDF/XLSX registers and financial-report downloads, including permission-scoped document metadata and retained report snapshots. All generated PDF downloads use readable A4 portrait layouts; agreement and browser print views share A4 print controls. See `programs-operations-records-exports.md` for testing and the deployment procedure preserving `ngosystem_demo`.
+
 Finance and Welfare now have branded PDF and genuine XLSX register downloads across Donations, Funds, Expenses, Restricted Funds, Transactions, Finance Reports, Beneficiaries, Applications, Field Verification, Assistance, Reviews/Follow Ups and the Welfare agreement register. They reuse the Foundation Register design, apply existing module permissions and active filters, and distinguish posted cash from commitments and historical requests. See `finance-welfare-exports.md` for scope, deployment and beginner testing instructions. Existing signed-agreement downloads remain separate.
 
 13 cleanup/integration/deployment · 15 persistent Settings. Tasks, Meetings and Records Reports were completed early at the client's request.

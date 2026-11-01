@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Records;
 
 use App\Domain\Audit\Services\AuditRecorder;
+use App\Domain\Organization\Services\DirectoryExport;
+use App\Domain\Organization\Services\SectionRegister;
 use App\Domain\Reports\Models\ReportRun;
 use App\Domain\Reports\Services\ReportBuilder;
 use Illuminate\Http\Request;
@@ -53,7 +55,16 @@ class ReportController
     public function export(Request $request, ReportRun $report, ReportBuilder $builder, AuditRecorder $audit)
     {
         $this->authorizeRun($request, $report, $builder);
-        $format = $request->validate(['format' => ['required', Rule::in(['print', 'xlsx'])]])['format'];
+        $format = $request->validate(['format' => ['required', Rule::in(['print', 'xlsx', 'pdf', 'branded-xlsx'])]])['format'];
+        if (in_array($format, ['pdf', 'branded-xlsx'])) {
+            $report->load('generator');
+            $register = app(SectionRegister::class)->snapshot($report, $request->user()->name);
+            $actual = $format === 'pdf' ? 'pdf' : 'xlsx';
+            $body = app(DirectoryExport::class)->{$actual}($register);
+            $audit->record('reports', 'report_exported', ['subject_type' => ReportRun::class, 'subject_id' => $report->id, 'subject_reference' => $report->number, 'after' => ['format' => $actual, 'type' => $report->type]]);
+
+            return response($body, 200, ['Content-Type' => $actual === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Content-Disposition' => 'attachment; filename="'.strtolower($report->number).'.'.$actual.'"', 'Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
+        }
         if ($format === 'print') {
             $body = view('records.reports.print', compact('report'))->render();
             $audit->record('reports', 'report_exported', ['subject_type' => ReportRun::class, 'subject_id' => $report->id, 'subject_reference' => $report->number, 'after' => ['format' => $format, 'type' => $report->type]]);

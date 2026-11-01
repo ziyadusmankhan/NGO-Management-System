@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -212,6 +213,24 @@ class BeneficiaryVerificationController extends Controller
 
         $verification = DB::transaction(
             function () use ($data, $application) {
+                if (DB::connection()->getDriverName() === 'sqlite') {
+                    // Acquire SQLite's writer lock before taking a read snapshot.
+                    // FOR UPDATE alone is a no-op on SQLite.
+                    WelfareApplication::whereKey($application->id)->toBase()->update(['status' => DB::raw('status')]);
+                }
+                // Serialize assignments on the parent; the preflight checks above
+                // are only friendly feedback and cannot authorize a concurrent write.
+                $application = WelfareApplication::whereKey($application->id)->lockForUpdate()->firstOrFail();
+                $beneficiary = $application->beneficiary()->lockForUpdate()->first();
+                if ($application->status !== 'submitted'
+                    || ! $beneficiary || $beneficiary->verification_status !== 'verified'
+                    || $beneficiary->approval_status !== 'approved'
+                    || BeneficiaryVerification::where('application_id', $application->id)
+                        ->whereIn('workflow_status', ['assigned', 'in_progress'])->exists()) {
+                    throw ValidationException::withMessages([
+                        'application_id' => 'This application is no longer eligible for a new field verification assignment.',
+                    ]);
+                }
                 $verification = BeneficiaryVerification::create([
                     'beneficiary_id' => $application->beneficiary_id,
                     'application_id' => $application->id,
@@ -242,7 +261,7 @@ class BeneficiaryVerificationController extends Controller
                 ]);
 
                 return $verification;
-            }
+            }, 5
         );
 
         return redirect()

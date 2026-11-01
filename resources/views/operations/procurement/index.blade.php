@@ -2,6 +2,8 @@
 @section('title', 'Procurement')
 @push('styles')@include('operations.procurement.style')@endpush
 @section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'procurement'])</div>
+
 <div class="qard-page procurement-page">
     <h1>Procurement</h1>
     <p>Purchase requests, supplier quotations, accepted deliveries and authorized payments.</p>

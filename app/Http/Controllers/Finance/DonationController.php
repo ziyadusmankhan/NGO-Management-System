@@ -41,10 +41,8 @@ class DonationController
             );
 
         $donationsThisMonth = Money::sum((clone $postedDonations)
-            ->whereBetween('transaction_date', [
-                now()->startOfMonth()->toDateString(),
-                now()->endOfMonth()->toDateString(),
-            ]));
+            ->where('transaction_date', '>=', now()->startOfMonth()->toDateString())
+            ->where('transaction_date', '<', now()->startOfMonth()->addMonth()->toDateString()));
 
         $totalDonations = (clone $postedDonations)
             ->whereBetween('transaction_date', [

@@ -2,6 +2,8 @@
 @section('title','Tasks')
 @push('styles')@include('records.audit.style')@endpush
 @section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'tasks'])</div>
+
 <div class="audit-page">
 <div style="display:flex;justify-content:space-between;gap:16px;align-items:center"><div><h1>Tasks</h1><p>Assignments, deadlines and meeting follow-up work.</p></div>@can('tasks.manage')@if(auth()->user()?->hasPermission('tasks.view') && auth()->user()?->hasPermission('tasks.manage'))<a class="audit-btn" href="{{ route('operations.tasks.create') }}">Create task</a>@endif
 @endcan</div>

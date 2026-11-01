@@ -9,6 +9,7 @@ use App\Domain\Users\Models\Permission;
 use App\Domain\Users\Models\Role;
 use App\Domain\Users\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
@@ -90,6 +91,7 @@ class OperationsAndReportsTest extends TestCase
 
     public function test_report_permissions_retained_snapshot_print_and_real_xlsx(): void
     {
+        $this->travelTo(Carbon::parse('2026-10-20 12:00:00', 'UTC'));
         $manager = $this->user(['tasks.view', 'tasks.manage', 'meetings.view', 'reports.view', 'reports.generate']);
         $restricted = $this->user(['reports.view', 'reports.generate']);
         $this->createTask($manager);

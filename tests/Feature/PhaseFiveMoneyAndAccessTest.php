@@ -9,6 +9,7 @@ use App\Domain\Finance\Support\Money;
 use App\Domain\Finance\Transactions\Models\Transaction;
 use App\Domain\Users\Models\Role;
 use App\Domain\Welfare\Applications\Models\WelfareApplication;
+use Carbon\Carbon;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\WelfareReviewRoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,6 +25,8 @@ class PhaseFiveMoneyAndAccessTest extends TestCase
 
     public function test_report_dashboard_and_ledger_keep_cents_in_totals_and_empty_results(): void
     {
+        // A DATE column in SQLite can contain a midnight suffix; include the final day.
+        $this->travelTo(Carbon::parse('2026-10-31 12:00:00', 'UTC'));
         $actor = $this->staff(['finance.view', 'finance.donations.manage', 'finance.reports.view', 'finance.expenses.manage']);
         $fund = Fund::create(['fund_reference' => 'FND-EXACT', 'name' => 'Exact fund', 'type' => 'general',
             'purpose' => 'general_welfare', 'status' => 'active', 'opening_balance' => '1000.00']);

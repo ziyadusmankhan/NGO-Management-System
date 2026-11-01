@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>Audit Trail report</title>
     <link rel="stylesheet" href="{{ asset('css/views/records-audit-print-1.css') }}">
-<link rel="stylesheet" href="{{ asset('css/foundation-print.css') }}"></head>
+<link rel="stylesheet" href="{{ asset('css/foundation-print.css') }}"><script defer src="{{ asset('js/foundation-print.js') }}?v=1"></script></head>
 
 <body><button onclick="window.print()">Print / Save as PDF</button>
     <h1>Audit Trail</h1>

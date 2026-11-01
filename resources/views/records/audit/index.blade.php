@@ -2,6 +2,8 @@
 @section('title', 'Audit Trail')
 @push('styles')@include('records.audit.style')@endpush
 @section('content')
+<div class="no-print" style="margin-bottom:16px">@include('shared.section-export',['exportKind'=>'audit'])</div>
+
     <div class="audit-page">
         <h1>Audit Trail</h1>
         <p>Recorded changes and security events across the foundation.</p>
@@ -39,7 +41,7 @@
                 href="{{ route('records.audit.index') }}">Reset filters</a>@endif
             @can('audit.export')<button class="audit-btn" formaction="{{ route('records.audit.export') }}" name="format"
                 value="print">Print / Save as PDF</button><button class="audit-btn"
-            formaction="{{ route('records.audit.export') }}" name="format" value="xlsx">Download XLSX</button>@endcan
+            formaction="{{ route('sections.export',['kind'=>'audit']) }}" name="format" value="xlsx">Download XLSX</button>@endcan
             <p class="audit-muted">Dates use Asia/Karachi. History with an unknown occurrence time is excluded when date
                 filters are applied. Export limit: 10,000 events.</p>
         </form>
