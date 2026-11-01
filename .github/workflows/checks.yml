@@ -16,6 +16,8 @@ jobs:
       - run: composer install --prefer-dist --no-interaction
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Verify isolated PHP worker
+        run: php vendor/bin/phpunit --filter PhpWorkerTest
       - run: php -d memory_limit=1G vendor/bin/phpunit
         env:
           UI_EXPORT_PREVIEWS: '1'

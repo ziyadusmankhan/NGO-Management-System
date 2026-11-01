@@ -82,16 +82,7 @@ class WelfarePaymentConcurrencyTest extends TestCase
                     ? ['void', $payment->id, 'second'] : ['pay', $assistance->id, (string) Str::uuid()]];
             }
             $release = $directory.DIRECTORY_SEPARATOR.'release';
-            $php = [PHP_BINARY, '-n'];
-            foreach (['mbstring', 'pdo_sqlite', 'sqlite3', 'fileinfo', 'openssl'] as $extension) {
-                $path = ini_get('extension_dir').DIRECTORY_SEPARATOR.(PHP_OS_FAMILY === 'Windows' ? 'php_' : '').$extension.'.'.PHP_SHLIB_SUFFIX;
-                if (! is_file($path)) {
-                    $path = dirname(PHP_BINARY).DIRECTORY_SEPARATOR.$path;
-                }
-                if (is_file($path)) {
-                    array_push($php, '-d', 'extension='.$path);
-                }
-            }
+            $php = \Tests\Support\PhpWorker::command();
             foreach ($jobs as $i => [$action, $sourceId, $requestKey]) {
                 $process = new Process(array_merge($php, [
                     base_path('tests/Support/payment_integrity_worker.php'), $database, $action,

@@ -33,14 +33,7 @@ class WelfareAssistanceConcurrencyTest extends TestCase
             $release = $directory.DIRECTORY_SEPARATOR.'release';
 
             // Child PHP processes use only the extensions this test needs; no debugger hooks.
-            $php = [PHP_BINARY, '-n'];
-            foreach (['mbstring', 'pdo_sqlite', 'sqlite3', 'fileinfo', 'openssl'] as $extension) {
-                $path = ini_get('extension_dir').DIRECTORY_SEPARATOR.(PHP_OS_FAMILY === 'Windows' ? 'php_' : '').$extension.'.'.PHP_SHLIB_SUFFIX;
-                if (! is_file($path)) { $path = dirname(PHP_BINARY).DIRECTORY_SEPARATOR.$path; }
-                if (is_file($path)) {
-                    array_push($php, '-d', 'extension='.$path);
-                }
-            }
+            $php = \Tests\Support\PhpWorker::command();
             for ($i = 0; $i < 2; $i++) {
                 $process = new Process(array_merge($php, [
                     base_path('tests/Support/create_assistance_worker.php'), $database,
