@@ -1,6 +1,6 @@
 # Alwaysdata deployment and startup
 
-The current deployment uses account `ngosystem`, application path `/home/ngosystem/www/foundation`, website root `www/foundation/public`, PHP 8.4, database host `mysql-ngosystem.alwaysdata.net`, database `ngosystem_s`, and database user `ngosystem`. Credentials and encryption keys belong only in the server's private application-root `.env`.
+The current deployment uses account `ngosystem`, application path `/home/ngosystem/www/foundation`, website root `www/foundation/public`, PHP 8.4, database host `mysql-ngosystem.alwaysdata.net`, database `ngosystem_demo`, and database user `ngosystem`. Credentials and encryption keys belong only in the server's private application-root `.env`.
 
 The SSH user's configured home directory may be the website's `public` directory. Use the absolute application path rather than assuming `~/www/foundation` resolves to it.
 

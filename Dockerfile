@@ -1,17 +1,8 @@
-# Optional frontend/Vite build. Laravel projects without package.json skip npm.
-FROM node:22-bookworm-slim AS frontend
-WORKDIR /src
-COPY . .
-RUN if [ -f package.json ]; then \
-      if [ -f package-lock.json ]; then npm ci; else npm install; fi; \
-      npm run build; \
-    fi
-
 # The committed Symfony dependencies require PHP >= 8.4.1.
 FROM php:8.4-apache
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      git unzip ca-certificates libzip-dev libicu-dev libonig-dev \
+      git unzip ca-certificates cron supervisor libzip-dev libicu-dev libonig-dev \
       libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring bcmath intl zip gd exif opcache \
@@ -22,8 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 WORKDIR /var/www/html
 COPY . .
-# Copy frontend-generated public/build files without replacing the Laravel app.
-COPY --from=frontend /src/public/ /var/www/html/public/
 COPY docker/apache.conf /etc/apache2/sites-available/laravel.conf
 RUN a2dissite 000-default && a2ensite laravel \
     && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
@@ -32,5 +21,10 @@ RUN a2dissite 000-default && a2ensite laravel \
     && chmod -R ug+rwX storage bootstrap/cache
 
 COPY docker/start.sh /usr/local/bin/start-laravel
+COPY docker/supervisord.conf /etc/supervisor/conf.d/foundation.conf
+RUN printf '* * * * * www-data cd /var/www/html && /usr/local/bin/php artisan operations:scheduler-run >> storage/logs/scheduler.log 2>&1\n' > /etc/cron.d/foundation \
+    && chmod 0644 /etc/cron.d/foundation
 EXPOSE 10000
+HEALTHCHECK --interval=60s --timeout=10s --start-period=180s --retries=3 \
+    CMD php artisan operations:scheduler-health || exit 1
 CMD ["sh", "/usr/local/bin/start-laravel"]

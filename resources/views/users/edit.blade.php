@@ -285,6 +285,10 @@
 
                     <div class="role-grid">
 
+                        @if (!auth()->user()->hasPermission('users.assign-roles') || auth()->id() === $user->id)
+                            <p>Role assignment needs separate authorization. You cannot change your own roles.</p>
+                        @endif
+
                         @forelse ($roles as $role)
 
                             <div class="role-option">
@@ -292,6 +296,7 @@
                                 <input
                                     type="radio"
                                     name="roles[]"
+                                    @disabled(!auth()->user()->hasPermission('users.assign-roles') || auth()->id() === $user->id)
                                     id="role{{ $role->id }}"
                                     value="{{ $role->id }}"
                                     @checked(

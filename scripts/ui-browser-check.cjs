@@ -4,10 +4,13 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 (async () => {
  const root = process.cwd(), previews = path.join(root,'tmp/ui-previews');
+ if (!fs.existsSync(previews) || !fs.existsSync(path.join(previews,'dashboard.html'))) throw new Error('Generate synthetic previews first: UI_EXPORT_PREVIEWS=1 vendor/bin/phpunit --filter UiRedesignTest');
  const browser = await chromium.launch({headless:true, ...(process.env.UI_BROWSER_PATH ? {executablePath:process.env.UI_BROWSER_PATH} : {})});
  const page = await browser.newPage();
  if(process.env.UI_THEME) await page.addInitScript(theme=>localStorage.setItem('foundation-theme',theme),process.env.UI_THEME);
  const errors = [], results=[];
+ // Synthetic previews must not depend on CDN availability or contact a live app.
+ await page.route('**/*', route => new URL(route.request().url()).origin === 'http://localhost' ? route.fallback() : route.abort());
  page.on('pageerror',error=>errors.push(page.url()+': '+error.message));
  await page.route('http://localhost/**',async route=>{
   const url=new URL(route.request().url());
@@ -65,4 +68,5 @@ const { chromium } = require('playwright');
  fs.writeFileSync(path.join(root,'tmp/ui-browser-results.json'),JSON.stringify(report,null,2));
  console.log(JSON.stringify({pages:results.length/5,checks:results.length,overflows:results.filter(r=>r.overflow),whiteSurfaces:results.filter(r=>r.whiteSurfaces.length),tinyText:results.filter(r=>r.tiny),unlabeled:results.filter(r=>r.unlabeled),errors:report.errors,drawerOpen,drawerClosed,themeChecks},null,2));
  await browser.close();
+ if (report.errors.length || !drawerOpen || !drawerClosed || results.some(r=>r.overflow || r.unlabeled)) process.exitCode=1;
 })().catch(e=>{console.error(e);process.exitCode=1});

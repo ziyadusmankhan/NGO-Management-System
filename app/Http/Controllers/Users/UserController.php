@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Domain\Organization\Services\DirectoryQuery;
 use App\Domain\Security\Services\AccountSecurity;
 use App\Domain\Users\Models\Role;
 use App\Domain\Users\Models\User;
+use App\Domain\Users\Services\UserAuthority;
 use App\Http\Requests\Users\StoreUserRequest;
 use App\Http\Requests\Users\UpdateUserRequest;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +18,7 @@ class UserController
 {
     public function index(): View
     {
-        $directory = app(\App\Domain\Organization\Services\DirectoryQuery::class);
+        $directory = app(DirectoryQuery::class);
         $users = $directory->query('users', $directory->filters(request(), 'users'))
             ->paginate(15)
             ->withQueryString();
@@ -65,6 +67,8 @@ class UserController
 
         AccountSecurity::requireRecent($request);
         $validated = $request->validated();
+
+        app(UserAuthority::class)->assign($request->user(), null, $validated['roles'] ?? []);
 
         $user = DB::transaction(function () use ($validated) {
 
@@ -146,10 +150,23 @@ class UserController
         AccountSecurity::requireRecent($request);
         $validated = $request->validated();
 
+        $authority = app(UserAuthority::class);
+        $authority->manage($request->user(), $user);
+        if (array_key_exists('roles', $validated)) {
+            $authority->assign($request->user(), $user, $validated['roles'] ?? []);
+        }
+
         DB::transaction(function () use (
             $validated,
             $user
         ) {
+
+            $user = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $authority = app(UserAuthority::class);
+            $authority->manage(auth()->user(), $user);
+            if (array_key_exists('roles', $validated)) {
+                $authority->assign(auth()->user(), $user, $validated['roles'] ?? []);
+            }
 
             $data = [
                 'name' => $validated['name'],
@@ -165,9 +182,9 @@ class UserController
 
             $user->update($data);
 
-            $user->roles()->sync(
-                $validated['roles'] ?? []
-            );
+            if (array_key_exists('roles', $validated)) {
+                $user->roles()->sync($validated['roles'] ?? []);
+            }
         });
 
         return redirect()
@@ -185,6 +202,7 @@ class UserController
         User $user
     ): RedirectResponse {
 
+        app(UserAuthority::class)->manage(auth()->user(), $user);
         /*
          * Prevent accidentally deleting the currently
          * logged-in account.

@@ -63,6 +63,16 @@ class RoleController
             ],
         ]);
 
+        if (! $request->user()->hasRole('administrator')) {
+            abort_if($role->slug === 'administrator' || $role->users()->whereKey($request->user()->id)->exists(), 403);
+            $permissions = Permission::whereIn('id', array_unique(array_merge(
+                $validated['permissions'] ?? [], $role->permissions()->pluck('permissions.id')->all()
+            )))->get();
+            foreach ($permissions as $permission) {
+                abort_unless($request->user()->hasPermission($permission->slug), 403);
+            }
+        }
+
         $role->permissions()->sync(
             $validated['permissions'] ?? []
         );

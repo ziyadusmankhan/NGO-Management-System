@@ -18,4 +18,4 @@ php artisan view:cache
 php artisan storage:link || true
 chown -R www-data:www-data storage bootstrap/cache
 
-exec apache2-foreground
+exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/foundation.conf
